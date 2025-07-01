@@ -28,7 +28,7 @@ class _VehicleDetailPageState extends State<VehicleDetailPage> {
   Widget build(BuildContext ctx) {
     return Scaffold(
       appBar: const TopBar(),
-      drawer: const SideMenu(),
+      drawer: const SideMenu(currentPage: 'detail'),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: _buildDetailForm(ctx),

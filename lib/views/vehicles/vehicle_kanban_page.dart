@@ -78,7 +78,7 @@ class _VehicleKanbanPageState extends State<VehicleKanbanPage> with SingleTicker
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const TopBar(),
-      drawer: const SideMenu(),
+      drawer: SideMenu(currentPage: 'kanban'),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1001918715286",
+    "project_id": "goya-fleet",
+    "storage_bucket": "goya-fleet.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1001918715286:android:f26a3c9923645dda9f39b7",
+        "android_client_info": {
+          "package_name": "com.example.fleet"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDygAP1MchmQL4o3KE0FKhM4Lw0bU_lx_M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

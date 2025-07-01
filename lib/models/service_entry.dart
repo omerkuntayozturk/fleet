@@ -1,4 +1,9 @@
-import '../core/enums.dart';
+enum ServiceStage {
+  newService,
+  inProgress,
+  completed,
+}
+
 class ServiceEntry {
  String id, vehicleId, serviceType, supplier, driver;
  DateTime date;

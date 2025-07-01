@@ -1,0 +1,542 @@
+{
+  "register_send_verification_code": "发送验证码",
+  "verification_invalid_code": "验证码无效",
+  "auth_email_in_use": "该电子邮件地址已被使用",
+  "verification_subscription_web_platform_warning": "请注意，您只能在移动应用程序上使用此功能。",
+  "login": {
+    "welcome_back": "欢迎回来！",
+    "email_label": "您的电子邮件地址",
+    "password_label": "您的密码",
+    "remember_me": "记住我",
+    "login_button": "登录",
+    "sign_up": "立即加入",
+    "no_account": "还没有账户？",
+    "loading": "加载中...",
+    "google_sign_in": "使用 Google 登录",
+    "errors": {
+      "unknown_error": "发生了意外错误"
+    }
+  },
+  "register": {
+    "create_account": "创建新账户",
+    "manage_pet_description": "轻松管理您的任务",
+    "email_label": "您的电子邮件地址",
+    "password_label": "您的密码",
+    "confirm_password_label": "确认您的密码",
+    "password_rules_not_met": "请确保您的密码满足所有要求。",
+    "register_button": "注册",
+    "loading": "注册中...",
+    "already_have_account": "已有账户？",
+    "sign_in": "登录",
+    "password_mismatch": "密码不匹配。",
+    "password_rule_min_length": "至少 8 个字符",
+    "password_rule_uppercase": "至少一个大写字母",
+    "password_rule_number": "至少一个数字",
+    "password_rule_special_char": "至少一个特殊字符",
+    "terms_accept": "我接受隐私政策和使用条款。",
+    "accept_terms_warning": "请接受条款和条件。",
+    "privacy_policy_and_terms": "隐私政策、使用条款和数据保护协议",
+    "privacy_policy": "隐私政策",
+    "privacy_policy_content": "LAST UPDATE DATE: [01/04/2025]\n\nDear Users, Customers, and Visitors,\n\nAs GoyaApp Software & Digital Solutions (\"GoyaApp\" or the \"Company\"), we place great importance on processing all personal data obtained through our websites and mobile applications (accessible via Google Play and the App Store) in accordance with the principles of confidentiality, integrity, and security. This Privacy Policy and the Clarification Text (\"Policy\"), prepared pursuant to the Turkish Law on the Protection of Personal Data No. 6698 (\"KVKK\"), explains the purposes and methods of processing your personal data, the measures we take to protect it, and your rights as a data subject.\n\n1. DATA CONTROLLER\n\nPursuant to KVKK, the data controller is:\n• Trade Name: GoyaApp Software & Digital Solutions\n• Address: Growth Plaza, Fenerbahçe Mh. Iğrıp Sk. No: 13 Kadıköy, Istanbul\n• Email: info@goyaapp.com\n\nYour personal data is processed in accordance with the procedures and principles set out in this Policy and within the legal framework.\n\n2. SCOPE\n\nThis Policy applies to all websites, mobile applications, online services, and digital platforms operated and managed by GoyaApp. It also covers the data collected through our applications published on Google Play Store and Apple App Store. All such data is processed in line with the principles outlined in this Policy.\n\n3. PERSONAL DATA COLLECTED AND PURPOSES OF PROCESSING\n\nWe collect and process:\n• Identity & Contact Information\n• Location Data (with consent)\n• Technical & Device Information\n• Camera and File Access (with permission)\n• Payment Information (via secure providers)\n• Chat Data (AI-supported)\n• Integration Data (third-party services)\n\n4. LEGAL BASES\n• Explicit Consent\n• Contract Performance\n• Legal Obligations\n• Legitimate Interests\n\n5. DATA RETENTION\nData is retained as required by law or purpose, then securely deleted.\n\n6. DATA SHARING\n• Payment Processors\n• Service Providers\n• Legal Authorities\n• Corporate Transactions\n\n7. SECURITY MEASURES\n• SSL/TLS Encryption\n• Firewalls\n• Secure Payment Processing\n• Access Controls\n• Regular Security Testing\n\n8. USER RIGHTS\nYou have the right to:\n• Access your data\n• Request corrections\n• Request deletion\n• Object to processing\n\nContact:\nEmail: info@goyaapp.com\nPhone: +90 (537) 587 82 47\nAddress: Growth Plaza, Fenerbahçe Mh. Iğrıp Sk. No: 13 Kadıköy, Istanbul /n INTRODUCTION\nThis Terms of Use and Membership Agreement (\"Agreement\") sets forth the terms and conditions governing the use of the website and mobile application provided by GoyaApp (hereinafter collectively referred to as the \"Application\"). Please read this Agreement carefully before using GoyaApp or becoming a member of the Application. By accessing GoyaApp, creating an account, or using its services, you acknowledge that you have read, understood, and agree to be bound by all the terms of this Agreement. If you do not accept these terms or if you are not over 18 years of age, you must not use the Application.\n\nMEMBERSHIP MODELS\nGoyaApp offers its users different membership models, which include a credit-based system as well as monthly and yearly subscription packages. By selecting a model that suits your needs, you can benefit from the related services. All membership options are provided in compliance with the applicable laws and regulations; users' rights and obligations are governed by this Agreement:\n\n1. Credit-Based System:\n• Users can purchase credits in bundles to use for certain transactions or content within the Application.\n• Purchased credits are added to the user's account and are only valid within GoyaApp; they cannot be converted into cash, transferred to another account, or used outside the Application.\n• The user agrees to use credits in compliance with the law and this Agreement, and not for fraudulent or abusive purposes.\n• The validity period and usage conditions of credits that are purchased but not used are determined by GoyaApp and announced to users through the Application.\n• Except where legally mandated, no refunds or returns are provided for purchased credits.\n\n2. Monthly Membership (Subscription):\n• The monthly membership model is based on paying a monthly subscription fee in exchange for access to GoyaApp's premium services.\n• This subscription renews automatically each month unless the user cancels it.\n• At the time of the initial purchase, the user pays the subscription fee through the relevant app store (App Store or Google Play) and the subscription becomes active.\n• At the start of each subscription period, the monthly subscription fee is charged automatically.\n• If the user wishes to terminate the subscription, they must cancel the automatic renewal through their App Store or Google Play account settings before the end of the current subscription period.\n• When the subscription is canceled, the user's right to use the services continues until the end of the currently paid period; however, no partial refund is provided for the remaining time.\n\n3. Yearly Membership (Subscription):\n• The yearly membership is a one-year prepayment version of the monthly membership.\n• By paying the annual subscription fee in advance, the user obtains the right to access premium services for one year.\n• The yearly subscription also renews automatically for another year unless the user cancels it before the renewal date, in which case the subscription fee for the renewal period will be charged through the relevant app store.\n• The user must cancel the subscription before the renewal date if they do not wish to renew it for the following year.\n• As with the monthly membership, even if the annual subscription is canceled, the user will continue to have access to the services until the end of the currently paid year, and no refund is provided for unused months.\n\nAGE RESTRICTION\nGoyaApp services are intended solely for individuals aged 18 and older. Persons under the age of 18 are prohibited from using or subscribing to the Application. GoyaApp reserves the right to verify users' ages and request proof where deemed necessary. Accounts of users found to be underage may be closed immediately without prior notice. Those who violate the age restriction do not have the right to request a refund for any fees they have paid, and GoyaApp cannot be held responsible for any such issues.\n\nRULES OF USE AND SECURITY\nBy using GoyaApp, the user undertakes to comply with all applicable laws, regulations, and the provisions of this Agreement. To prevent misuse and security breaches, the user agrees to adhere to the following prohibitions:\n\n• Illegal or Unauthorized Use: Not using the Application for any illegal, deceptive, harmful, or unauthorized purpose. Any attempt at fraud or illegal activity is strictly prohibited.\n• Prohibited Content: Not sharing or transmitting any content through the Application that is unlawful, threatening, defamatory, obscene, inappropriate, or objectionable.\n• Account Misuse: Not using another person's account without authorization, or allowing someone else to use your account. You are responsible for keeping your account login information (username, password, etc.) confidential and secure.\n• Harmful Software and Spam: Not sending viruses, trojans, worms, spam messages, or any code/content that could compromise GoyaApp's or other users' data security or disrupt system functionality.\n• Unauthorized Access: Not attempting to disrupt, disable, or gain unauthorized access to GoyaApp's server, database, network, or communication infrastructure. Not engaging in reverse engineering or attempting to bypass firewalls or encryption systems.\n• Reproduction and Commercial Use: Not reproducing, copying, selling, or using for commercial purposes any part of the Application without GoyaApp's explicit permission. You agree not to use any content, trademark, logo, or other intellectual property of GoyaApp in an unauthorized manner.\n\nIf a user is found to be violating these rules, GoyaApp reserves the right to take the necessary technical and legal measures to prevent the violation and ensure the security of the Application. In this regard, GoyaApp may remove posts that violate the rules, restrict access, or suspend/terminate the user's account. Moreover, if any security breach, fraud, or illegal activity is detected, GoyaApp reserves the right to immediately close the account without notice and, if necessary, notify the relevant authorities and initiate legal proceedings.\n\nDISCLAIMER OF LIABILITY\nTo the maximum extent permitted by law, GoyaApp and its content are provided \"as is\" and \"as available.\" GoyaApp makes no explicit or implied warranties that the services will be uninterrupted, error-free, secure, or fully meet the user's expectations. The user acknowledges that they use the Application at their own risk, and they assume any and all risks that may arise from such use.\n\nGoyaApp shall not be liable for any direct or indirect damages, losses, or harms that may result from the use or inability to use its services. This includes, but is not limited to, lost revenues or profits, data loss, business interruption, loss of goodwill, or any other tangible/intangible damages, except to the extent that such liability cannot be excluded by law. Even in cases where liability cannot be completely excluded by law, GoyaApp's total liability will under no circumstances exceed the amount paid by the user for the relevant service in the last 1 year.\n\nThe content and services provided on the Application are of a general nature and do not come with a guarantee of suitability for a particular purpose. If the user acts based on any information, suggestions, or directions obtained from GoyaApp, they acknowledge that they assume all associated risks. GoyaApp does not guarantee the accuracy, quality, or reliability of any content, advertisements, products, or services provided by third parties or accessed through the Application. As stated below, the details regarding third-party integrations (e.g., Google, Facebook, OpenAI services) are provided, and GoyaApp accepts no responsibility for any errors or malfunctions arising from these third-party services.\n\nImportant Note: Under no circumstances can GoyaApp be held directly responsible for unforeseen events (force majeure, internet infrastructure issues, etc.) that may occur during the provision of the service (including GoyaApp's own negligence) resulting in losses for the user. By using GoyaApp, the user agrees to these limitations of liability.\n\nPAYMENT AND REFUND TERMS\nFees for paid services or content within GoyaApp (e.g., credit packages or subscription fees) are collected via third-party app stores such as Apple App Store or Google Play Store. By initiating a purchase, the user agrees to be subject to the payment, subscription, and refund policies of the relevant app store. The following payment and refund terms apply:\n\n1. Payment Transactions:\n• The user pays the fee for the selected service via the specified payment method (credit card, mobile payment, etc.) through the relevant platform.\n• The payment is processed securely by the App Store/Google Play, and once approved, the user receives a digital receipt/payment confirmation.\n• GoyaApp does not directly collect or store any user credit or debit card details; such information is processed by the platform that receives the payment.\n• In monthly or annual subscriptions, the fee for each new subscription period is charged in advance. The user acknowledges that recurring payments will be charged automatically unless they cancel their subscription.\n\n2. Refund and Cancellation Policy:\n• As a rule, no refunds are issued for digital products and services except where required by law.\n• By confirming a purchase, the user agrees that the service will commence immediately, and thus they may waive their right of withdrawal under applicable distance selling legislation. (For instance, when credits are purchased, they are immediately credited to the user's account; when a subscription is purchased, paid features are enabled immediately.)\n• Nonetheless, certain refunds may be allowed under the specific policies of the App Store or Google Play. If the user requests a refund, they must apply directly to the relevant app store.\n• If Apple or Google approves a refund, GoyaApp reserves the right to update the user's service access and/or remaining credit balance accordingly (e.g., removing credits or subscription privileges corresponding to the refunded amount).\n\n3. Subscription Cancellation:\n• The user can cancel their subscriptions at any time through their App Store/Google Play account settings.\n• Upon cancellation, the user can continue to use the services until the end of the current subscription period; however, no refund is provided for the remaining period after cancellation.\n• If the user does not wish to renew the subscription, it must be canceled at least 24 hours prior to the renewal date. Otherwise, the fee for the next period may be charged.\n\n4. Fee Changes:\n• GoyaApp reserves the right to change the prices of the services offered.\n• Subscription holders will be notified in the Application or via email before any price changes take effect for their next billing cycle.\n• Continuing to use the service after the effective date of the price change signifies acceptance of the new price. If the user does not accept the price change, they have the right to cancel their subscription before the next renewal.\n\nSERVICE INTERRUPTIONS AND MAINTENANCE\nGoyaApp makes reasonable efforts to provide its services continuously and without interruption. However, scheduled maintenance, system updates, technical failures, or force majeure events beyond our control may cause temporary interruptions in the Application. GoyaApp will notify users in advance of planned maintenance or updates whenever possible (for example, via in-app notifications or email).\n\nThe user acknowledges that the service may occasionally be temporarily unavailable and that GoyaApp cannot be held liable for outages or malfunctions of reasonable duration. In particular, for short-term maintenance interruptions that are announced in advance, the user may not claim any compensation or fee refund from GoyaApp. If there are prolonged or unusual outages, GoyaApp may, at its discretion, grant additional usage time to subscription holders or take other compensatory measures to prevent user inconvenience; however, users should not assume in advance that such compensation will be provided.\n\nTHIRD-PARTY INTEGRATIONS\nTo offer better services and enable various features, GoyaApp may integrate with third-party services and platforms such as Google, Apple, Facebook, OpenAI, and Firebase. By using the Application, the user acknowledges and agrees to the conditions and data processing practices required by these third-party integrations. Key principles regarding these third-party integrations are as follows:\n\n1. Social Login (Google, Apple, Facebook, etc.):\n• GoyaApp may allow users to log in using their Google, Apple, or Facebook accounts.\n• If the user chooses to log in through these methods, they will be subject to the respective third-party platform's terms of service and privacy policy.\n• GoyaApp uses personal information provided by these platforms (e.g., name, email) solely to verify the user's identity and personalize the Application experience.\n• Data collected in this way is processed in accordance with GoyaApp's Privacy Policy and applicable data protection legislation. By using social login, the user agrees to comply with the relevant third-party's terms as well.\n\n2. OpenAI Integration (Artificial Intelligence Services):\n• Some smart features or content within GoyaApp may be enabled by artificial intelligence technologies provided by OpenAI.\n• For example, when using an in-app chatbot, text completion, or similar AI-based features, the data entered by the user may be sent to OpenAI's servers for processing, and the generated response will be displayed to the user.\n• By using these features, the user acknowledges that their inputs will be processed by OpenAI's infrastructure. GoyaApp does not guarantee the accuracy, suitability, or originality of content generated by OpenAI.\n• Users understand that AI-generated responses are suggestions only, and they should exercise their own judgment when making final decisions or taking actions. In the event of any data breach or error during the use of OpenAI services, responsibility lies with the third-party service provider (OpenAI), and GoyaApp cannot be held directly liable.\n\n3. Firebase and Other Infrastructure Services:\n• GoyaApp may use Google Firebase or similar third-party infrastructure and analytics services to operate the application, monitor performance, detect errors, send notifications, and securely store user data.\n• Through these services, information such as device details, usage statistics, and location data (if the user has granted permission) may be collected and analyzed.\n• Such data will, where possible, be processed in an anonymized or de-identified form; personal data will be stored and protected in accordance with our Privacy Policy and applicable personal data protection laws (KVKK).\n• By using GoyaApp, the user acknowledges the use of such technical services and agrees that their data may be processed by these services.\n\nGoyaApp takes reasonable precautions to ensure the security and confidentiality of integrated third-party services and expects these service providers to apply their own security policies. However, GoyaApp makes no warranty regarding the functionality or reliability of these third-party platforms or services. The user is aware of the risks associated with third-party integrations and understands that using them is their own choice. Each of these third parties has its own independent terms of use and privacy policy, under which user data may be processed. GoyaApp is not liable for any interruptions, data loss, unauthorized access, or similar issues caused by these third parties, but will make reasonable efforts to provide support if users encounter such problems.\n\nACCOUNT CANCELLATION AND LEGAL SANCTIONS\nThe user acknowledges that if they breach this Agreement or violate applicable laws, GoyaApp may terminate their account and take legal actions. Below are examples of possible situations and outcomes:\n\n1. Agreement Violation and Account Closure:\n• If the user violates any of the usage conditions specified in this Agreement, GoyaApp has the right to suspend or permanently delete their account without prior notice.\n• In particular, if misuse, fraud, or illegal activity is detected, GoyaApp may immediately terminate the account.\n\n2. No Refund for Fees:\n• If a user's account is closed or their access to the service is blocked due to a violation of the Agreement, they are not entitled to a refund, even if they have unused subscription time or remaining credit balances.\n• The user accepts in advance that if they are barred from the service because of a violation, any fees they have paid will not be refunded.\n\n3. Legal Proceedings:\n• GoyaApp reserves the right to seek legal remedies if it deems necessary to protect the platform's security and to compensate any damages suffered by GoyaApp or third parties as a result of user violations.\n• In cases of unlawful activities, fraud, or attacks on security systems, GoyaApp may file criminal charges against the user and cooperate with the competent authorities to initiate legal proceedings.\n• The user may be liable to compensate GoyaApp for all damages incurred (including attorney fees and court costs).\n\nThe user may terminate their GoyaApp membership at any time. In the event of a user-initiated cancellation/deactivation, the user may continue to use the services until the end of the current subscription period, but no refund will be issued for any prepaid period. Users who delete their account or terminate their membership voluntarily must create a new membership if they wish to use the service again; there is no guarantee that data from deleted accounts can be recovered (except data retained in backups in compliance with applicable privacy legislation).\n\nDISPUTE RESOLUTION\nThis Agreement is governed by Turkish law. Any disputes arising from this Agreement or the use of GoyaApp services shall be subject to the jurisdiction of the courts and enforcement offices of the Republic of Türkiye. Unless otherwise expressly stated, the courts of the Republic of Türkiye shall have jurisdiction over any disputes arising out of or in connection with this Agreement. The rights and powers granted under the relevant consumer protection legislation (e.g., the right to apply to a consumer arbitration panel) remain valid for users acting in the capacity of a consumer.\n\nThe parties shall first attempt to resolve any disputes through good-faith negotiations. If no amicable resolution is reached, the judicial remedies outlined above will apply.\n\nAMENDMENTS TO THE AGREEMENT AND EFFECTIVENESS\nGoyaApp reserves the right to unilaterally update or modify the terms of this Agreement from time to time. In the event of significant changes to the Agreement, the updated terms will be made visibly available within the Application and, if necessary, notified to users by email or in-app notification. Continued use of the Application after such changes have been announced constitutes the user's acceptance of the revised terms. If the user does not accept the updated terms, they have the right to terminate their membership and discontinue using the Application.\n\nThis Agreement takes effect when the user electronically consents or starts using the Application in practice. The current Agreement will remain in force until a new version is published by GoyaApp or until the user terminates their membership. GoyaApp will make the most recent version of the Agreement accessible within the Application at all times.\n\nFINAL PROVISIONS\nIn matters not covered by this Agreement, the applicable legal provisions will apply. If any provision of this Agreement is deemed invalid or unenforceable, the remaining provisions will remain in effect. The failure of either party to exercise their rights under this Agreement does not constitute a waiver of those rights.\n\nThank you for reading the GoyaApp Terms of Use and Membership Agreement. For a safe, enjoyable, and efficient experience, please follow the rules above. If you have any questions, feel free to contact us at info@goyaapp.com. /n INTRODUCTION\nThis GoyaApp Software & Digital Solutions Intellectual Property and Copyright Agreement (hereinafter referred to as the \"Agreement\") sets forth the conditions relating to intellectual property rights that may arise during the use of the platform and services provided by GoyaApp Software & Digital Solutions, as well as the rights and obligations of the parties. By using the services of GoyaApp Software & Digital Solutions or entering into a business relationship with GoyaApp Software & Digital Solutions, all relevant parties, including users, employees, and subcontractors, agree to comply with the terms specified in this Agreement. The provisions of this Agreement shall be applied in accordance with national and international intellectual property legislation.\n\n1. OWNERSHIP RIGHTS\n\n1.1. Ownership by GoyaApp Software & Digital Solutions\nAll intellectual property rights pertaining to the software, mobile and web applications, code, databases, interfaces, designs, texts, graphics, logos, trademarks and service marks, trade dress, content, and technologies—developed and offered by GoyaApp Software & Digital Solutions—are the exclusive property of GoyaApp Software & Digital Solutions. These include copyrights, trademark rights, patents, design rights, and trade secrets related to the GoyaApp Software & Digital Solutions platform and services. All such rights are reserved by GoyaApp Software & Digital Solutions.\n\n1.2. Limited Use License\nGoyaApp Software & Digital Solutions grants its users a limited, non-transferable, personal right to use the platform and its content in compliance with applicable laws and this Agreement. This permission allows users to use the functionality provided by GoyaApp Software & Digital Solutions solely in line with the purposes of the platform. No portion of the platform or its content may be copied, modified, republished, distributed, or used for commercial purposes without the express written consent of GoyaApp Software & Digital Solutions. Under no circumstances shall the use of the platform imply that any intellectual property rights of GoyaApp Software & Digital Solutions are being transferred to the user.\n\n1.3. Trademarks and Logos\nAll trademarks, logos, domain names, and corporate identity elements either registered under or actually used by GoyaApp Software & Digital Solutions are owned by GoyaApp Software & Digital Solutions. Users may not use any trademark, logo, or other identifying marks of GoyaApp Software & Digital Solutions in any manner without prior written permission from GoyaApp Software & Digital Solutions. Any unauthorized use of GoyaApp Software & Digital Solutions' trademarks or logos constitutes a breach of this Agreement and is subject to legal enforcement under the relevant laws.\n\n2. THIRD-PARTY CONTENT (USER AND EXTERNALLY SOURCED CONTENT)\n\n2.1. Responsibility for User Content\nThe GoyaApp Software & Digital Solutions platform may allow users to create, upload, or share content. Users are solely responsible for any content (text, comments, photographs, videos, graphics, etc.) they upload to or share via the platform. Each user represents and warrants that they either own all necessary intellectual property rights in the content they upload or have obtained all required permissions. Uploading protected materials (such as copyrighted or trademarked content) without the copyright owner's permission is strictly prohibited. The user agrees not to share any third-party materials without authorization.\n\n2.2. Rights in User Content\nUsers retain ownership and copyright of any content they upload to the GoyaApp Software & Digital Solutions platform. GoyaApp Software & Digital Solutions does not claim ownership of user-created content, and users remain the original rights holders of such content. However, by uploading content to the platform, the user grants GoyaApp Software & Digital Solutions a license to use such content so that the service can operate, and the GoyaApp Software & Digital Solutions platform can function. This license is worldwide, for an indefinite term (until the user deletes the content), irrevocable, transferable, and royalty-free, allowing GoyaApp Software & Digital Solutions to use, reproduce, modify, adapt, publish, translate, distribute, store, and display the user content. GoyaApp Software & Digital Solutions will use this license solely for the purpose of operating, maintaining, improving, promoting the platform, and providing related services.\n\n2.3. Third-Party Rights and Violations\nUsers guarantee that the content they upload in no way infringes upon any third party's copyright, trademark, patent, trade secret, or other rights. If content provided by any user is found to infringe upon someone else's intellectual property rights, GoyaApp Software & Digital Solutions has the right to immediately remove the infringing content from the platform and suspend or terminate the infringing user's access. If a third party alleges that user-generated content violates their rights, GoyaApp Software & Digital Solutions may investigate such claims and take any measures required under Law No. 5651 on Regulation of Publications on the Internet and Suppression of Crimes Committed by Means of Such Publications, as well as other relevant legislation (including removing the content from publication or blocking access). GoyaApp Software & Digital Solutions shall follow standard notice-and-takedown procedures in the event of a copyright infringement claim.\n\n2.4. Content Removal and Moderation\nGoyaApp Software & Digital Solutions is not obligated to pre-screen user-submitted content. However, if it identifies any content that may violate this Agreement or applicable laws, it reserves the right to remove or block access to that content without notice. Such content includes content that is illegal, obscene, defamatory, threatening, abusive, or that infringes upon the intellectual property rights of others. In the event of the user's content being removed or their account suspended, the user agrees not to claim any rights or compensation from GoyaApp Software & Digital Solutions.\n\n2.5. Limitation of GoyaApp Software & Digital Solutions' Liability\nGoyaApp Software & Digital Solutions does not guarantee the accuracy, legality, or reliability of third-party content uploaded by users. As a \"hosting provider\" under Law No. 5651, GoyaApp Software & Digital Solutions bears no direct liability for user-generated content. Users accept sole responsibility for all claims, lawsuits, demands, or damages that may be asserted by third parties in connection with the content they share, and they agree to indemnify GoyaApp Software & Digital Solutions promptly for any losses, damages, or expenses it may incur as a result.\n\n3. UNAUTHORIZED USE AND INFRINGEMENTS\n\n3.1. Prohibited Acts\nAny unauthorized or excessive use of GoyaApp Software & Digital Solutions' intellectual property is strictly prohibited. Users and third parties may not engage in any of the following actions with respect to software, code, content, or materials within the scope of the GoyaApp Software & Digital Solutions platform:\n• Copy, reproduce, or distribute;\n• Modify, reverse engineer, or create derivative works;\n• Publicly perform or display;\n• Use or sell for commercial purposes;\n• Circumvent or remove security or access control mechanisms;\n• Publish any part of the platform's content on another website or medium without prior written permission from GoyaApp Software & Digital Solutions;\n• Use them in any other manner not explicitly permitted by this Agreement.\nSuch actions constitute illegal usage under copyright and related legislation and amount to a breach of this Agreement.\n\n3.2. Sanctions in Case of Infringement\nIf GoyaApp Software & Digital Solutions determines that its intellectual property rights or the Agreement's provisions concerning prohibited acts have been violated, it reserves the right to pursue legal and criminal remedies against the responsible individual(s) or entity(ies). In this context, GoyaApp Software & Digital Solutions may take any of the following measures:\n• Immediately suspend or permanently terminate the infringer's access to GoyaApp Software & Digital Solutions accounts and services,\n• Issue a warning or unilaterally terminate the Agreement, depending on the severity of the infringement,\n• Seek compensation: GoyaApp Software & Digital Solutions may legally demand compensation for any material or moral damages it suffers due to the infringement. The infringing party or parties are liable for all losses incurred by GoyaApp Software & Digital Solutions, including lost profits,\n• Initiate legal proceedings: In cases involving intellectual property rights infringement, GoyaApp Software & Digital Solutions may file criminal complaints, bring civil lawsuits, or approach relevant administrative authorities.\n\nNotice of Infringement: If any user or third party believes that content on the GoyaApp Software & Digital Solutions platform violates their copyright or other intellectual property rights, they may report the matter to GoyaApp Software & Digital Solutions in writing or through the specified communication channels. GoyaApp Software & Digital Solutions will promptly review any reported infringements and, if confirmed, will take the necessary steps, including removing or blocking access to the infringing content. Any action taken by GoyaApp Software & Digital Solutions in response to such notice is carried out in good faith and in accordance with applicable regulations, with due regard to the legal rights of both the complaining party and the content provider.\n\nExceptional Circumstances: If the GoyaApp Software & Digital Solutions platform's APIs, software, or content include components subject to separate open-source licenses such as GNU or MIT, those components shall be governed by their respective licenses. Such situations may constitute an exception to the general prohibitions on unauthorized use stated in this Agreement, but only with respect to the relevant component and license. Users must also comply with the license terms governing open-source or third-party licensed content.\n\n4. TRANSFER OF INTELLECTUAL PROPERTY (EMPLOYEE AND SUBCONTRACTOR WORKS)\n\n4.1. Works Created by Employees\nAll works, software, code, designs, documents, ideas, inventions, or innovations (collectively referred to as \"works\") produced by GoyaApp Software & Digital Solutions employees as part of their job descriptions and in the course of their employment relationship are, by the nature of the work and as far as legally permissible, the property of GoyaApp Software & Digital Solutions. Pursuant to Article 8/2 of Law No. 5846 on Intellectual and Artistic Works, unless otherwise agreed in the employment contract, the employee is deemed to own the work they create in the course of their work, while granting the employer the right to use that work. By entering into this Agreement, the employee acknowledges and undertakes to transfer all economic rights (including rights of adaptation, reproduction, dissemination, performance, digital transmission, etc.) to GoyaApp Software & Digital Solutions for any work created within the framework of the employment relationship. This transfer is deemed to have been effected in exchange for the employee's salary and other employment benefits. If requested by GoyaApp Software & Digital Solutions, the employee agrees to sign additional documents or contracts to fulfill the transfer requirements.\n\n4.2. Subcontractors and Contracted Service Providers\nConsultants, developers, designers, or other subcontractors and third-party service providers working under contract with GoyaApp Software & Digital Solutions agree to transfer all intellectual property rights of the works they develop or produce for GoyaApp Software & Digital Solutions to GoyaApp Software & Digital Solutions, unless otherwise explicitly stated in this Agreement. Subcontractors undertake to provide GoyaApp Software & Digital Solutions with either an exclusive, comprehensive transfer of rights or the broadest license possible for any software code, design, data, documentation, and all other intellectual products they deliver under the project or service contract. Accordingly, upon the delivery of the work and payment of the corresponding fee, all copyrights and other intellectual property rights to the works created by the subcontractor will pass to GoyaApp Software & Digital Solutions. Upon GoyaApp Software & Digital Solutions' request, the subcontractor must sign any documents and complete any procedures necessary to ensure the full transfer of the relevant works' rights to GoyaApp Software & Digital Solutions.\n\n4.3. Moral Rights and Exceptions\nUnder Turkish law, creators (employees and subcontractors) retain certain moral rights to the works they produce (e.g., the right to be recognized as the author and the right to prevent modifications of the work). However, by entering into this Agreement, the creator agrees not to exercise any moral rights against GoyaApp Software & Digital Solutions to the extent permitted by law and not to impede GoyaApp Software & Digital Solutions' use of the works for its corporate purposes. If deemed necessary, GoyaApp Software & Digital Solutions may register or apply for protection of these works in its own name and may freely exercise its rights to exploit the works, including commercial use, modification, licensing, or transfer to third parties.\n\n4.4. Transfer to Third Parties\nGoyaApp Software & Digital Solutions may transfer or license to third parties any intellectual property rights developed internally or transferred to it, in line with its business needs or commercial strategies. The employees and subcontractors acknowledge that if the intellectual property rights originally transferred from them to GoyaApp Software & Digital Solutions are later transferred to or licensed to a third party, they will not demand any additional consent or remuneration for such a transfer. GoyaApp Software & Digital Solutions shall be responsible for ensuring that any such transfer or licensing conforms to applicable legislation.\n\n5. APPLICABLE LAW AND DISPUTE RESOLUTION\n\n5.1. Applicable Law\nThis Agreement and any disputes arising from it shall be governed by the laws of the Republic of Turkey in force at the time. The provisions of this Agreement shall be interpreted in light of the relevant international intellectual property agreements to which Turkey is a party, as well as applicable legislation. In circumstances not explicitly addressed by this Agreement, the mandatory provisions of Turkish law shall apply. If there is a conflict between national and international legislation regarding a mandatory rule applicable to GoyaApp Software & Digital Solutions services, the binding provisions of international agreements shall prevail first, followed by the mandatory provisions of the laws of the Republic of Turkey.\n\n5.2. Jurisdiction\nThe courts and enforcement offices of the Republic of Turkey shall have exclusive jurisdiction over any disputes arising from this Agreement or the use of GoyaApp Software & Digital Solutions services. The parties may agree that the courts where GoyaApp Software & Digital Solutions' headquarters are located (for example, the Istanbul Courts) shall have territorial jurisdiction. This provision does not restrict any mandatory legal rights of users who qualify as consumers to apply to authorities designated by consumer protection laws; however, in commercial relations, the parties accept the jurisdiction of the Turkish courts.\n\n5.3. Methods of Dispute Resolution\nThe parties shall endeavor to resolve any disputes amicably through negotiation and reconciliation in good faith. If no solution can be reached through friendly negotiations, and if alternative dispute resolution methods (e.g., mediation) are legally required prior to litigation, such methods shall be exhausted. The ultimate venue for resolution, in any case, shall be the competent Turkish courts.\n\n5.4. Language of the Agreement\nIn the interpretation of this Agreement, the Turkish text shall be decisive. If the Agreement is translated into other languages and there is a discrepancy between the translations and the Turkish version, the Turkish text shall prevail. The scope and limits of the rights and obligations arising from the Agreement shall be determined according to their meaning under Turkish law.\n\nFINAL PROVISIONS\nThis Agreement is provided to users electronically on the GoyaApp Software & Digital Solutions platform and becomes effective once electronically accepted by the users or implicitly accepted through use of the platform. GoyaApp Software & Digital Solutions may amend the provisions of this Agreement if it deems necessary; in such cases, the updated agreement text will be announced via the platform and submitted for users' approval. Continued use of the platform after the amendments are announced shall be deemed acceptance of those amendments. The invalidity or unenforceability of any provision of this Agreement shall not affect the validity of its remaining provisions. The parties acknowledge that in matters not regulated by the Agreement, the applicable intellectual property legislation and general legal principles in force shall apply.",
+    "privacy_policy_title": "隐私政策、使用条款和数据保护协议",
+    "terms_of_use": "使用条款",
+    "terms_of_use_content": "有关我们使用条款的信息在这里……",
+    "data_protection_agreement": "数据保护协议",
+    "data_protection_agreement_content": "有关我们数据保护协议的信息在这里……",
+    "close": "关闭",
+    "registration_success": "注册成功完成！",
+    "success": "成功",
+    "error": "错误",
+    "unknown_error": "发生了意外错误。",
+    "sample_categories": {
+      "general_maintenance": "常规维护",
+      "treatments": "治疗"
+    },
+    "sample_regions": {
+      "primary_region": "主要区域",
+      "secondary_region": "次要区域"
+    },
+    "sample_income_names": {
+      "consultation": "咨询",
+      "treatment": "治疗"
+    },
+    "sample_expense_names": {
+      "medicine": "药品",
+      "material": "材料"
+    },
+    "sample_departments": {
+      "general": "综合",
+      "surgical": "外科"
+    },
+    "sample_payment_methods": {
+      "cash": "现金",
+      "credit_card": "信用卡"
+    },
+    "sample_suppliers": {
+      "abc_veterinary_supplies": "ABC 兽医用品",
+      "abc_address": "Merkez Mah. No:123, 伊斯坦布尔",
+      "xyz_medical": "XYZ 医疗",
+      "xyz_address": "Atatürk Cad. No:456, 伊斯坦布尔"
+    },
+    "sample_products": {
+      "sterile_gloves": "无菌手套",
+      "antibiotic": "抗生素"
+    },
+    "email_already_in_use": "此电子邮件地址已被使用。",
+    "weak_password": "您的密码太弱。",
+    "invalid_email": "无效的电子邮件地址。",
+    "operation_not_allowed": "操作不允许。",
+    "network_request_failed": "网络错误。"
+  },
+  "validator": {
+    "email_required": "必须填写电子邮件地址。",
+    "email_invalid": "请输入有效的电子邮件地址。",
+    "password_required": "必须填写密码。",
+    "password_min_length": "您的密码至少需要 6 个字符。"
+  },
+  "auth": {
+    "email-already-in-use": "此电子邮件地址已被使用。",
+    "weak-password": "您的密码太弱。",
+    "invalid-email": "无效的电子邮件地址。",
+    "login_failed": "登录失败。请再试一次。"
+  },
+  "ask_ai_appbar": {
+    "title": "询问助手"
+  },
+  "calendar": {
+    "title": "日历",
+    "month": "月",
+    "monthly": "每月",
+    "today": "今天",
+    "selected": "选定的日子",
+    "hasEvents": "有事件",
+    "close": "关闭",
+    "days": {
+      "mon": "周一",
+      "tue": "周二",
+      "wed": "周三",
+      "thu": "周四",
+      "fri": "周五",
+      "sat": "周六",
+      "sun": "周日"
+    },
+    "months": {
+      "january": "一月",
+      "february": "二月",
+      "march": "三月",
+      "april": "四月",
+      "may": "五月",
+      "june": "六月",
+      "july": "七月",
+      "august": "八月",
+      "september": "九月",
+      "october": "十月",
+      "november": "十一月",
+      "december": "十二月"
+    },
+    "weekdays": {
+      "monday": "星期一",
+      "tuesday": "星期二",
+      "wednesday": "星期三",
+      "thursday": "星期四",
+      "friday": "星期五",
+      "saturday": "星期六",
+      "sunday": "星期日"
+    },
+    "weekdays_short": {
+      "mon": "周一",
+      "tue": "周二",
+      "wed": "周三",
+      "thu": "周四",
+      "fri": "周五",
+      "sat": "周六",
+      "sun": "周日"
+    },
+    "header": {
+      "month_year": "{month} {year}",
+      "weekday_format": "EEEE"
+    },
+    "months_short": {
+      "jan": "1月",
+      "feb": "2月",
+      "mar": "3月",
+      "apr": "4月",
+      "may": "5月",
+      "jun": "6月",
+      "jul": "7月",
+      "aug": "8月",
+      "sep": "9月",
+      "oct": "10月",
+      "nov": "11月",
+      "dec": "12月"
+    },
+    "format": {
+      "month_year": "{month} {year}",
+      "short_weekday": "{weekday}"
+    },
+    "selected_date": "任务：%s",
+    "selected_date_format": "dd MMMM yyyy",
+    "close": "关闭",
+    "date_format": {
+      "selected_date": "dd MMMM yyyy"
+    },
+    "month_names": {
+      "january": "一月",
+      "february": "二月",
+      "march": "三月",
+      "april": "四月",
+      "may": "五月",
+      "june": "六月",
+      "july": "七月",
+      "august": "八月",
+      "september": "九月",
+      "october": "十月",
+      "november": "十一月",
+      "december": "十二月"
+    },
+    "legend": {
+      "income": "收入",
+      "expense": "支出",
+      "income_and_expense": "收入 & 支出",
+      "today": "今天",
+      "selected_day": "选定的日子"
+    },
+    "incomes": "收入",
+    "expenses": "支出"
+  },
+  "home": {
+    "today": "今天",
+    "no_tasks_for_selected_day": "未找到所选日的任务！",
+    "tasks": {
+      "morning_tasks": "晨间任务",
+      "breakfast": "吃早餐",
+      "email_check": "检查邮件"
+    },
+    "add_task_hint": "👉 点击 + 按钮添加新任务",
+    "single_time_date": "仅在 {interval}",
+    "single_time": "一次性",
+    "every_day": "每天",
+    "delete_income": "删除收入",
+    "delete_expense": "删除支出",
+    "delete_income_content": "您确定要删除此收入吗？",
+    "delete_expense_content": "您确定要删除此支出吗？",
+    "delete": "删除",
+    "cancel": "取消",
+    "delete_success": "删除成功",
+    "delete_error": "删除时发生错误",
+    "edit": "编辑",
+    "edit_income": "编辑收入",
+    "edit_expense": "编辑支出",
+    "edit_income_content": "编辑收入详情",
+    "edit_expense_content": "编辑支出详情",
+    "edit_success": "编辑成功",
+    "edit_error": "编辑时发生错误",
+    "no_expense": "没有支出",
+    "no_incomes": "没有收入",
+    "no_expense_desc": "您还未添加任何支出",
+    "no_income_desc": "您还未添加任何收入",
+    "every_n_days": "每 {interval} 天",
+    "weekly_days": "每周 {days}",
+    "every_n_weeks": "每 {interval} 周 {days}",
+    "monthly_days": "每月 {days} 日",
+    "every_n_months": "每 {interval} 个月 {days} 日",
+    "days": {
+      "sun": "星期日",
+      "mon": "星期一",
+      "tue": "星期二",
+      "wed": "星期三",
+      "thu": "星期四",
+      "fri": "星期五",
+      "sat": "星期六"
+    },
+    "income": "收入",
+    "expense": "支出",
+    "balance": "余额",
+    "total": "总计",
+    "monthly": "每月",
+    "no_income": "没有收入",
+    "no_income_desc": "您还未添加任何收入",
+    "select_month": "选择月份"
+  },
+  "info_card": {
+    "title": "信息",
+    "error_title": "错误",
+    "success_title": "成功",
+    "warning_title": "警告"
+  },
+  "settings": {
+    "title": "设置",
+    "account_settings": "账户设置",
+    "profile": {
+      "title": "个人资料",
+      "name_label": "资料名称",
+      "no_info": "暂无信息",
+      "edit_title": "编辑个人资料",
+      "empty_error": "资料名称不能为空",
+      "update_success": "个人资料更新成功",
+      "update_error": "更新个人资料时出错",
+      "unnamed": "未命名",
+      "edit_subtitle": "编辑您的个人资料",
+      "name_hint": "名称"
+    },
+    "language": {
+      "title": "语言",
+      "change_loading": "正在更改语言...",
+      "change_success": "语言更改成功",
+      "change_failed": "语言更改失败",
+      "languages": {
+        "turkish": "土耳其语",
+        "english": "英语",
+        "chinese": "中文",
+        "arabic": "阿拉伯语",
+        "spanish": "西班牙语",
+        "french": "法语",
+        "german": "德语",
+        "italian": "意大利语",
+        "japanese": "日语",
+        "korean": "韩语",
+        "portuguese": "葡萄牙语",
+        "russian": "俄语"
+      }
+    },
+    "password": {
+      "title": "密码",
+      "hidden": "****",
+      "new_password": "新密码",
+      "confirm_password": "确认密码",
+      "empty_error": "密码字段不能为空",
+      "mismatch_error": "密码不匹配",
+      "success": "密码更新成功",
+      "error": "更新密码时出错"
+    },
+    "change_password": {
+      "title": "更改密码",
+      "new_password": "新密码",
+      "confirm_password": "确认密码",
+      "subtitle": "更改密码",
+      "new_password_hint": "新密码",
+      "confirm_password_hint": "确认密码"
+    },
+    "help_support": {
+      "title": "帮助与支持",
+      "contact": {
+        "title": "联系我们",
+        "subtitle": "有问题或建议，请联系我们"
+      },
+      "privacy": {
+        "title": "Privacy Policy",
+        "subtitle": "Learn about our privacy policy",
+        "content": "LAST UPDATE DATE: [01/04/2025]\n\nDear Users, Customers, and Visitors,\n\nAs GoyaApp Software & Digital Solutions (\"GoyaApp\" or the \"Company\"), we place great importance on processing all personal data obtained through our websites and mobile applications (accessible via Google Play and the App Store) in accordance with the principles of confidentiality, integrity, and security. This Privacy Policy and the Clarification Text (\"Policy\"), prepared pursuant to the Turkish Law on the Protection of Personal Data No. 6698 (\"KVKK\"), explains the purposes and methods of processing your personal data, the measures we take to protect it, and your rights as a data subject.\n\n1. DATA CONTROLLER\n\nPursuant to KVKK, the data controller is:\n• Trade Name: GoyaApp Software & Digital Solutions\n• Address: Growth Plaza, Fenerbahçe Mh. Iğrıp Sk. No: 13 Kadıköy, Istanbul\n• Email: info@goyaapp.com\n\nYour personal data is processed in accordance with the procedures and principles set out in this Policy and within the legal framework.\n\n2. SCOPE\n\nThis Policy applies to all websites, mobile applications, online services, and digital platforms operated and managed by GoyaApp. It also covers the data collected through our applications published on Google Play Store and Apple App Store. All such data is processed in line with the principles outlined in this Policy.\n\n3. PERSONAL DATA COLLECTED AND PURPOSES OF PROCESSING\n\nThe personal data listed below is processed in compliance with the relevant legislation and the processing conditions and principles set forth in Articles 4, 5, and 6 of KVKK:\n1. Identity and Contact Information: Name-surname, username, email address, telephone number, company details (if applicable), and billing information. These data are processed for:\n• Registering and creating an account within the application,\n• Executing contractual and sales processes,\n• Providing user support services,\n• Fulfilling legal obligations.\n2. Location Data (GPS): Our mobile applications may collect the geographical location of your device to provide location-based services. Location permissions are activated only with your consent, and such data is used for:\n• Optimization based on the stops/clients you have added,\n• Providing navigation or map functionalities,\n• Informing you of regional campaigns.\nYou may revoke the application's access to location data at any time through your device settings.\n3. Technical and Device Information: IP address, operating system, device model, browser type, app version, and similar data. This information is processed for:\n• Ensuring the security of the application,\n• Detecting and fixing errors,\n• Improving the user experience (analytics).\n4. Camera and File Access: If you wish to upload your photo/video, take a photo, or share certain documents within the application, you will be prompted to grant the relevant permissions. These data are processed solely for your intended purpose. The Company does not access your camera or device storage without your explicit permission.\n5. Payment Information: For purchasing transactions or in-app purchases, credit/debit card details, payment method, billing information, IBAN, etc. may be involved. Payments are handled through secure infrastructures such as Iyzico, bank transfers, or App Store/Play Store payment systems. Full card numbers or CVV details are not stored by the Company; during payment, these details are processed directly by the respective payment service provider.\n6. Chatbot Messaging Permissions: When you use the Chatbot feature on our application or website, the messages you send are answered with the support of artificial intelligence. These messages may be analyzed temporarily or anonymously to prevent misuse, improve service quality, and manage Q&A.\n7. Third-Party Integration Data: Services such as Firebase, Google Maps, Yandex Maps, Here Map, OpenStreetMap, ChatGPT, etc. may receive your location or other data on their own servers. Your use of these services is also subject to their respective privacy policies. Such integrations aim to offer you a better experience or additional features.\n\n4. LEGAL BASES FOR PROCESSING PERSONAL DATA\n\nYour personal data is processed in compliance with KVKK and international data protection regulations under the following legal grounds:\n• Your Explicit Consent (e.g., for marketing communications or using location data),\n• Performance or Execution of a Contract (e.g., purchasing a service, membership processes, support services),\n• Compliance with Legal Obligations (e.g., for tax or judicial processes),\n• Legitimate Interest (e.g., application and service security, fraud prevention, business development),\n• Establishment, Exercise, or Protection of a Right.\n\n5. RETENTION PERIOD OF PERSONAL DATA\n\nYour personal data is retained for the duration required by the relevant legislation or by the purpose of processing. At the end of this period, the data is securely erased, anonymized, or destroyed. For instance, payment/billing data may be retained for 10 years pursuant to financial regulations, while your membership data is retained for as long as your membership continues or is deleted upon your request, in any event no later than the expiry of applicable legal retention periods.\n\n6. TRANSFER OF PERSONAL DATA\n\nAs a general rule, GoyaApp does not share or sell your personal data with unauthorized third parties without your consent. In limited circumstances, personal data may be shared with relevant third parties as follows:\n1. Payment Service Providers and Banks: For carrying out transactions related to credit card payments, bank transfers, etc.\n2. Business Partners and Suppliers: Companies that provide or collaborate with us on the operation of the application or website, support services, cloud infrastructure, map APIs, analytics services, etc.\n3. Authorized Public Institutions: In cases where it is mandatory under the law or upon request by courts, public prosecutors, law enforcement bodies, or relevant regulatory agencies.\n4. Group Companies and Corporate Transactions: In the event of a partial or complete transfer, merger, or spin-off of the Company, personal data may be transferred. In such cases, the receiving party must protect the confidentiality of the data.\n\nYour data may be stored in data centers located in Turkey or abroad. Where an international data transfer is necessary, KVKK and international regulations on data transfers (e.g., recognized safe countries, standard contractual clauses) are complied with.\n\n7. SECURITY MEASURES\n\nGoyaApp implements high-level technical and administrative measures to prevent personal data from falling into the hands of malicious parties. For example:\n• Securing data transmission with SSL/TLS encryption,\n• Firewalls and penetration tests,\n• Ensuring credit card information is not stored on company servers (directing users to secure payment service providers),\n• Restricting access rights and keeping regular logs of data records,\n• Fraud and abuse detection systems,\n• Managing processes in compliance with data retention, destruction, and anonymization policies.\n\nAdditionally, data sharing with third-party services such as maps, location, and chatbot is carried out using encrypted communication to minimize potential security risks. Users are responsible for protecting their own device and account information.\n\n8. USER RIGHTS\n\nPursuant to Article 11 of KVKK, as a data subject, you have the right to:\n• Inquire whether your personal data is processed,\n• Request information regarding the processing if your data has been processed,\n• Learn the purpose for processing your data and whether it is used in line with its intended purpose,\n• Identify the third parties to whom your data is transferred (locally or abroad),\n• Request the correction of incomplete or incorrect data,\n• Request the deletion or destruction of your personal data under the circumstances set out in KVKK,\n• Request that third parties to whom your data has been transferred be notified about such correction or deletion,\n• Object to any outcome that is to your detriment, resulting from the exclusive automated analysis of your data,\n• Demand compensation if you incur damages due to unlawful processing.\n\nTo exercise these rights, please send an email to info@goyaapp.com or use one of the other written communication channels provided below. Your requests will be processed within a maximum of 30 (thirty) days, following the verification of your identity.\n\n9. AMENDMENTS TO THE POLICY\n\nThe Company reserves the right to unilaterally update this Privacy Policy in line with changes in legal regulations and our practices. Any updates will become effective on the date they are announced via our website or applications. With the publication of the new text, the previous version shall be rendered invalid.\n\n10. CONTACT\n\nFor questions, requests, or support regarding our personal data processing activities, you may reach us through the following channels:\n• Email: info@goyaapp.com\n• Phone: +90 (537) 587 82 47\n• Address: Growth Plaza, Fenerbahçe Mh. Iğrıp Sk. No: 13 Kadıköy, Istanbul\n\nAs GoyaApp Software & Digital Solutions, we diligently work to protect and maintain the confidentiality of your personal data, acting in full compliance with KVKK and all other applicable national and international legal regulations. We commit to safeguarding your data with high security standards, preventing unauthorized use, and taking every necessary measure against unlawful access. By continuing to use our applications and services, you acknowledge and agree to the terms set forth in this Policy.\n\nThank you."
+      },
+      "terms": {
+        "title": "Terms of Use",
+        "subtitle": "Learn about our terms of use",
+        "content": "INTRODUCTION\nThis Terms of Use and Membership Agreement (\"Agreement\") sets forth the terms and conditions governing the use of the website and mobile application provided by GoyaApp (hereinafter collectively referred to as the \"Application\"). Please read this Agreement carefully before using GoyaApp or becoming a member of the Application. By accessing GoyaApp, creating an account, or using its services, you acknowledge that you have read, understood, and agree to be bound by all the terms of this Agreement. If you do not accept these terms or if you are not over 18 years of age, you must not use the Application.\n\nMEMBERSHIP MODELS\nGoyaApp offers its users different membership models, which include a credit-based system as well as monthly and yearly subscription packages. By selecting a model that suits your needs, you can benefit from the related services. All membership options are provided in compliance with the applicable laws and regulations; users' rights and obligations are governed by this Agreement:\n\n1. Credit-Based System:\n• Users can purchase credits in bundles to use for certain transactions or content within the Application.\n• Purchased credits are added to the user's account and are only valid within GoyaApp; they cannot be converted into cash, transferred to another account, or used outside the Application.\n• The user agrees to use credits in compliance with the law and this Agreement, and not for fraudulent or abusive purposes.\n• The validity period and usage conditions of credits that are purchased but not used are determined by GoyaApp and announced to users through the Application.\n• Except where legally mandated, no refunds or returns are provided for purchased credits.\n\n2. Monthly Membership (Subscription):\n• The monthly membership model is based on paying a monthly subscription fee in exchange for access to GoyaApp's premium services.\n• This subscription renews automatically each month unless the user cancels it.\n• At the time of the initial purchase, the user pays the subscription fee through the relevant app store (App Store or Google Play) and the subscription becomes active.\n• At the start of each subscription period, the monthly subscription fee is charged automatically.\n• If the user wishes to terminate the subscription, they must cancel the automatic renewal through their App Store or Google Play account settings before the end of the current subscription period.\n• When the subscription is canceled, the user's right to use the services continues until the end of the currently paid period; however, no partial refund is provided for the remaining time.\n\n3. Yearly Membership (Subscription):\n• The yearly membership is a one-year prepayment version of the monthly membership.\n• By paying the annual subscription fee in advance, the user obtains the right to access premium services for one year.\n• The yearly subscription also renews automatically for another year unless the user cancels it before the renewal date, in which case the subscription fee for the renewal period will be charged through the relevant app store.\n• The user must cancel the subscription before the renewal date if they do not wish to renew it for the following year.\n• As with the monthly membership, even if the annual subscription is canceled, the user will continue to have access to the services until the end of the currently paid year, and no refund is provided for unused months.\n\nAGE RESTRICTION\nGoyaApp services are intended solely for individuals aged 18 and older. Persons under the age of 18 are prohibited from using or subscribing to the Application. GoyaApp reserves the right to verify users' ages and request proof where deemed necessary. Accounts of users found to be underage may be closed immediately without prior notice. Those who violate the age restriction do not have the right to request a refund for any fees they have paid, and GoyaApp cannot be held responsible for any such issues.\n\nRULES OF USE AND SECURITY\nBy using GoyaApp, the user undertakes to comply with all applicable laws, regulations, and the provisions of this Agreement. To prevent misuse and security breaches, the user agrees to adhere to the following prohibitions:\n\n• Illegal or Unauthorized Use: Not using the Application for any illegal, deceptive, harmful, or unauthorized purpose. Any attempt at fraud or illegal activity is strictly prohibited.\n• Prohibited Content: Not sharing or transmitting any content through the Application that is unlawful, threatening, defamatory, obscene, inappropriate, or objectionable.\n• Account Misuse: Not using another person's account without authorization, or allowing someone else to use your account. You are responsible for keeping your account login information (username, password, etc.) confidential and secure.\n• Harmful Software and Spam: Not sending viruses, trojans, worms, spam messages, or any code/content that could compromise GoyaApp's or other users' data security or disrupt system functionality.\n• Unauthorized Access: Not attempting to disrupt, disable, or gain unauthorized access to GoyaApp's server, database, network, or communication infrastructure. Not engaging in reverse engineering or attempting to bypass firewalls or encryption systems.\n• Reproduction and Commercial Use: Not reproducing, copying, selling, or using for commercial purposes any part of the Application without GoyaApp's explicit permission. You agree not to use any content, trademark, logo, or other intellectual property of GoyaApp in an unauthorized manner.\n\nIf a user is found to be violating these rules, GoyaApp reserves the right to take the necessary technical and legal measures to prevent the violation and ensure the security of the Application. In this regard, GoyaApp may remove posts that violate the rules, restrict access, or suspend/terminate the user's account. Moreover, if any security breach, fraud, or illegal activity is detected, GoyaApp reserves the right to immediately close the account without notice and, if necessary, notify the relevant authorities and initiate legal proceedings.\n\nDISCLAIMER OF LIABILITY\nTo the maximum extent permitted by law, GoyaApp and its content are provided \"as is\" and \"as available.\" GoyaApp makes no explicit or implied warranties that the services will be uninterrupted, error-free, secure, or fully meet the user's expectations. The user acknowledges that they use the Application at their own risk, and they assume any and all risks that may arise from such use.\n\nGoyaApp shall not be liable for any direct or indirect damages, losses, or harms that may result from the use or inability to use its services. This includes, but is not limited to, lost revenues or profits, data loss, business interruption, loss of goodwill, or any other tangible/intangible damages, except to the extent that such liability cannot be excluded by law. Even in cases where liability cannot be completely excluded by law, GoyaApp's total liability will under no circumstances exceed the amount paid by the user for the relevant service in the last 1 year.\n\nThe content and services provided on the Application are of a general nature and do not come with a guarantee of suitability for a particular purpose. If the user acts based on any information, suggestions, or directions obtained from GoyaApp, they acknowledge that they assume all associated risks. GoyaApp does not guarantee the accuracy, quality, or reliability of any content, advertisements, products, or services provided by third parties or accessed through the Application. As stated below, the details regarding third-party integrations (e.g., Google, Facebook, OpenAI services) are provided, and GoyaApp accepts no responsibility for any errors or malfunctions arising from these third-party services.\n\nImportant Note: Under no circumstances can GoyaApp be held directly responsible for unforeseen events (force majeure, internet infrastructure issues, etc.) that may occur during the provision of the service (including GoyaApp's own negligence) resulting in losses for the user. By using GoyaApp, the user agrees to these limitations of liability.\n\nPAYMENT AND REFUND TERMS\nFees for paid services or content within GoyaApp (e.g., credit packages or subscription fees) are collected via third-party app stores such as Apple App Store or Google Play Store. By initiating a purchase, the user agrees to be subject to the payment, subscription, and refund policies of the relevant app store. The following payment and refund terms apply:\n\n1. Payment Transactions:\n• The user pays the fee for the selected service via the specified payment method (credit card, mobile payment, etc.) through the relevant platform.\n• The payment is processed securely by the App Store/Google Play, and once approved, the user receives a digital receipt/payment confirmation.\n• GoyaApp does not directly collect or store any user credit or debit card details; such information is processed by the platform that receives the payment.\n• In monthly or annual subscriptions, the fee for each new subscription period is charged in advance. The user acknowledges that recurring payments will be charged automatically unless they cancel their subscription.\n\n2. Refund and Cancellation Policy:\n• As a rule, no refunds are issued for digital products and services except where required by law.\n• By confirming a purchase, the user agrees that the service will commence immediately, and thus they may waive their right of withdrawal under applicable distance selling legislation. (For instance, when credits are purchased, they are immediately credited to the user's account; when a subscription is purchased, paid features are enabled immediately.)\n• Nonetheless, certain refunds may be allowed under the specific policies of the App Store or Google Play. If the user requests a refund, they must apply directly to the relevant app store.\n• If Apple or Google approves a refund, GoyaApp reserves the right to update the user's service access and/or remaining credit balance accordingly (e.g., removing credits or subscription privileges corresponding to the refunded amount).\n\n3. Subscription Cancellation:\n• The user can cancel their subscriptions at any time through their App Store/Google Play account settings.\n• Upon cancellation, the user can continue to use the services until the end of the current subscription period; however, no refund is provided for the remaining period after cancellation.\n• If the user does not wish to renew the subscription, it must be canceled at least 24 hours prior to the renewal date. Otherwise, the fee for the next period may be charged.\n\n4. Fee Changes:\n• GoyaApp reserves the right to change the prices of the services offered.\n• Subscription holders will be notified in the Application or via email before any price changes take effect for their next billing cycle.\n• Continuing to use the service after the effective date of the price change signifies acceptance of the new price. If the user does not accept the price change, they have the right to cancel their subscription before the next renewal.\n\nSERVICE INTERRUPTIONS AND MAINTENANCE\nGoyaApp makes reasonable efforts to provide its services continuously and without interruption. However, scheduled maintenance, system updates, technical failures, or force majeure events beyond our control may cause temporary interruptions in the Application. GoyaApp will notify users in advance of planned maintenance or updates whenever possible (for example, via in-app notifications or email).\n\nThe user acknowledges that the service may occasionally be temporarily unavailable and that GoyaApp cannot be held liable for outages or malfunctions of reasonable duration. In particular, for short-term maintenance interruptions that are announced in advance, the user may not claim any compensation or fee refund from GoyaApp. If there are prolonged or unusual outages, GoyaApp may, at its discretion, grant additional usage time to subscription holders or take other compensatory measures to prevent user inconvenience; however, users should not assume in advance that such compensation will be provided.\n\nTHIRD-PARTY INTEGRATIONS\nTo offer better services and enable various features, GoyaApp may integrate with third-party services and platforms such as Google, Apple, Facebook, OpenAI, and Firebase. By using the Application, the user acknowledges and agrees to the conditions and data processing practices required by these third-party integrations. Key principles regarding these third-party integrations are as follows:\n\n1. Social Login (Google, Apple, Facebook, etc.):\n• GoyaApp may allow users to log in using their Google, Apple, or Facebook accounts.\n• If the user chooses to log in through these methods, they will be subject to the respective third-party platform's terms of service and privacy policy.\n• GoyaApp uses personal information provided by these platforms (e.g., name, email) solely to verify the user's identity and personalize the Application experience.\n• Data collected in this way is processed in accordance with GoyaApp's Privacy Policy and applicable data protection legislation. By using social login, the user agrees to comply with the relevant third-party's terms as well.\n\n2. OpenAI Integration (Artificial Intelligence Services):\n• Some smart features or content within GoyaApp may be enabled by artificial intelligence technologies provided by OpenAI.\n• For example, when using an in-app chatbot, text completion, or similar AI-based features, the data entered by the user may be sent to OpenAI's servers for processing, and the generated response will be displayed to the user.\n• By using these features, the user acknowledges that their inputs will be processed by OpenAI's infrastructure. GoyaApp does not guarantee the accuracy, suitability, or originality of content generated by OpenAI.\n• Users understand that AI-generated responses are suggestions only, and they should exercise their own judgment when making final decisions or taking actions. In the event of any data breach or error during the use of OpenAI services, responsibility lies with the third-party service provider (OpenAI), and GoyaApp cannot be held directly liable.\n\n3. Firebase and Other Infrastructure Services:\n• GoyaApp may use Google Firebase or similar third-party infrastructure and analytics services to operate the application, monitor performance, detect errors, send notifications, and securely store user data.\n• Through these services, information such as device details, usage statistics, and location data (if the user has granted permission) may be collected and analyzed.\n• Such data will, where possible, be processed in an anonymized or de-identified form; personal data will be stored and protected in accordance with our Privacy Policy and applicable personal data protection laws (KVKK).\n• By using GoyaApp, the user acknowledges the use of such technical services and agrees that their data may be processed by these services.\n\nGoyaApp takes reasonable precautions to ensure the security and confidentiality of integrated third-party services and expects these service providers to apply their own security policies. However, GoyaApp makes no warranty regarding the functionality or reliability of these third-party platforms or services. The user is aware of the risks associated with third-party integrations and understands that using them is their own choice. Each of these third parties has its own independent terms of use and privacy policy, under which user data may be processed. GoyaApp is not liable for any interruptions, data loss, unauthorized access, or similar issues caused by these third parties, but will make reasonable efforts to provide support if users encounter such problems.\n\nACCOUNT CANCELLATION AND LEGAL SANCTIONS\nThe user acknowledges that if they breach this Agreement or violate applicable laws, GoyaApp may terminate their account and take legal actions. Below are examples of possible situations and outcomes:\n\n1. Agreement Violation and Account Closure:\n• If the user violates any of the usage conditions specified in this Agreement, GoyaApp has the right to suspend or permanently delete their account without prior notice.\n• In particular, if misuse, fraud, or illegal activity is detected, GoyaApp may immediately terminate the account.\n\n2. No Refund for Fees:\n• If a user's account is closed or their access to the service is blocked due to a violation of the Agreement, they are not entitled to a refund, even if they have unused subscription time or remaining credit balances.\n• The user accepts in advance that if they are barred from the service because of a violation, any fees they have paid will not be refunded.\n\n3. Legal Proceedings:\n• GoyaApp reserves the right to seek legal remedies if it deems necessary to protect the platform's security and to compensate any damages suffered by GoyaApp or third parties as a result of user violations.\n• In cases of unlawful activities, fraud, or attacks on security systems, GoyaApp may file criminal charges against the user and cooperate with the competent authorities to initiate legal proceedings.\n• The user may be liable to compensate GoyaApp for all damages incurred (including attorney fees and court costs).\n\nThe user may terminate their GoyaApp membership at any time. In the event of a user-initiated cancellation/deactivation, the user may continue to use the services until the end of the current subscription period, but no refund will be issued for any prepaid period. Users who delete their account or terminate their membership voluntarily must create a new membership if they wish to use the service again; there is no guarantee that data from deleted accounts can be recovered (except data retained in backups in compliance with applicable privacy legislation).\n\nDISPUTE RESOLUTION\nThis Agreement is governed by Turkish law. Any disputes arising from this Agreement or the use of GoyaApp services shall be subject to the jurisdiction of the courts and enforcement offices of the Republic of Türkiye. Unless otherwise expressly stated, the courts of the Republic of Türkiye shall have jurisdiction over any disputes arising out of or in connection with this Agreement. The rights and powers granted under the relevant consumer protection legislation (e.g., the right to apply to a consumer arbitration panel) remain valid for users acting in the capacity of a consumer.\n\nThe parties shall first attempt to resolve any disputes through good-faith negotiations. If no amicable resolution is reached, the judicial remedies outlined above will apply.\n\nAMENDMENTS TO THE AGREEMENT AND EFFECTIVENESS\nGoyaApp reserves the right to unilaterally update or modify the terms of this Agreement from time to time. In the event of significant changes to the Agreement, the updated terms will be made visibly available within the Application and, if necessary, notified to users by email or in-app notification. Continued use of the Application after such changes have been announced constitutes the user's acceptance of the revised terms. If the user does not accept the updated terms, they have the right to terminate their membership and discontinue using the Application.\n\nThis Agreement takes effect when the user electronically consents or starts using the Application in practice. The current Agreement will remain in force until a new version is published by GoyaApp or until the user terminates their membership. GoyaApp will make the most recent version of the Agreement accessible within the Application at all times.\n\nFINAL PROVISIONS\nIn matters not covered by this Agreement, the applicable legal provisions will apply. If any provision of this Agreement is deemed invalid or unenforceable, the remaining provisions will remain in effect. The failure of either party to exercise their rights under this Agreement does not constitute a waiver of those rights.\n\nThank you for reading the GoyaApp Terms of Use and Membership Agreement. For a safe, enjoyable, and efficient experience, please follow the rules above. If you have any questions, feel free to contact us at info@goyaapp.com."
+      },
+      "data_security": {
+        "title": "Data Security",
+        "subtitle": "Learn about our data security",
+        "content": "INTRODUCTION\nThis GoyaApp Software & Digital Solutions Intellectual Property and Copyright Agreement (hereinafter referred to as the \"Agreement\") sets forth the conditions relating to intellectual property rights that may arise during the use of the platform and services provided by GoyaApp Software & Digital Solutions, as well as the rights and obligations of the parties. By using the services of GoyaApp Software & Digital Solutions or entering into a business relationship with GoyaApp Software & Digital Solutions, all relevant parties, including users, employees, and subcontractors, agree to comply with the terms specified in this Agreement. The provisions of this Agreement shall be applied in accordance with national and international intellectual property legislation.\n\n1. OWNERSHIP RIGHTS\n\n1.1. Ownership by GoyaApp Software & Digital Solutions\nAll intellectual property rights pertaining to the software, mobile and web applications, code, databases, interfaces, designs, texts, graphics, logos, trademarks and service marks, trade dress, content, and technologies—developed and offered by GoyaApp Software & Digital Solutions—are the exclusive property of GoyaApp Software & Digital Solutions. These include copyrights, trademark rights, patents, design rights, and trade secrets related to the GoyaApp Software & Digital Solutions platform and services. All such rights are reserved by GoyaApp Software & Digital Solutions.\n\n1.2. Limited Use License\nGoyaApp Software & Digital Solutions grants its users a limited, non-transferable, personal right to use the platform and its content in compliance with applicable laws and this Agreement. This permission allows users to use the functionality provided by GoyaApp Software & Digital Solutions solely in line with the purposes of the platform. No portion of the platform or its content may be copied, modified, republished, distributed, or used for commercial purposes without the express written consent of GoyaApp Software & Digital Solutions. Under no circumstances shall the use of the platform imply that any intellectual property rights of GoyaApp Software & Digital Solutions are being transferred to the user.\n\n1.3. Trademarks and Logos\nAll trademarks, logos, domain names, and corporate identity elements either registered under or actually used by GoyaApp Software & Digital Solutions are owned by GoyaApp Software & Digital Solutions. Users may not use any trademark, logo, or other identifying marks of GoyaApp Software & Digital Solutions in any manner without prior written permission from GoyaApp Software & Digital Solutions. Any unauthorized use of GoyaApp Software & Digital Solutions' trademarks or logos constitutes a breach of this Agreement and is subject to legal enforcement under the relevant laws.\n\n2. THIRD-PARTY CONTENT (USER AND EXTERNALLY SOURCED CONTENT)\n\n2.1. Responsibility for User Content\nThe GoyaApp Software & Digital Solutions platform may allow users to create, upload, or share content. Users are solely responsible for any content (text, comments, photographs, videos, graphics, etc.) they upload to or share via the platform. Each user represents and warrants that they either own all necessary intellectual property rights in the content they upload or have obtained all required permissions. Uploading protected materials (such as copyrighted or trademarked content) without the copyright owner's permission is strictly prohibited. The user agrees not to share any third-party materials without authorization.\n\n2.2. Rights in User Content\nUsers retain ownership and copyright of any content they upload to the GoyaApp Software & Digital Solutions platform. GoyaApp Software & Digital Solutions does not claim ownership of user-created content, and users remain the original rights holders of such content. However, by uploading content to the platform, the user grants GoyaApp Software & Digital Solutions a license to use such content so that the service can operate, and the GoyaApp Software & Digital Solutions platform can function. This license is worldwide, for an indefinite term (until the user deletes the content), irrevocable, transferable, and royalty-free, allowing GoyaApp Software & Digital Solutions to use, reproduce, modify, adapt, publish, translate, distribute, store, and display the user content. GoyaApp Software & Digital Solutions will use this license solely for the purpose of operating, maintaining, improving, promoting the platform, and providing related services.\n\n2.3. Third-Party Rights and Violations\nUsers guarantee that the content they upload in no way infringes upon any third party's copyright, trademark, patent, trade secret, or other rights. If content provided by any user is found to infringe upon someone else's intellectual property rights, GoyaApp Software & Digital Solutions has the right to immediately remove the infringing content from the platform and suspend or terminate the infringing user's access. If a third party alleges that user-generated content violates their rights, GoyaApp Software & Digital Solutions may investigate such claims and take any measures required under Law No. 5651 on Regulation of Publications on the Internet and Suppression of Crimes Committed by Means of Such Publications, as well as other relevant legislation (including removing the content from publication or blocking access). GoyaApp Software & Digital Solutions shall follow standard notice-and-takedown procedures in the event of a copyright infringement claim.\n\n2.4. Content Removal and Moderation\nGoyaApp Software & Digital Solutions is not obligated to pre-screen user-submitted content. However, if it identifies any content that may violate this Agreement or applicable laws, it reserves the right to remove or block access to that content without notice. Such content includes content that is illegal, obscene, defamatory, threatening, abusive, or that infringes upon the intellectual property rights of others. In the event of the user's content being removed or their account suspended, the user agrees not to claim any rights or compensation from GoyaApp Software & Digital Solutions.\n\n2.5. Limitation of GoyaApp Software & Digital Solutions' Liability\nGoyaApp Software & Digital Solutions does not guarantee the accuracy, legality, or reliability of third-party content uploaded by users. As a \"hosting provider\" under Law No. 5651, GoyaApp Software & Digital Solutions bears no direct liability for user-generated content. Users accept sole responsibility for all claims, lawsuits, demands, or damages that may be asserted by third parties in connection with the content they share, and they agree to indemnify GoyaApp Software & Digital Solutions promptly for any losses, damages, or expenses it may incur as a result.\n\n3. UNAUTHORIZED USE AND INFRINGEMENTS\n\n3.1. Prohibited Acts\nAny unauthorized or excessive use of GoyaApp Software & Digital Solutions' intellectual property is strictly prohibited. Users and third parties may not engage in any of the following actions with respect to software, code, content, or materials within the scope of the GoyaApp Software & Digital Solutions platform:\n• Copy, reproduce, or distribute;\n• Modify, reverse engineer, or create derivative works;\n• Publicly perform or display;\n• Use or sell for commercial purposes;\n• Circumvent or remove security or access control mechanisms;\n• Publish any part of the platform's content on another website or medium without prior written permission from GoyaApp Software & Digital Solutions;\n• Use them in any other manner not explicitly permitted by this Agreement.\nSuch actions constitute illegal usage under copyright and related legislation and amount to a breach of this Agreement.\n\n3.2. Sanctions in Case of Infringement\nIf GoyaApp Software & Digital Solutions determines that its intellectual property rights or the Agreement's provisions concerning prohibited acts have been violated, it reserves the right to pursue legal and criminal remedies against the responsible individual(s) or entity(ies). In this context, GoyaApp Software & Digital Solutions may take any of the following measures:\n• Immediately suspend or permanently terminate the infringer's access to GoyaApp Software & Digital Solutions accounts and services,\n• Issue a warning or unilaterally terminate the Agreement, depending on the severity of the infringement,\n• Seek compensation: GoyaApp Software & Digital Solutions may legally demand compensation for any material or moral damages it suffers due to the infringement. The infringing party or parties are liable for all losses incurred by GoyaApp Software & Digital Solutions, including lost profits,\n• Initiate legal proceedings: In cases involving intellectual property rights infringement, GoyaApp Software & Digital Solutions may file criminal complaints, bring civil lawsuits, or approach relevant administrative authorities.\n\nNotice of Infringement: If any user or third party believes that content on the GoyaApp Software & Digital Solutions platform violates their copyright or other intellectual property rights, they may report the matter to GoyaApp Software & Digital Solutions in writing or through the specified communication channels. GoyaApp Software & Digital Solutions will promptly review any reported infringements and, if confirmed, will take the necessary steps, including removing or blocking access to the infringing content. Any action taken by GoyaApp Software & Digital Solutions in response to such notice is carried out in good faith and in accordance with applicable regulations, with due regard to the legal rights of both the complaining party and the content provider.\n\nExceptional Circumstances: If the GoyaApp Software & Digital Solutions platform's APIs, software, or content include components subject to separate open-source licenses such as GNU or MIT, those components shall be governed by their respective licenses. Such situations may constitute an exception to the general prohibitions on unauthorized use stated in this Agreement, but only with respect to the relevant component and license. Users must also comply with the license terms governing open-source or third-party licensed content.\n\n4. TRANSFER OF INTELLECTUAL PROPERTY (EMPLOYEE AND SUBCONTRACTOR WORKS)\n\n4.1. Works Created by Employees\nAll works, software, code, designs, documents, ideas, inventions, or innovations (collectively referred to as \"works\") produced by GoyaApp Software & Digital Solutions employees as part of their job descriptions and in the course of their employment relationship are, by the nature of the work and as far as legally permissible, the property of GoyaApp Software & Digital Solutions. Pursuant to Article 8/2 of Law No. 5846 on Intellectual and Artistic Works, unless otherwise agreed in the employment contract, the employee is deemed to own the work they create in the course of their work, while granting the employer the right to use that work. By entering into this Agreement, the employee acknowledges and undertakes to transfer all economic rights (including rights of adaptation, reproduction, dissemination, performance, digital transmission, etc.) to GoyaApp Software & Digital Solutions for any work created within the framework of the employment relationship. This transfer is deemed to have been effected in exchange for the employee's salary and other employment benefits. If requested by GoyaApp Software & Digital Solutions, the employee agrees to sign additional documents or contracts to fulfill the transfer requirements.\n\n4.2. Subcontractors and Contracted Service Providers\nConsultants, developers, designers, or other subcontractors and third-party service providers working under contract with GoyaApp Software & Digital Solutions agree to transfer all intellectual property rights of the works they develop or produce for GoyaApp Software & Digital Solutions to GoyaApp Software & Digital Solutions, unless otherwise explicitly stated in this Agreement. Subcontractors undertake to provide GoyaApp Software & Digital Solutions with either an exclusive, comprehensive transfer of rights or the broadest license possible for any software code, design, data, documentation, and all other intellectual products they deliver under the project or service contract. Accordingly, upon the delivery of the work and payment of the corresponding fee, all copyrights and other intellectual property rights to the works created by the subcontractor will pass to GoyaApp Software & Digital Solutions. Upon GoyaApp Software & Digital Solutions' request, the subcontractor must sign any documents and complete any procedures necessary to ensure the full transfer of the relevant works' rights to GoyaApp Software & Digital Solutions.\n\n4.3. Moral Rights and Exceptions\nUnder Turkish law, creators (employees and subcontractors) retain certain moral rights to the works they produce (e.g., the right to be recognized as the author and the right to prevent modifications of the work). However, by entering into this Agreement, the creator agrees not to exercise any moral rights against GoyaApp Software & Digital Solutions to the extent permitted by law and not to impede GoyaApp Software & Digital Solutions' use of the works for its corporate purposes. If deemed necessary, GoyaApp Software & Digital Solutions may register or apply for protection of these works in its own name and may freely exercise its rights to exploit the works, including commercial use, modification, licensing, or transfer to third parties.\n\n4.4. Transfer to Third Parties\nGoyaApp Software & Digital Solutions may transfer or license to third parties any intellectual property rights developed internally or transferred to it, in line with its business needs or commercial strategies. The employees and subcontractors acknowledge that if the intellectual property rights originally transferred from them to GoyaApp Software & Digital Solutions are later transferred to or licensed to a third party, they will not demand any additional consent or remuneration for such a transfer. GoyaApp Software & Digital Solutions shall be responsible for ensuring that any such transfer or licensing conforms to applicable legislation.\n\n5. APPLICABLE LAW AND DISPUTE RESOLUTION\n\n5.1. Applicable Law\nThis Agreement and any disputes arising from it shall be governed by the laws of the Republic of Turkey in force at the time. The provisions of this Agreement shall be interpreted in light of the relevant international intellectual property agreements to which Turkey is a party, as well as applicable legislation. In circumstances not explicitly addressed by this Agreement, the mandatory provisions of Turkish law shall apply. If there is a conflict between national and international legislation regarding a mandatory rule applicable to GoyaApp Software & Digital Solutions services, the binding provisions of international agreements shall prevail first, followed by the mandatory provisions of the laws of the Republic of Turkey.\n\n5.2. Jurisdiction\nThe courts and enforcement offices of the Republic of Turkey shall have exclusive jurisdiction over any disputes arising from this Agreement or the use of GoyaApp Software & Digital Solutions services. The parties may agree that the courts where GoyaApp Software & Digital Solutions' headquarters are located (for example, the Istanbul Courts) shall have territorial jurisdiction. This provision does not restrict any mandatory legal rights of users who qualify as consumers to apply to authorities designated by consumer protection laws; however, in commercial relations, the parties accept the jurisdiction of the Turkish courts.\n\n5.3. Methods of Dispute Resolution\nThe parties shall endeavor to resolve any disputes amicably through negotiation and reconciliation in good faith. If no solution can be reached through friendly negotiations, and if alternative dispute resolution methods (e.g., mediation) are legally required prior to litigation, such methods shall be exhausted. The ultimate venue for resolution, in any case, shall be the competent Turkish courts.\n\n5.4. Language of the Agreement\nIn the interpretation of this Agreement, the Turkish text shall be decisive. If the Agreement is translated into other languages and there is a discrepancy between the translations and the Turkish version, the Turkish text shall prevail. The scope and limits of the rights and obligations arising from the Agreement shall be determined according to their meaning under Turkish law.\n\nFINAL PROVISIONS\nThis Agreement is provided to users electronically on the GoyaApp Software & Digital Solutions platform and becomes effective once electronically accepted by the users or implicitly accepted through use of the platform. GoyaApp Software & Digital Solutions may amend the provisions of this Agreement if it deems necessary; in such cases, the updated agreement text will be announced via the platform and submitted for users' approval. Continued use of the platform after the amendments are announced shall be deemed acceptance of those amendments. The invalidity or unenforceability of any provision of this Agreement shall not affect the validity of its remaining provisions. The parties acknowledge that in matters not regulated by the Agreement, the applicable intellectual property legislation and general legal principles in force shall apply."
+      },
+      "contact_us": {
+        "title": "联系我们",
+        "subject": "主题",
+        "message": "消息",
+        "send": "发送",
+        "empty_error": "主题和消息字段不能为空",
+        "success": "您的消息已成功发送",
+        "send_error": "发送消息时出错",
+        "subtitle": "与我们的支持团队联系",
+        "subject_hint": "请输入主题",
+        "message_hint": "请输入消息"
+      }
+    },
+    "account_actions": {
+      "title": "账户操作",
+      "cancel_membership": {
+        "title": "取消会员资格",
+        "subtitle": "结束您的高级会员资格",
+        "confirm_message": "您确定要取消会员资格吗？",
+        "success": "会员资格已成功取消",
+        "error": "取消会员资格时出错",
+        "user_not_found": "未找到用户",
+        "confirm_title": "取消会员资格"
+      },
+      "delete_account": {
+        "title": "删除账户",
+        "subtitle": "永久删除您的账户及所有数据",
+        "confirm_message": "您确定要删除账户吗？此操作无法撤销。",
+        "success": "您的账户已成功删除",
+        "error": "删除账户时出错，请重试。",
+        "menu_title": "删除账户",
+        "menu_subtitle": "永久移除您的账户",
+        "warning": "此操作不可撤销。",
+        "confirm_password": "确认您的密码",
+        "password_hint": "密码",
+        "confirm_button": "确认"
+      },
+      "logout": {
+        "title": "退出登录",
+        "subtitle": "安全退出您的账户",
+        "confirm_message": "您确定要退出吗？",
+        "success": "成功退出",
+        "error": "退出时出错"
+      }
+    },
+    "language_selection": {
+      "title": "语言选择"
+    }
+  },
+  "membership": {
+    "title": "高级会员",
+    "expired_title": "您的高级会员资格已结束",
+    "expired_message": "您对高级功能的访问已结束。请续订会员以继续享受高级体验。",
+    "renew_button": "续订会员"
+  },
+  "common": {
+    "ok": "确定",
+    "cancel": "取消",
+    "yes": "是",
+    "save": "保存",
+    "turkish": "土耳其语",
+    "new_user": "新用户",
+    "user_not_logged_in": "用户未登录",
+    "türkçe": "土耳其语",
+    "close": "关闭",
+    "back": "返回",
+    "refresh": "刷新",
+    "once": "一次",
+    "english": "英语"
+  },
+  "add_fab": {
+    "tooltip": "添加新收入",
+    "dialog": {
+      "title": "添加新目标",
+      "goal_name": "目标名称",
+      "select_repeat_time": "选择重复间隔",
+      "select_time": "选择时间",
+      "cancel": "取消",
+      "add": "添加"
+    }
+  },
+  "ai_fab": {
+    "tooltip": "添加新支出"
+  },
+  "navigation": {
+    "home": "首页",
+    "calendar": "日历",
+    "discover": "发现",
+    "settings": "设置",
+    "subscription": "注册"
+  },
+  "subscription": {
+    "title": "高级",
+    "upgrade_message": "💰 掌控您的财务生活最简单的方法！使用此应用程序，智能管理您的收入和支出，规划预算，实现财务目标。",
+    "membership_expired": "您的会员资格已过期",
+    "remaining_days": "剩余 {0} 天",
+    "plans": {
+      "free": "免费",
+      "monthly": {
+        "title": "月度计划",
+        "duration": "每月",
+        "features": {
+          "unlimited_visits": "每日、每周和每月的收入支出跟踪",
+          "unlimited_products": "在日历上查看财务交易",
+          "detailed_reports": "快速添加收入/支出并支持拖放编辑",
+          "ai_assistant_pro": "每月收入支出对比及财务趋势",
+          "advanced_stock": "基于云的数据存储和自动备份",
+          "route_optimization": "深色/浅色主题、直观界面及快速交易录入",
+          "customer_segmentation": "控制支出，跟踪储蓄目标",
+          "payment_tracking": "标记重要财务日期和定期交易",
+          "email_notifications": "详细搜索、可定制分类和即时通知",
+          "priority_support": "持续性能改进及基于用户反馈的优化"
+        }
+      },
+      "yearly": {
+        "title": "年度计划",
+        "duration": "每年",
+        "savings": "免费 2 个月！",
+        "features": {
+          "pro_features": "提升财务意识的综合跟踪工具",
+          "api_integration": "高级日历整合及彩色交易显示",
+          "multi_user": "详细报告、饼图和趋势分析",
+          "ai_assistant_unlimited": "安全的用户验证和数据加密",
+          "custom_reports": "直观导航菜单及快速摘要视图",
+          "data_backup": "支持财务控制和储蓄目标的附加功能",
+          "dedicated_rep": "收入支出历史及支持自定义分类的实用性",
+          "onsite_training": "定期更新：性能改进及新功能",
+          "strategy_consulting": "适用于个人财务管理及预算规划",
+          "vip_support": "您的智能财务助手全天候 24/7 为您服务，助您实现目标"
+        }
+      }
+    },
+    "selected_plan": "已选计划",
+    "current_plan": "当前计划",
+    "active_plan": "激活计划",
+    "popular": "热门",
+    "start_now": "立即开始",
+    "days_remaining": "剩余 {0} 天",
+    "features": {
+      "support": "支持",
+      "support_description": "7/24 全天候支持",
+      "unlimited": "无限制使用",
+      "unlimited_description": "无限功能",
+      "exclusive_content": "独家内容",
+      "exclusive_content_description": "仅限订阅者的内容",
+      "ai_assistant": "AI 助手",
+      "ai_assistant_desc": "为您的财务决策提供个性化建议和激励支持",
+      "unlimited_customers": "无限收入/支出类别",
+      "unlimited_customers_desc": "添加并管理任意数量的类别",
+      "unlimited_products": "全面报告",
+      "unlimited_products_desc": "通过详细图表和表格查看您的财务数据",
+      "advanced_reports": "高级规划",
+      "advanced_reports_desc": "使用定期收入/支出和预算跟踪规划您的未来",
+      "route_optimization": "财务分析",
+      "route_optimization_desc": "进行每月收入支出对比及趋势分析",
+      "auto_backup": "自动备份",
+      "auto_backup_desc": "将您的数据安全存储在云端",
+      "priority_support": "优先支持",
+      "priority_support_desc": "始终享受快速、优先的客户支持",
+      "payment_tracking": "支付跟踪",
+      "payment_tracking_desc": "不要忘记定期付款，按时支付账单",
+      "performance_analytics": "绩效分析",
+      "performance_analytics_desc": "查看您离目标有多近，跟踪您的进度",
+      "smart_notifications": "智能通知",
+      "smart_notifications_desc": "绝不遗漏重要日期、付款和财务提醒"
+    },
+    "premium_features": "高级功能",
+    "current_plan_badge": "当前计划",
+    "popular_badge": "最受欢迎",
+    "remaining_days": "剩余 {0} 天",
+    "membership_expired": "您的会员资格已过期",
+    "end_date": "结束日期：{0}",
+    "current_plan_button": "您的当前计划",
+    "start_now": "立即开始",
+    "join_now": "立即加入",
+    "days_remaining_text": "%s 天剩余",
+    "end_date_text": "结束日期：%s"
+  },
+  "bottom_sheet": {
+    "add_income": "添加收入",
+    "income_name": "收入名称",
+    "amount": "金额",
+    "monthly_repeat": "每月重复",
+    "add": "添加",
+    "add_expense": "添加支出",
+    "expense_name": "支出名称",
+    "repeat_monthly": "每月重复",
+    "income_added": "收入添加成功",
+    "expense_added": "支出添加成功",
+    "income_updated": "收入更新成功",
+    "expense_updated": "支出更新成功"
+  },
+  "verification": {
+    "email_verification": "电子邮件验证",
+    "title": "验证您的电子邮件",
+    "subtitle": "请输入发送到您收件箱的验证码",
+    "verify_button": "验证",
+    "code_valid_for": "此验证码有效期为 %s 分钟",
+    "wait_before_resend": "请求新验证码前请等待 %s 秒",
+    "success": "电子邮件验证成功"
+  }
+}

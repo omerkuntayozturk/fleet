@@ -42,7 +42,7 @@ class _ContractsPageState extends State<ContractsPage> with SingleTickerProvider
     
     return Scaffold(
       appBar: const TopBar(),
-      drawer: const SideMenu(),
+      drawer: const SideMenu(currentPage: 'contracts'),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(

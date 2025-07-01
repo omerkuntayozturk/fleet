@@ -41,7 +41,7 @@ class _VehicleListPageState extends State<VehicleListPage> with SingleTickerProv
    
    return Scaffold(
      appBar: const TopBar(),
-     drawer: const SideMenu(),
+     drawer: const SideMenu(currentPage: 'list'),
      body: SingleChildScrollView(
        child: Padding(
          padding: const EdgeInsets.all(24),

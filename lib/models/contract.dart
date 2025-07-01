@@ -1,4 +1,6 @@
-import '../core/enums.dart';
+
+enum ContractStage { newContract, active, expired }
+
 class Contract {
  String id, vehicleId, reference, supplier;
  DateTime startDate, endDate;
@@ -12,4 +14,6 @@ class Contract {
    required this.endDate,
    this.stage = ContractStage.newContract,
  });
+
+  num? get durationInDays => null;
 }

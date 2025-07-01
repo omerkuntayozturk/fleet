@@ -56,7 +56,7 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
     
     return Scaffold(
       appBar: const TopBar(),
-      drawer: const SideMenu(),
+      drawer: const SideMenu(currentPage: 'service'),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(

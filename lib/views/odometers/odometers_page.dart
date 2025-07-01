@@ -57,7 +57,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
     
     return Scaffold(
       appBar: const TopBar(),
-      drawer: const SideMenu(),
+      drawer: const SideMenu(currentPage: 'odometers'),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
