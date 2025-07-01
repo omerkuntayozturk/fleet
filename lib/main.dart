@@ -13,9 +13,7 @@ Future<void> main() async {
   // Initialize easy_localization
   await EasyLocalization.ensureInitialized();
   
-  // Initialize dotenv before Firebase
-  await dotenv.load(fileName: ".env");
-  
+  // Initialize dotenv before Firebase  
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
