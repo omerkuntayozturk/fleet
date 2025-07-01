@@ -93,8 +93,6 @@ flutter:
     - assets/translations/zh.json
     - assets/google_logo.png
     - assets/animations/
-    - .env
-    - assets/.env
     - assets/fonts/opensans/
 
   fonts:
