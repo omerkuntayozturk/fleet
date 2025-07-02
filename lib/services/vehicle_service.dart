@@ -7,4 +7,7 @@ class VehicleService {
    final i = _list.indexWhere((x) => x.id == v.id);
    if (i >= 0) _list[i] = v;
  }
+ void remove(String id) {
+   _list.removeWhere((v) => v.id == id);
+ }
 }

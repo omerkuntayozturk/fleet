@@ -4,6 +4,7 @@ import '../../widgets/side_menu.dart';
 import '../../services/service_service.dart';
 import '../../models/service_entry.dart';
 import '../../services/vehicle_service.dart';
+import 'add_service.dart'; // Add this import
 
 class ServicesPage extends StatefulWidget {
   const ServicesPage({super.key});
@@ -16,9 +17,22 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
   final vehicleSvc = VehicleService();
   late AnimationController _controller;
   final TextEditingController _searchController = TextEditingController();
-  List<bool> _isStatsHovering = []; // List for stats cards hovering state
-  List<bool> _isServiceHovering = []; // List for service cards hovering state
+  List<bool> _isStatsHovering = [];
   bool _isLoading = false;
+
+  // Responsive
+  late bool _isSmallScreen;
+  late bool _isMediumScreen;
+
+  // Pagination
+  int _currentPage = 1;
+  int _pageSize = 5;
+  int _totalPages = 1;
+  int _totalRecords = 0;
+  List<ServiceEntry> _allRecords = [];
+  List<ServiceEntry> _displayedRecords = [];
+  List<ServiceEntry> _filteredRecords = [];
+  Map<String, String> _vehicleModels = {};
 
   @override
   void initState() {
@@ -27,13 +41,105 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
       duration: const Duration(milliseconds: 800),
       vsync: this,
     )..forward();
-    
-    // Initialize hovering states for stats cards
+
     _isStatsHovering = List.generate(4, (_) => false);
-    
-    // Initialize hovering states for service cards
-    final services = svc.getAll();
-    _isServiceHovering = List.generate(services.length, (_) => false);
+
+    _searchController.addListener(() {
+      _filterRecords(_searchController.text);
+    });
+
+    _loadServiceData();
+  }
+
+  void _setScreenSizeBreakpoints(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    _isSmallScreen = screenWidth < 650;
+    _isMediumScreen = screenWidth >= 650 && screenWidth < 1024;
+  }
+
+  void _loadServiceData() {
+    setState(() {
+      _isLoading = true;
+    });
+    Future.delayed(const Duration(milliseconds: 800), () {
+      final items = svc.getAll();
+      final vehicles = vehicleSvc.getAll();
+      final vehicleModels = <String, String>{};
+      for (var v in vehicles) {
+        vehicleModels[v.id] = v.model;
+      }
+      setState(() {
+        _allRecords = items;
+        _vehicleModels = vehicleModels;
+        _totalRecords = items.length;
+        _totalPages = (_totalRecords / _pageSize).ceil();
+        if (_totalPages == 0) _totalPages = 1;
+        _isLoading = false;
+      });
+      _updateDisplayedRecords();
+    });
+  }
+
+  void _updateDisplayedRecords() {
+    setState(() {
+      int startIndex = (_currentPage - 1) * _pageSize;
+      int endIndex = startIndex + _pageSize;
+      if (endIndex > _allRecords.length) endIndex = _allRecords.length;
+      if (startIndex >= _allRecords.length) {
+        _displayedRecords = [];
+      } else {
+        _displayedRecords = _allRecords.sublist(startIndex, endIndex);
+      }
+      _filteredRecords = _displayedRecords;
+    });
+  }
+
+  void _filterRecords(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        _filteredRecords = _displayedRecords;
+      } else {
+        final lowercaseQuery = query.toLowerCase();
+        _filteredRecords = _allRecords.where((record) =>
+          record.vehicleId.toLowerCase().contains(lowercaseQuery) ||
+          record.serviceType.toLowerCase().contains(lowercaseQuery) ||
+          record.cost.toString().contains(lowercaseQuery)
+        ).toList();
+      }
+    });
+  }
+
+  void _changePage(int page) {
+    setState(() {
+      _currentPage = page;
+      _searchController.clear();
+    });
+    _updateDisplayedRecords();
+  }
+
+  void _previousPage() {
+    if (_currentPage > 1) {
+      _changePage(_currentPage - 1);
+    }
+  }
+
+  void _nextPage() {
+    if (_currentPage < _totalPages) {
+      _changePage(_currentPage + 1);
+    }
+  }
+
+  // Dummy import/export methods
+  void _importServices(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('İçe Aktar özelliği henüz eklenmedi.'), backgroundColor: Colors.blue),
+    );
+  }
+
+  void _exportServices(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Dışa Aktar özelliği henüz eklenmedi.'), backgroundColor: Colors.blue),
+    );
   }
 
   @override
@@ -45,15 +151,7 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    final items = svc.getAll();
-    final vehicles = vehicleSvc.getAll();
-    
-    // Map vehicle IDs to their models for display
-    Map<String, String> vehicleModels = {};
-    for (var vehicle in vehicles) {
-      vehicleModels[vehicle.id] = vehicle.model;
-    }
-    
+    _setScreenSizeBreakpoints(context);
     return Scaffold(
       appBar: const TopBar(),
       drawer: const SideMenu(currentPage: 'service'),
@@ -61,353 +159,629 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.all(24),
+                padding: EdgeInsets.all(_isSmallScreen ? 16 : 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header section with title and search
                     _buildHeaderSection(context),
-                    
-                    const SizedBox(height: 32),
-                    
-                    // Stats section
-                    _buildStatsSection(context, items),
-                    
-                    const SizedBox(height: 40),
-                    
-                    // Services section
-                    _buildServicesSection(context, items, vehicleModels),
+                    SizedBox(height: _isSmallScreen ? 24 : 32),
+                    _buildStatsSection(context, _allRecords),
+                    SizedBox(height: _isSmallScreen ? 32 : 40),
+                    _buildServicesSection(context),
                   ],
                 ),
               ),
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addNewServiceEntry,
-        tooltip: 'Yeni Servis Kaydı Ekle',
-        child: const Icon(Icons.add),
+      floatingActionButton: _isSmallScreen ? _buildModernFAB(context) : null,
+    );
+  }
+
+  Widget _buildModernFAB(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).primaryColor,
+            Theme.of(context).primaryColor.withOpacity(0.8),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).primaryColor.withOpacity(0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: _addNewServiceEntry,
+          child: Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Icon(
+              Icons.add_circle_outline_rounded,
+              color: Colors.white,
+              size: 24,
+            ),
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildHeaderSection(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, -0.5),
-                    end: Offset.zero,
-                  ).animate(CurvedAnimation(
-                    parent: _controller,
-                    curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
-                  )),
-                  child: Text(
-                    'Servis Kayıtları',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).primaryColor,
-                        ),
+    if (_isSmallScreen) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, -0.5),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(
+              parent: _controller,
+              curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
+            )),
+            child: Text(
+              'Servis Kayıtları',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).primaryColor,
+                  ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          FadeTransition(
+            opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
+              CurvedAnimation(
+                parent: _controller,
+                curve: const Interval(0.3, 0.8, curve: Curves.easeOut),
+              ),
+            ),
+            child: Text(
+              'Araç bakım ve servis işlemlerini takip edin',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: Colors.grey[600],
+                  ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          FadeTransition(
+            opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
+              CurvedAnimation(
+                parent: _controller,
+                curve: const Interval(0.5, 1.0, curve: Curves.easeOut),
+              ),
+            ),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Servis kaydı ara...',
+                prefixIcon: const Icon(Icons.search),
+                filled: true,
+                fillColor: Colors.grey[100],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 0),
+              ),
+            ),
+          ),
+        ],
+      );
+    } else if (_isMediumScreen) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0, -0.5),
+                      end: Offset.zero,
+                    ).animate(CurvedAnimation(
+                      parent: _controller,
+                      curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
+                    )),
+                    child: Text(
+                      'Servis Kayıtları',
+                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  FadeTransition(
+                    opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
+                      CurvedAnimation(
+                        parent: _controller,
+                        curve: const Interval(0.3, 0.8, curve: Curves.easeOut),
+                      ),
+                    ),
+                    child: Text(
+                      'Araç bakım ve servis işlemlerini takip edin',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Colors.grey[600],
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.add),
+                label: const Text('Yeni Servis'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-                const SizedBox(height: 8),
-                FadeTransition(
+                onPressed: _addNewServiceEntry,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: FadeTransition(
                   opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
                     CurvedAnimation(
                       parent: _controller,
-                      curve: const Interval(0.3, 0.8, curve: Curves.easeOut),
+                      curve: const Interval(0.5, 1.0, curve: Curves.easeOut),
                     ),
                   ),
-                  child: Text(
-                    'Araç bakım ve servis işlemlerini takip edin',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Colors.grey[600],
-                        ),
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Servis kaydı ara...',
+                      prefixIcon: const Icon(Icons.search),
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                    ),
                   ),
                 ),
-              ],
-            ),
-            SizedBox(
-              width: 300,
-              child: FadeTransition(
+              ),
+              const SizedBox(width: 16),
+              OutlinedButton.icon(
+                icon: const Icon(Icons.upload_file),
+                label: const Text('İçe Aktar'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+                onPressed: () => _importServices(context),
+              ),
+              const SizedBox(width: 12),
+              OutlinedButton.icon(
+                icon: const Icon(Icons.download),
+                label: const Text('Dışa Aktar'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+                onPressed: () => _exportServices(context),
+              ),
+            ],
+          ),
+        ],
+      );
+    } else {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, -0.5),
+                  end: Offset.zero,
+                ).animate(CurvedAnimation(
+                  parent: _controller,
+                  curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
+                )),
+                child: Text(
+                  'Servis Kayıtları',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              FadeTransition(
                 opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
                   CurvedAnimation(
                     parent: _controller,
-                    curve: const Interval(0.5, 1.0, curve: Curves.easeOut),
+                    curve: const Interval(0.3, 0.8, curve: Curves.easeOut),
                   ),
                 ),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Servis kaydı ara...',
-                    prefixIcon: const Icon(Icons.search),
-                    filled: true,
-                    fillColor: Colors.grey[100],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                  ),
-                  onChanged: (value) {
-                    // Implement search functionality
-                    setState(() {});
-                  },
+                child: Text(
+                  'Araç bakım ve servis işlemlerini takip edin',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Colors.grey[600],
+                      ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ],
-    );
+            ],
+          ),
+          Row(
+            children: [
+              ElevatedButton.icon(
+                icon: const Icon(Icons.upload_file),
+                label: const Text('İçe Aktar'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.secondary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                onPressed: () => _importServices(context),
+              ),
+              const SizedBox(width: 16),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.download),
+                label: const Text('Dışa Aktar'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.tertiary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                onPressed: () => _exportServices(context),
+              ),
+              const SizedBox(width: 16),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.add),
+                label: const Text('Yeni Servis'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                onPressed: _addNewServiceEntry,
+              ),
+              const SizedBox(width: 16),
+              SizedBox(
+                width: 300,
+                child: FadeTransition(
+                  opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
+                    CurvedAnimation(
+                      parent: _controller,
+                      curve: const Interval(0.5, 1.0, curve: Curves.easeOut),
+                    ),
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Servis kaydı ara...',
+                      prefixIcon: const Icon(Icons.search),
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
+    }
   }
 
   Widget _buildStatsSection(BuildContext context, List<ServiceEntry> items) {
-    // Calculate service statistics
     double totalCost = 0;
     double averageCost = 0;
     Map<String, int> serviceTypeCount = {};
     String mostCommonService = 'Yok';
     int maxCount = 0;
-    
+
     for (var service in items) {
       totalCost += service.cost;
-      
-      // Count service types
       final type = service.serviceType.isEmpty ? 'Belirsiz' : service.serviceType;
       serviceTypeCount[type] = (serviceTypeCount[type] ?? 0) + 1;
-      
-      // Find most common service type
       if (serviceTypeCount[type]! > maxCount) {
         maxCount = serviceTypeCount[type]!;
         mostCommonService = type;
       }
     }
-    
     averageCost = items.isEmpty ? 0 : totalCost / items.length;
-    
-    return LayoutBuilder(
-      builder: (ctx, constraints) {
-        int cols = constraints.maxWidth > 1200
-            ? 4
-            : constraints.maxWidth > 800
-                ? 2
-                : 1;
-        
-        return Column(
+
+    final List<Map<String, dynamic>> cards = [
+      {
+        'icon': Icons.build,
+        'title': 'Toplam Servis',
+        'value': '${items.length}',
+        'color': Colors.purple,
+        'trend': '+3%',
+        'isUp': true,
+      },
+      {
+        'icon': Icons.attach_money,
+        'title': 'Toplam Maliyet',
+        'value': '${totalCost.toStringAsFixed(2)} TL',
+        'color': Colors.orange,
+        'trend': '+5%',
+        'isUp': true,
+      },
+      {
+        'icon': Icons.category,
+        'title': 'En Sık Servis',
+        'value': mostCommonService,
+        'color': Colors.blue,
+        'trend': '+2%',
+        'isUp': true,
+      },
+      {
+        'icon': Icons.calculate,
+        'title': 'Ortalama Maliyet',
+        'value': '${averageCost.toStringAsFixed(2)} TL',
+        'color': Colors.green,
+        'trend': '-1%',
+        'isUp': false,
+      },
+    ];
+
+    if (_isSmallScreen || _isMediumScreen) {
+      return FadeTransition(
+        opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: const Interval(0.4, 0.9, curve: Curves.easeOut),
+          ),
+        ),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            FadeTransition(
-              opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
-                CurvedAnimation(
-                  parent: _controller,
-                  curve: const Interval(0.4, 0.9, curve: Curves.easeOut),
-                ),
-              ),
-              child: Text(
-                'Servis İstatistikleri',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: cols,
-                crossAxisSpacing: 24,
-                mainAxisSpacing: 24,
-                childAspectRatio: 1.5,
-              ),
-              itemCount: 4,
-              itemBuilder: (context, index) {
-                final List<Map<String, dynamic>> cards = [
-                  {
-                    'icon': Icons.build,
-                    'title': 'Toplam Servis',
-                    'value': '${items.length}',
-                    'color': Colors.indigo,
-                    'trend': '+3%',
-                    'isUp': true,
-                  },
-                  {
-                    'icon': Icons.attach_money,
-                    'title': 'Toplam Maliyet',
-                    'value': '${totalCost.toStringAsFixed(2)} TL',
-                    'color': Colors.orange,
-                    'trend': '+5%',
-                    'isUp': true,
-                  },
-                  {
-                    'icon': Icons.category,
-                    'title': 'En Sık Servis',
-                    'value': mostCommonService,
-                    'color': Colors.blue,
-                    'trend': '+2%',
-                    'isUp': true,
-                  },
-                  {
-                    'icon': Icons.calculate,
-                    'title': 'Ortalama Maliyet',
-                    'value': '${averageCost.toStringAsFixed(2)} TL',
-                    'color': Colors.green,
-                    'trend': '-1%',
-                    'isUp': false,
-                  },
-                ];
-
-                return MouseRegion(
-                  onEnter: (_) => setState(() => _isStatsHovering[index] = true),
-                  onExit: (_) => setState(() => _isStatsHovering[index] = false),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    transform: _isStatsHovering[index]
-                        ? (Matrix4.identity()..translate(0, -5, 0))
-                        : Matrix4.identity(),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: cards[index]['color'].withOpacity(_isStatsHovering[index] ? 0.3 : 0.1),
-                          blurRadius: 15,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
-                      border: Border.all(
-                        color: _isStatsHovering[index]
-                            ? cards[index]['color']
-                            : Colors.grey[200]!,
-                        width: 1,
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: cards[index]['color'].withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Icon(
-                                  cards[index]['icon'],
-                                  color: cards[index]['color'],
-                                  size: 24,
-                                ),
-                              ),
-                              Row(
-                                children: [
-                                  Icon(
-                                    cards[index]['isUp']
-                                        ? Icons.arrow_upward
-                                        : Icons.arrow_downward,
-                                    color: cards[index]['isUp']
-                                        ? Colors.green
-                                        : Colors.red,
-                                    size: 16,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    cards[index]['trend'],
-                                    style: TextStyle(
-                                      color: cards[index]['isUp']
-                                          ? Colors.green
-                                          : Colors.red,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            cards[index]['title'],
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: Colors.grey[600],
-                                ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            cards[index]['value'],
-                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).textTheme.bodyMedium?.color,
-                                ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildServicesSection(BuildContext context, List<ServiceEntry> items, Map<String, String> vehicleModels) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
             Text(
-              'Servis Listesi',
+              'Servis İstatistikleri',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
             ),
+            const SizedBox(height: 16),
             Row(
               children: [
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.filter_list),
-                  label: const Text('Filtrele'),
-                  onPressed: () {
-                    // Filtreleme seçenekleri
-                    _showFilterDialog(context);
-                  },
-                ),
-                const SizedBox(width: 12),
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Yenile'),
-                  onPressed: () {
-                    setState(() {
-                      _isLoading = true;
-                    });
-                    
-                    // Simulate loading delay
-                    Future.delayed(const Duration(milliseconds: 800), () {
-                      setState(() {
-                        _isLoading = false;
-                      });
-                    });
-                  },
-                ),
+                Expanded(child: _buildStatCard(context, cards[0], 0)),
+                const SizedBox(width: 16),
+                Expanded(child: _buildStatCard(context, cards[1], 1)),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(child: _buildStatCard(context, cards[2], 2)),
+                const SizedBox(width: 16),
+                Expanded(child: _buildStatCard(context, cards[3], 3)),
               ],
             ),
           ],
         ),
+      );
+    } else {
+      return FadeTransition(
+        opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: const Interval(0.4, 0.9, curve: Curves.easeOut),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Servis İstatistikleri',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: List.generate(4, (i) => Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(right: i < 3 ? 16 : 0),
+                  child: _buildStatCard(context, cards[i], i),
+                ),
+              )),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  Widget _buildStatCard(BuildContext context, Map<String, dynamic> card, int index) {
+    if (_isSmallScreen) {
+      return Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: card['color'].withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
+          border: Border.all(color: Colors.grey[200]!),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: card['color'].withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(card['icon'], color: card['color'], size: 18),
+                ),
+                Row(
+                  children: [
+                    Icon(card['isUp'] ? Icons.arrow_upward : Icons.arrow_downward,
+                        color: card['isUp'] ? Colors.green : Colors.red, size: 12),
+                    const SizedBox(width: 4),
+                    Text(card['trend'],
+                        style: TextStyle(
+                          color: card['isUp'] ? Colors.green : Colors.red,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                        )),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              card['title'],
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: Colors.grey[600],
+                    fontSize: 12,
+                  ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              card['value'],
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      );
+    } else {
+      return MouseRegion(
+        onEnter: (_) => setState(() => _isStatsHovering[index] = true),
+        onExit: (_) => setState(() => _isStatsHovering[index] = false),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          transform: _isStatsHovering[index]
+              ? (Matrix4.identity()..translate(0, -5, 0))
+              : Matrix4.identity(),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: card['color'].withOpacity(_isStatsHovering[index] ? 0.3 : 0.1),
+                blurRadius: 15,
+                offset: const Offset(0, 5),
+              ),
+            ],
+            border: Border.all(
+              color: _isStatsHovering[index] ? card['color'] : Colors.grey[200]!,
+              width: 1,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: card['color'].withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(card['icon'], color: card['color'], size: 24),
+                  ),
+                  Row(
+                    children: [
+                      Icon(card['isUp'] ? Icons.arrow_upward : Icons.arrow_downward,
+                          color: card['isUp'] ? Colors.green : Colors.red, size: 16),
+                      const SizedBox(width: 4),
+                      Text(card['trend'],
+                          style: TextStyle(
+                            color: card['isUp'] ? Colors.green : Colors.red,
+                            fontWeight: FontWeight.bold,
+                          )),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                card['title'],
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Colors.grey[600],
+                    ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                card['value'],
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.bodyMedium?.color,
+                    ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+  }
+
+  Widget _buildServicesSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Servis Listesi',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
         const SizedBox(height: 16),
-        items.isEmpty
+        _filteredRecords.isEmpty
             ? _buildEmptyState()
             : Container(
                 decoration: BoxDecoration(
@@ -421,150 +795,378 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
                     ),
                   ],
                 ),
-                padding: const EdgeInsets.all(24),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final columns = constraints.maxWidth > 1200 
-                        ? 3 
-                        : constraints.maxWidth > 800 
-                            ? 2 
-                            : 1;
-                    
-                    return GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: columns,
-                        crossAxisSpacing: 20,
-                        mainAxisSpacing: 20,
-                        childAspectRatio: 1.2,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      // Table header
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: Text(
+                                'Araç',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: Text(
+                                'Tarih',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: Text(
+                                'Servis Türü',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: Text(
+                                'Maliyet',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: _isSmallScreen ? 50 : 100,
+                            ),
+                          ],
+                        ),
                       ),
-                      itemCount: items.length,
-                      itemBuilder: (context, index) {
-                        final service = items[index];
-                        
-                        // Ensure the hovering list is up to date with data list
-                        if (_isServiceHovering.length != items.length) {
-                          _isServiceHovering = List.generate(items.length, (_) => false);
-                        }
-                        
-                        final vehicleModel = service.vehicleId.isEmpty 
-                            ? '(Araç seçilmedi)' 
-                            : vehicleModels[service.vehicleId] ?? 'Bilinmeyen Araç';
-                        
-                        return MouseRegion(
-                          onEnter: (_) => setState(() => _isServiceHovering[index] = true),
-                          onExit: (_) => setState(() => _isServiceHovering[index] = false),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            transform: _isServiceHovering[index]
-                                ? (Matrix4.identity()..translate(0, -5, 0))
-                                : Matrix4.identity(),
+                      const SizedBox(height: 8),
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: _filteredRecords.length,
+                        itemBuilder: (context, index) {
+                          final record = _filteredRecords[index];
+                          final vehicleModel = record.vehicleId.isEmpty
+                              ? '(Araç yok)'
+                              : _vehicleModels[record.vehicleId] ?? record.vehicleId;
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 8),
                             decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Theme.of(context).primaryColor.withOpacity(_isServiceHovering[index] ? 0.2 : 0.05),
-                                  blurRadius: 15,
-                                  offset: const Offset(0, 5),
-                                ),
-                              ],
-                              border: Border.all(
-                                color: _isServiceHovering[index]
-                                    ? Theme.of(context).primaryColor.withOpacity(0.5)
-                                    : Colors.grey[200]!,
-                                width: 1,
-                              ),
+                              border: Border.all(color: Colors.grey[200]!),
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(16),
-                                onTap: () => _editServiceEntry(service),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(20),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(16),
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(context).primaryColor.withOpacity(0.1),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Icon(
-                                          Icons.build,
-                                          color: Theme.of(context).primaryColor,
-                                          size: 32,
-                                        ),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(8),
+                              onTap: () => _editServiceEntry(record),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 2,
+                                      child: Text(
+                                        vehicleModel,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                      const SizedBox(height: 16),
-                                      Text(
-                                        service.serviceType.isEmpty ? '(Tür yok)' : service.serviceType,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 18,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        'Araç: $vehicleModel',
-                                        style: TextStyle(
-                                          color: Colors.grey[600],
-                                          fontSize: 14,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        'Tarih: ${_formatDate(service.date)}',
-                                        style: TextStyle(
-                                          color: Colors.grey[600],
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        'Maliyet: ${service.cost} TL',
-                                        style: TextStyle(
-                                          color: Colors.grey[800],
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 16),
-                                      if (_isServiceHovering[index])
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            IconButton(
-                                              icon: const Icon(Icons.edit, color: Colors.blue),
-                                              tooltip: 'Düzenle',
-                                              onPressed: () => _editServiceEntry(service),
+                                    ),
+                                    Expanded(
+                                      flex: 2,
+                                      child: Text(_formatDate(record.date)),
+                                    ),
+                                    Expanded(
+                                      flex: 2,
+                                      child: Text(record.serviceType.isEmpty ? '(Tür yok)' : record.serviceType),
+                                    ),
+                                    Expanded(
+                                      flex: 2,
+                                      child: Text('${record.cost.toStringAsFixed(2)} TL'),
+                                    ),
+                                    SizedBox(
+                                      width: _isSmallScreen ? 50 : 100,
+                                      child: _isSmallScreen
+                                          ? PopupMenuButton(
+                                              icon: Icon(Icons.more_vert, color: Colors.grey[600]),
+                                              itemBuilder: (context) => [
+                                                const PopupMenuItem(
+                                                  value: 'edit',
+                                                  child: Text('Düzenle'),
+                                                ),
+                                                const PopupMenuItem(
+                                                  value: 'delete',
+                                                  child: Text('Sil'),
+                                                ),
+                                              ],
+                                              onSelected: (value) {
+                                                if (value == 'edit') {
+                                                  _editServiceEntry(record);
+                                                } else if (value == 'delete') {
+                                                  _deleteServiceEntry(record);
+                                                }
+                                              },
+                                            )
+                                          : Row(
+                                              mainAxisAlignment: MainAxisAlignment.end,
+                                              children: [
+                                                IconButton(
+                                                  icon: Icon(Icons.edit_outlined, color: Colors.blue[600], size: 20),
+                                                  tooltip: 'Düzenle',
+                                                  constraints: const BoxConstraints(),
+                                                  padding: const EdgeInsets.all(8),
+                                                  onPressed: () => _editServiceEntry(record),
+                                                ),
+                                                IconButton(
+                                                  icon: Icon(Icons.delete_outline, color: Colors.red[600], size: 20),
+                                                  tooltip: 'Sil',
+                                                  constraints: const BoxConstraints(),
+                                                  padding: const EdgeInsets.all(8),
+                                                  onPressed: () => _deleteServiceEntry(record),
+                                                ),
+                                              ],
                                             ),
-                                            const SizedBox(width: 8),
-                                            IconButton(
-                                              icon: const Icon(Icons.delete, color: Colors.red),
-                                              tooltip: 'Sil',
-                                              onPressed: () => _deleteServiceEntry(service),
-                                            ),
-                                          ],
-                                        ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
-                          ),
-                        );
-                      },
-                    );
-                  },
+                          );
+                        },
+                      ),
+                      if (_searchController.text.isEmpty && _totalPages > 1)
+                        _isSmallScreen
+                            ? _buildSimplifiedPagination()
+                            : _isMediumScreen
+                                ? _buildMediumPaginationControls()
+                                : _buildPaginationControls(),
+                    ],
+                  ),
                 ),
               ),
       ],
+    );
+  }
+
+  Widget _buildSimplifiedPagination() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.chevron_left),
+            onPressed: _currentPage > 1 ? _previousPage : null,
+            tooltip: 'Önceki Sayfa',
+            splashRadius: 20,
+            color: _currentPage > 1 ? Colors.blue : Colors.grey,
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              '$_currentPage / $_totalPages',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.chevron_right),
+            onPressed: _currentPage < _totalPages ? _nextPage : null,
+            tooltip: 'Sonraki Sayfa',
+            splashRadius: 20,
+            color: _currentPage < _totalPages ? Colors.blue : Colors.grey,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMediumPaginationControls() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+        border: Border(top: BorderSide(color: Colors.grey[200]!)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Toplam $_totalRecords kayıt',
+            style: TextStyle(
+              color: Colors.grey[700],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.chevron_left),
+                onPressed: _currentPage > 1 ? _previousPage : null,
+                tooltip: 'Önceki Sayfa',
+                splashRadius: 20,
+                color: _currentPage > 1 ? Colors.blue : Colors.grey,
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey[300]!),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: DropdownButton<int>(
+                  value: _currentPage,
+                  underline: const SizedBox(),
+                  items: List.generate(_totalPages, (index) {
+                    return DropdownMenuItem<int>(
+                      value: index + 1,
+                      child: Text('${index + 1}'),
+                    );
+                  }),
+                  onChanged: (value) {
+                    if (value != null) {
+                      _changePage(value);
+                    }
+                  },
+                ),
+              ),
+              Text(' / $_totalPages', style: const TextStyle(color: Colors.grey)),
+              IconButton(
+                icon: const Icon(Icons.chevron_right),
+                onPressed: _currentPage < _totalPages ? _nextPage : null,
+                tooltip: 'Sonraki Sayfa',
+                splashRadius: 20,
+                color: _currentPage < _totalPages ? Colors.blue : Colors.grey,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPaginationControls() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+        border: Border(top: BorderSide(color: Colors.grey[200]!)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Toplam $_totalRecords kayıt',
+            style: TextStyle(
+              color: Colors.grey[700],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.first_page),
+                onPressed: _currentPage > 1 ? () => _changePage(1) : null,
+                tooltip: 'İlk Sayfa',
+                splashRadius: 20,
+                color: _currentPage > 1 ? Colors.blue : Colors.grey,
+              ),
+              IconButton(
+                icon: const Icon(Icons.chevron_left),
+                onPressed: _currentPage > 1 ? _previousPage : null,
+                tooltip: 'Önceki Sayfa',
+                splashRadius: 20,
+                color: _currentPage > 1 ? Colors.blue : Colors.grey,
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey[300]!),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: DropdownButton<int>(
+                  value: _currentPage,
+                  underline: const SizedBox(),
+                  items: List.generate(_totalPages, (index) {
+                    return DropdownMenuItem<int>(
+                      value: index + 1,
+                      child: Text('${index + 1}'),
+                    );
+                  }),
+                  onChanged: (value) {
+                    if (value != null) {
+                      _changePage(value);
+                    }
+                  },
+                ),
+              ),
+              Text(' / $_totalPages', style: const TextStyle(color: Colors.grey)),
+              IconButton(
+                icon: const Icon(Icons.chevron_right),
+                onPressed: _currentPage < _totalPages ? _nextPage : null,
+                tooltip: 'Sonraki Sayfa',
+                splashRadius: 20,
+                color: _currentPage < _totalPages ? Colors.blue : Colors.grey,
+              ),
+              IconButton(
+                icon: const Icon(Icons.last_page),
+                onPressed: _currentPage < _totalPages ? () => _changePage(_totalPages) : null,
+                tooltip: 'Son Sayfa',
+                splashRadius: 20,
+                color: _currentPage < _totalPages ? Colors.blue : Colors.grey,
+              ),
+              const SizedBox(width: 16),
+              Text('Sayfa Başına:', style: TextStyle(color: Colors.grey[700])),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey[300]!),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: DropdownButton<int>(
+                  value: _pageSize,
+                  underline: const SizedBox(),
+                  items: [5, 10, 15, 20].map((size) {
+                    return DropdownMenuItem<int>(
+                      value: size,
+                      child: Text('$size'),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        _pageSize = value;
+                        _totalPages = (_totalRecords / _pageSize).ceil();
+                        if (_totalPages == 0) _totalPages = 1;
+                        _currentPage = 1;
+                      });
+                      _updateDisplayedRecords();
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -619,62 +1221,16 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
     return '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
   }
 
-  void _showFilterDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Servis Kayıtlarını Filtrele'),
-        content: SizedBox(
-          width: 300,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              DropdownButtonFormField<String>(
-                decoration: const InputDecoration(
-                  labelText: 'Servis Türü',
-                ),
-                items: const [
-                  DropdownMenuItem(value: 'all', child: Text('Tümü')),
-                  DropdownMenuItem(value: 'maintenance', child: Text('Bakım')),
-                  DropdownMenuItem(value: 'repair', child: Text('Onarım')),
-                  DropdownMenuItem(value: 'inspection', child: Text('Muayene')),
-                ],
-                onChanged: (value) {
-                  // Handle filter selection
-                },
-                value: 'all',
-              ),
-              const SizedBox(height: 16),
-              const TextField(
-                decoration: InputDecoration(
-                  labelText: 'Araç ID',
-                  hintText: 'Araç ID\'sine göre filtrele',
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('İptal'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              // Apply filters
-              Navigator.pop(context);
-            },
-            child: const Text('Uygula'),
-          ),
-        ],
-      ),
-    );
+  void _addNewServiceEntry() {
+    ServiceManagement.addNewService(context, () {
+      _loadServiceData(); // Refresh the data after adding a service
+    });
   }
 
   void _editServiceEntry(ServiceEntry service) {
-    // Navigation to edit page would go here
-    // For now, just print the service ID
-    print('Editing service entry: ${service.id}');
+    ServiceManagement.addNewService(context, () {
+      _loadServiceData(); // Refresh the data after editing
+    }, editService: service);
   }
 
   void _deleteServiceEntry(ServiceEntry service) {
@@ -682,7 +1238,7 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Servis Kaydını Sil'),
-        content: Text('Bu servis kaydını silmek istediğinize emin misiniz?'),
+        content: const Text('Bu servis kaydını silmek istediğinize emin misiniz?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -690,9 +1246,8 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
           ),
           ElevatedButton(
             onPressed: () {
-              // Delete service entry logic
               svc.remove(service.id);
-              setState(() {});
+              _loadServiceData();
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -705,26 +1260,6 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
             child: const Text('Sil'),
           ),
         ],
-      ),
-    );
-  }
-
-  void _addNewServiceEntry() {
-    final s = ServiceEntry(
-      id: DateTime.now().toIso8601String(),
-      vehicleId: '',
-      date: DateTime.now(),
-    );
-    svc.add(s);
-    setState(() {
-      // Update the hovering states list
-      _isServiceHovering.add(false);
-    });
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Yeni servis kaydı eklendi'),
-        backgroundColor: Colors.green,
       ),
     );
   }

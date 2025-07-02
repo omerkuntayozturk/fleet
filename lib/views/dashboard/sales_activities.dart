@@ -289,10 +289,8 @@ class _SalesActivitiesState extends State<SalesActivities> {
         contractCountForAvg++;
         
         // Add contract duration calculation
-        if (contract.durationInDays != null) {
-          totalDuration += contract.durationInDays!.toInt();
-        }
-        
+        totalDuration += contract.durationInDays.toInt();
+              
         // Check contract status - this is the key part that needs fixing
         if (contract.endDate.isAfter(now)) {
           // Contract is still active (not expired)

@@ -137,25 +137,22 @@ class _SideMenuState extends State<SideMenu> {
                                 '/',
                                 isSelected: widget.currentPage == '/' || widget.currentPage == '', // Home
                               ),
-                            // 2. Departman & Pozisyon Ekle
-                            if (_canAccessDepartmentPosition)
+                                                                                        if (_canAccessOrgChart)
                               _buildResponsiveMenuItem(
                                 context, 
-                                Icons.corporate_fare_rounded, 
-                                'Sözleşmeler', 
-                                '/contracts',
-                                isSelected: widget.currentPage == '/contracts' || widget.currentPage == 'contracts',
-                              ),
-                            // 3. Liste
-                            if (_canAccessList)
-                              _buildResponsiveMenuItem(
-                                context, 
-                                Icons.contacts_rounded, 
+                                Icons.inventory_2_rounded, 
                                 tr('sidemenu_list'), 
                                 '/list',
-                                isSelected: normalizedCurrentPage == 'list',
+                                isSelected: widget.currentPage == '/list' || widget.currentPage == 'list',
                               ),
-                            // 4. Sözleşmeler
+                                                            _buildResponsiveMenuItem(
+                                context, 
+                                Icons.inventory_2_rounded, 
+                                tr('sidemenu_detail'), 
+                                '/detail',
+                                isSelected: widget.currentPage == '/detail' || widget.currentPage == 'detail',
+                              ),
+
                             if (_canAccessContracts)
                               _buildResponsiveMenuItem(
                                 context, 
@@ -164,7 +161,6 @@ class _SideMenuState extends State<SideMenu> {
                                 '/odometer',
                                 isSelected: widget.currentPage == '/odometer' || widget.currentPage == 'odometer',
                               ),
-                            // 5. Organizasyon Şeması
                             if (_canAccessOrgChart)
                               _buildResponsiveMenuItem(
                                 context, 
@@ -172,25 +168,15 @@ class _SideMenuState extends State<SideMenu> {
                                 tr('sidemenu_orgchart'), 
                                 '/service',
                                 isSelected: widget.currentPage == '/service' || widget.currentPage == 'service',
-                              ),
-                            // 6. Yetenekler
-                            if (_canAccessSkills)
+                              ),         
+                                                          if (_canAccessDepartmentPosition)
                               _buildResponsiveMenuItem(
                                 context, 
-                                Icons.psychology_rounded, 
-                                'Detail', 
-                                '/detail',
-                                isSelected: widget.currentPage == '/detail' || widget.currentPage == 'detail',
-                              ),
-                                                          if (_canAccessSkills)
-                              _buildResponsiveMenuItem(
-                                context, 
-                                Icons.psychology_rounded, 
-                                'Kanban', 
-                                '/kanban',
-                                isSelected: widget.currentPage == '/kanban' || widget.currentPage == 'kanban',
-                              ),
-                            
+                                Icons.corporate_fare_rounded, 
+                                'Sözleşmeler', 
+                                '/contracts',
+                                isSelected: widget.currentPage == '/contracts' || widget.currentPage == 'contracts',
+                              ),                   
                             // System section with conditional rendering
                             if (_canAccessSystemMenu) ...[
                               Padding(
@@ -479,15 +465,6 @@ class _SideMenuState extends State<SideMenu> {
               break;
             case '/subscription':
               Navigator.pushReplacementNamed(context, AppRoutes.subscription);
-              break;
-            case '/list':
-              Navigator.pushReplacementNamed(context, AppRoutes.list);
-              break;
-            case '/kanban':
-              Navigator.pushReplacementNamed(context, AppRoutes.kanban);
-              break;
-            case '/detail':
-              Navigator.pushReplacementNamed(context, AppRoutes.detail);
               break;
             case '/service':
               Navigator.pushReplacementNamed(context, AppRoutes.service);

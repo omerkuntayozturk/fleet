@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fleet/models/contract.dart' as contract_model;
 import '../core/enums.dart'; // For enums
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -665,6 +666,37 @@ class FirestoreService {
     }
   }
 
+  // Add or update a service in Firestore
+  Future<void> addService(dynamic service, String userId) async {
+    return _handleFirestoreOperation(
+      operation: () async {
+        final docRef = _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('services')
+            .doc(service.id);
+            
+        await docRef.set({
+          'id': service.id,
+          'vehicleId': service.vehicleId,
+          'date': service.date,
+          'serviceType': service.serviceType,
+          'cost': service.cost,
+          'supplier': service.supplier,
+          'driver': service.driver,
+          'odometer': service.odometer,
+          'stage': service.stage.toString(),
+          'notes': service.notes,
+          'updatedAt': FieldValue.serverTimestamp(),
+          'createdAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+        
+        return;
+      },
+      errorMessage: 'Error adding/updating service',
+    );
+  }
+
   // Add this helper to convert EmploymentStatus to Turkish string for export
   String employmentStatusToTurkish(EmploymentStatus status) {
     switch (status) {
@@ -679,5 +711,298 @@ class FirestoreService {
       default:
         return 'Aktif';
     }
+  }
+
+  // Fetch employees for a specific user
+  Future<List<dynamic>> fetchEmployees({required String userId}) async {
+    return _handleFirestoreOperation<List<dynamic>>(
+      operation: () async {
+        // Create query reference
+        Query query = _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('employees');
+        
+        // Apply sorting
+        query = query.orderBy('name', descending: false);
+        
+        // Execute query
+        final querySnapshot = await query.get();
+
+        return querySnapshot.docs.map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          return {
+            'id': doc.id,
+            'name': data['name'] ?? '',
+            'email': data['email'] ?? '',
+            'phone': data['phone'] ?? '',
+            'position': data['position'] ?? '',
+            'departmentId': data['departmentId'] ?? '',
+            'status': data['status'] ?? 'active',
+          };
+        }).toList();
+      },
+      errorMessage: 'Error fetching employees',
+      defaultValue: [], // Return empty list on error
+    );
+  }
+
+  // Add a contract to Firestore
+  Future<void> addContract(contract_model.Contract contract, String userId) async {
+    return _handleFirestoreOperation(
+      operation: () async {
+        final docRef = _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('contracts')
+            .doc(contract.id);
+            
+        await docRef.set({
+          'id': contract.id,
+          'employeeId': contract.employeeId,
+          'employeeName': contract.employeeName,
+          'type': contract.reference,
+          'startDate': contract.startDate,
+          'endDate': contract.endDate,
+          'status': contract.status.toString(),
+          'createdAt': contract.createdAt,
+        });
+        
+        return;
+      },
+      errorMessage: 'Error adding contract',
+    );
+  }
+
+  // Update a contract in Firestore
+  Future<void> updateContract(contract_model.Contract contract, String userId) async {
+    return _handleFirestoreOperation(
+      operation: () async {
+        final docRef = _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('contracts')
+            .doc(contract.id);
+            
+        await docRef.update({
+          'employeeId': contract.employeeId,
+          'employeeName': contract.employeeName,
+          'type': contract.reference,
+          'startDate': contract.startDate,
+          'endDate': contract.endDate,
+          'status': contract.status.toString(),
+        });
+        
+        return;
+      },
+      errorMessage: 'Error updating contract',
+    );
+  }
+
+  // Delete a contract from Firestore
+  Future<void> deleteContract(String contractId, String userId) async {
+    return _handleFirestoreOperation(
+      operation: () async {
+        await _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('contracts')
+            .doc(contractId)
+            .delete();
+            
+        return;
+      },
+      errorMessage: 'Error deleting contract',
+    );
+  }
+
+  // Fetch contracts for a specific user
+  Future<List<contract_model.Contract>> fetchContracts({required String userId}) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('contracts')
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      return querySnapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return contract_model.Contract(
+          id: data['id'] ?? doc.id,
+          employeeId: data['employeeId'] ?? '',
+          employeeName: data['employeeName'] ?? '',
+          vehicleId: data['vehicleId'] ?? '',
+          reference: data['type'] ?? '',
+          startDate: (data['startDate'] is Timestamp)
+              ? (data['startDate'] as Timestamp).toDate()
+              : DateTime.tryParse(data['startDate'].toString()) ?? DateTime.now(),
+          endDate: (data['endDate'] is Timestamp)
+              ? (data['endDate'] as Timestamp).toDate()
+              : DateTime.tryParse(data['endDate'].toString()) ?? DateTime.now(),
+          status: _parseContractStatus(data['status']),
+          createdAt: (data['createdAt'] is Timestamp)
+              ? (data['createdAt'] as Timestamp).toDate()
+              : DateTime.tryParse(data['createdAt']?.toString() ?? '') ?? DateTime.now(),
+        );
+      }).toList();
+    } catch (e) {
+      print('Error fetching contracts: $e');
+      return [];
+    }
+  }
+
+  // Helper to parse status from string
+  contract_model.ContractStatus _parseContractStatus(dynamic status) {
+    if (status is contract_model.ContractStatus) return status;
+    if (status is String) {
+      switch (status) {
+        case 'ContractStatus.ongoing':
+        case 'ongoing':
+          return contract_model.ContractStatus.ongoing;
+        case 'ContractStatus.expired':
+        case 'completed':
+        case 'expired':
+          return contract_model.ContractStatus.expired;
+        case 'ContractStatus.terminated':
+        case 'terminated':
+          return contract_model.ContractStatus.terminated;
+        case 'ContractStatus.renewed':
+        case 'renewed':
+          return contract_model.ContractStatus.renewed;
+        default:
+          return contract_model.ContractStatus.ongoing;
+      }
+    }
+    return contract_model.ContractStatus.ongoing;
+  }
+
+  // Araçları çek
+  Future<List<Map<String, dynamic>>> fetchVehicles({required String userId}) async {
+    return _handleFirestoreOperation<List<Map<String, dynamic>>>(
+      operation: () async {
+        Query query = _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('vehicles');
+        query = query.orderBy('name', descending: false);
+        final querySnapshot = await query.get();
+        return querySnapshot.docs.map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          return {
+            'id': doc.id,
+            'name': data['name'] ?? '',
+          };
+        }).toList();
+      },
+      errorMessage: 'Error fetching vehicles',
+      defaultValue: [],
+    );
+  }
+
+  // Sözleşme ekle (supplier ile)
+  Future<void> addContractWithSupplier(contract_model.Contract contract, String userId, String supplier) async {
+    return _handleFirestoreOperation(
+      operation: () async {
+        final docRef = _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('contracts')
+            .doc(contract.id);
+
+        await docRef.set({
+          'id': contract.id,
+          'employeeId': contract.employeeId,
+          'employeeName': contract.employeeName,
+          'vehicleId': contract.vehicleId,
+          'type': contract.reference,
+          'reference': contract.reference,
+          'supplier': supplier,
+          'startDate': contract.startDate,
+          'endDate': contract.endDate,
+          'status': contract.status.toString(),
+          'createdAt': contract.createdAt,
+        });
+
+        return;
+      },
+      errorMessage: 'Error adding contract',
+    );
+  }
+
+  // Sözleşme güncelle (supplier ile)
+  Future<void> updateContractWithSupplier(contract_model.Contract contract, String userId, String supplier) async {
+    return _handleFirestoreOperation(
+      operation: () async {
+        final docRef = _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('contracts')
+            .doc(contract.id);
+
+        await docRef.update({
+          'employeeId': contract.employeeId,
+          'employeeName': contract.employeeName,
+          'vehicleId': contract.vehicleId,
+          'type': contract.reference,
+          'reference': contract.reference,
+          'supplier': supplier,
+          'startDate': contract.startDate,
+          'endDate': contract.endDate,
+          'status': contract.status.toString(),
+        });
+
+        return;
+      },
+      errorMessage: 'Error updating contract',
+    );
+  }
+
+  // Add an employee to Firestore
+  Future<void> addEmployee(dynamic employee, String userId) async {
+    return _handleFirestoreOperation(
+      operation: () async {
+        final docRef = _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('employees')
+            .doc(employee.id);
+        await docRef.set(employee.toJson());
+        return;
+      },
+      errorMessage: 'Error adding employee',
+    );
+  }
+
+  // Update an employee in Firestore
+  Future<void> updateEmployee(dynamic employee, String userId) async {
+    return _handleFirestoreOperation(
+      operation: () async {
+        final docRef = _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('employees')
+            .doc(employee.id);
+        await docRef.update(employee.toJson());
+        return;
+      },
+      errorMessage: 'Error updating employee',
+    );
+  }
+
+  // Delete an employee from Firestore
+  Future<void> deleteEmployee(String employeeId, String userId) async {
+    return _handleFirestoreOperation(
+      operation: () async {
+        await _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('employees')
+            .doc(employeeId)
+            .delete();
+        return;
+      },
+      errorMessage: 'Error deleting employee',
+    );
   }
 }

@@ -1,9 +1,8 @@
+import 'package:fleet/views/list/employee_list_page.dart';
 import 'package:fleet/views/contracts/contracts_page.dart';
 import 'package:fleet/views/odometers/odometers_page.dart';
 import 'package:fleet/views/services/services_page.dart';
 import 'package:fleet/views/vehicles/vehicle_detail_page.dart';
-import 'package:fleet/views/vehicles/vehicle_kanban_page.dart';
-import 'package:fleet/views/vehicles/vehicle_list_page.dart';
 import 'package:flutter/material.dart';
 import '../views/dashboard/dashboard_page.dart';
 import '../views/login/login_screen.dart';
@@ -26,9 +25,10 @@ class AppRoutes {
   static const String subscription = '/subscription';
   static const String service = '/service';
   static const String membershipDetails = '/membership_details'; // Add this constant
-  static const String detail = '/detail'; // Add this constant
-  static const String kanban = '/kanban'; // Add this constant
   static const String list = '/list'; // Add this constant
+  static const String detail = '/detail'; // Add this constant
+
+
 
 
   // Route map
@@ -42,9 +42,10 @@ class AppRoutes {
     subscription: (_) => const SubscriptionScreen(),
     service: (_) => const ServicesPage(),
     membershipDetails: (_) => const MembershipDetailsScreen(), // Add this route
-    detail: (_) => const VehicleDetailPage(), // Add this route
-    kanban: (_) => const VehicleKanbanPage(), // Add this route
-    list: (_) => const VehicleListPage(), // Add this route
+    list: (_) => const EmployeeListPage(), // Add this route
+    detail: (_) => const VehiclesPage(), // Add this route
+
+
 
   };
 

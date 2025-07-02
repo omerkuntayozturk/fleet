@@ -1,10 +1,10 @@
 class Vehicle {
   final String id;
-  final String model;
-  final String plate;
-  final int? year;  // Add year property as nullable int
+  String model;
+  String plate;
+  int? year;  // Add year property as nullable int
 
-  const Vehicle({
+  Vehicle({
     required this.id,
     required this.model, 
     required this.plate,

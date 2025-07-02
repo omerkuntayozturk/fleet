@@ -18,6 +18,6 @@ class ServiceEntry {
    required this.date,
    this.cost = 0,
    this.odometer = 0,
-   this.stage = ServiceStage.newService,
+   this.stage = ServiceStage.newService, required String notes,
  });
 }
