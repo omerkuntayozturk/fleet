@@ -1,6 +1,6 @@
 {
   "login_welcome_back": "Hoş Geldiniz",
-  "login_sign_in_prompt": "GOYA HR, modern işletmelerin insan kaynakları süreçlerini tek bir platformda kusursuzca yönetmesini sağlayan kapsamlı bir çözümdür. Sezgisel arayüzü ile çalışan bilgilerini anında görüntüleyin, departman bazlı raporlar oluşturun ve interaktif grafiklerle verileri anlamlandırın. İşe alım süreçlerinden performans değerlendirmelerine, bordro yönetiminden kariyer planlamasına kadar tüm İK fonksiyonlarını birleştirerek, şirketinizin insan kaynağını stratejik bir avantaja dönüştürün.",
+  "login_sign_in_prompt": "GOYA FLEET, modern işletmelerin insan kaynakları süreçlerini tek bir platformda kusursuzca yönetmesini sağlayan kapsamlı bir çözümdür. Sezgisel arayüzü ile çalışan bilgilerini anında görüntüleyin, departman bazlı raporlar oluşturun ve interaktif grafiklerle verileri anlamlandırın. İşe alım süreçlerinden performans değerlendirmelerine, bordro yönetiminden kariyer planlamasına kadar tüm İK fonksiyonlarını birleştirerek, şirketinizin insan kaynağını stratejik bir avantaja dönüştürün.",
   "login_account_access": "Hesap Erişimi",
   "login_email_label": "E-posta Adresi",
   "login_email_hint": "E-posta adresinizi girin",
@@ -93,7 +93,7 @@
   "resend_code_error": "Kod tekrar gönderilirken hata: {0}",
   
   "topbar_menu": "Menü",
-  "topbar_crm": "HR",
+  "topbar_crm": "FLEET",
   "topbar_admin_panel": "Yönetici Paneli",
   "topbar_admin": "Yönetici",
   "topbar_admin_role": "Sistem Yöneticisi",
@@ -174,7 +174,7 @@
   "sidemenu_system": "Sistem",
   "sidemenu_settings": "Ayarlar",
   "sidemenu_subscription": "Abonelik",
-  "sidemenu_crm_admin_panel": "HR Yönetici Paneli",
+  "sidemenu_crm_admin_panel": "FLEET Yönetici Paneli",
   "sidemenu_welcome": "Hoş Geldiniz",
   "sidemenu_pro_badge": "PRO",
   "sidemenu_version_info": "Versiyon 1.0.0",
@@ -361,11 +361,11 @@
   
 "user_agreement_title": "Kullanıcı Sözleşmesi",
 "user_agreement_close": "Kapat",
-"user_agreement_main_title": "GOYA HR – Kullanıcı Sözleşmesi",
-"user_agreement_intro": "Bu Kullanıcı Sözleşmesi (\"Sözleşme\"), GOYA HR yazılımını geliştiren ve işleten GoyaApp Yazılım & Dijital Çözümler (\"GoyaApp\", \"biz\", \"bizim\") ile kullanıcı (\"siz\") arasında yapılan yasal bir anlaşmadır. Uygulamanın herhangi bir şekilde kullanımı, bu Sözleşmenin tüm şartlarının okunduğu, anlaşıldığı ve kabul edildiği anlamına gelir.",
+"user_agreement_main_title": "GOYA FLEET – Kullanıcı Sözleşmesi",
+"user_agreement_intro": "Bu Kullanıcı Sözleşmesi (\"Sözleşme\"), GOYA FLEET yazılımını geliştiren ve işleten GoyaApp Yazılım & Dijital Çözümler (\"GoyaApp\", \"biz\", \"bizim\") ile kullanıcı (\"siz\") arasında yapılan yasal bir anlaşmadır. Uygulamanın herhangi bir şekilde kullanımı, bu Sözleşmenin tüm şartlarının okunduğu, anlaşıldığı ve kabul edildiği anlamına gelir.",
 "user_agreement_last_updated": "Son Güncelleme: [17.06.2025]",
 "user_agreement_section_1": "1. Hizmet Tanımı",
-"user_agreement_section_1_content": "GOYA HR, modern işletmelerin insan kaynakları süreçlerini tek bir platformda kusursuzca yönetmesini sağlayan kapsamlı bir çözümdür. İşe alım süreçlerinden performans değerlendirmelerine, bordro yönetiminden kariyer planlamasına kadar tüm İK fonksiyonlarını birleştirerek, şirketinizin insan kaynağını stratejik bir avantaja dönüştürmeyi amaçlar.",
+"user_agreement_section_1_content": "GOYA FLEET, modern işletmelerin insan kaynakları süreçlerini tek bir platformda kusursuzca yönetmesini sağlayan kapsamlı bir çözümdür. İşe alım süreçlerinden performans değerlendirmelerine, bordro yönetiminden kariyer planlamasına kadar tüm İK fonksiyonlarını birleştirerek, şirketinizin insan kaynağını stratejik bir avantaja dönüştürmeyi amaçlar.",
 "user_agreement_section_2": "2. Kullanım Koşulları",
 "user_agreement_section_2_bullet_1": "Uygulamayı yasalara aykırı şekilde kullanmamak,",
 "user_agreement_section_2_bullet_2": "Sahte/veri bozucu işlemler yapmamak,",
@@ -378,7 +378,7 @@
 "user_agreement_section_3_bullet_3": "Her kullanıcı benzersiz bir hesaba sahip olmalı ve hesabını başkasına devretmemelidir.",
 "user_agreement_section_4": "4. Ödeme, Abonelik ve İade Koşulları",
 "user_agreement_section_4_1": "4.1 Abonelik Modelleri",
-"user_agreement_section_4_1_content": "GOYA HR aylık veya yıllık üyelik paketleri sunabilir. Kullanıcı, seçtiği paketin ücretini Apple App Store, Google Play Store veya doğrudan sunulan ödeme altyapıları üzerinden öder.",
+"user_agreement_section_4_1_content": "GOYA FLEET aylık veya yıllık üyelik paketleri sunabilir. Kullanıcı, seçtiği paketin ücretini Apple App Store, Google Play Store veya doğrudan sunulan ödeme altyapıları üzerinden öder.",
 "user_agreement_section_4_2": "4.2 Yenileme ve İptal",
 "user_agreement_section_4_2_bullet_1": "Kullanıcı iptal etmediği sürece üyelik, abonelik süresi sonunda otomatik olarak yenilenir.",
 "user_agreement_section_4_2_bullet_2": "İptal işlemi bir sonraki fatura döneminden itibaren geçerli olur.",
@@ -391,7 +391,7 @@
 "user_agreement_section_5": "5. Fikri Mülkiyet Hakları",
 "user_agreement_section_5_bullet_1": "Uygulamanın tüm içeriği, yazılımı, veri yapıları ve tasarımı GoyaApp'e aittir.",
 "user_agreement_section_5_bullet_2": "Kullanıcılar bu içeriği kopyalayamaz, satamaz veya tersine mühendislik yapamaz.",
-"user_agreement_section_5_bullet_3": "GOYA HR sadece lisanslı kullanım hakkı verir, mülkiyet hakkı vermez.",
+"user_agreement_section_5_bullet_3": "GOYA FLEET sadece lisanslı kullanım hakkı verir, mülkiyet hakkı vermez.",
 
 "user_agreement_section_6": "6. Lisans ve EULA (Son Kullanıcı Lisans Anlaşması)",
 "user_agreement_section_6_1": "6.1 Lisans Verme",
@@ -411,12 +411,12 @@
 "user_agreement_section_7_bullet_4": "Çalışan verilerinin işlenmesinde KVKK ve ilgili mevzuata uyulması gereklidir.",
 
 "user_agreement_section_8": "8. Üçüncü Taraf Entegrasyonları",
-"user_agreement_section_8_bullet_1": "GOYA HR, bordro sistemleri, e-devlet ve diğer İK yazılımları ile entegre çalışabilir.",
+"user_agreement_section_8_bullet_1": "GOYA FLEET, bordro sistemleri, e-devlet ve diğer İK yazılımları ile entegre çalışabilir.",
 "user_agreement_section_8_bullet_2": "Bu servislerin kendi gizlilik politikaları geçerlidir.",
 "user_agreement_section_8_bullet_3": "GoyaApp, üçüncü taraf kesintileri ve güvenlik açıklarından sorumlu tutulamaz.",
 
 "user_agreement_section_9": "9. Uluslararası Kullanım ve Hukuki Yetki",
-"user_agreement_section_9_bullet_1": "GOYA HR dünya çapında kullanılabilir ve çoklu dil desteği sunar.",
+"user_agreement_section_9_bullet_1": "GOYA FLEET dünya çapında kullanılabilir ve çoklu dil desteği sunar.",
 "user_agreement_section_9_bullet_2": "Tüm anlaşmazlıklarda Türkiye Cumhuriyeti yasaları geçerlidir.",
 "user_agreement_section_9_bullet_3": "İstanbul Anadolu Mahkemeleri ve İcra Daireleri yetkilidir.",
 "user_agreement_section_9_bullet_4": "Kullanıcı, bu uygulama nedeniyle hiçbir ülkede dava açmayacağını, hak talebinde bulunmayacağını ve tüm bu taleplerinden feragat ettiğini peşinen kabul eder.",
@@ -484,15 +484,15 @@
   
   "privacy_title": "Gizlilik Politikası",
   "privacy_close": "Kapat",
-  "privacy_main_title": "GOYA HR – Gizlilik Politikası",
+  "privacy_main_title": "GOYA FLEET – Gizlilik Politikası",
   "privacy_company_name": "Firma: GoyaApp Yazılım & Dijital Çözümler",
-  "privacy_app_name": "Uygulama Adı: GOYA HR",
+  "privacy_app_name": "Uygulama Adı: GOYA FLEET",
   "privacy_effective_date": "Yürürlük Tarihi: [17.06.2025]",
   "privacy_section_1_title": "1. Giriş",
-  "privacy_section_1_content": "Bu gizlilik politikası, GOYA HR uygulamasını kullanan kullanıcıların kişisel bilgilerinin nasıl toplandığını, kullanıldığını, saklandığını ve korunduğunu açıklar. Uygulamayı kullanarak bu politikayı kabul etmiş sayılırsınız.",
+  "privacy_section_1_content": "Bu gizlilik politikası, GOYA FLEET uygulamasını kullanan kullanıcıların kişisel bilgilerinin nasıl toplandığını, kullanıldığını, saklandığını ve korunduğunu açıklar. Uygulamayı kullanarak bu politikayı kabul etmiş sayılırsınız.",
   
   "privacy_section_2_title": "2. Toplanan Bilgiler",
-  "privacy_section_2_content": "GOYA HR, kullanıcıdan aşağıdaki verileri toplayabilir:",
+  "privacy_section_2_content": "GOYA FLEET, kullanıcıdan aşağıdaki verileri toplayabilir:",
   "privacy_section_2_bullet_1": "İsim, soyisim, e-posta adresi",
   "privacy_section_2_bullet_2": "Profil ve çalışan bilgileri",
   "privacy_section_2_bullet_3": "Organizasyon şeması ve departman verileri",
@@ -519,10 +519,10 @@
   "privacy_section_6_content": "İnsan kaynakları verilerinizin güvenliği, endüstri standartlarına uygun şekilde sağlanır. Tüm veriler şifrelenerek saklanır, ancak internet üzerinden hiçbir iletimin %100 güvenli olması garanti edilemez.",
   
   "privacy_section_7_title": "7. Uluslararası Aktarım",
-  "privacy_section_7_content": "GOYA HR, global olarak kullanılabildiği için veriler yurtdışındaki sunucularda saklanabilir. Bu aktarım, ilgili veri koruma düzenlemelerine ve KVKK gerekliliklerine uygun şekilde yapılır.",
+  "privacy_section_7_content": "GOYA FLEET, global olarak kullanılabildiği için veriler yurtdışındaki sunucularda saklanabilir. Bu aktarım, ilgili veri koruma düzenlemelerine ve KVKK gerekliliklerine uygun şekilde yapılır.",
   
   "privacy_section_8_title": "8. Çocukların Gizliliği",
-  "privacy_section_8_content": "GOYA HR, kurumsal kullanıma yönelik bir insan kaynakları uygulaması olup, 18 yaşın altındaki bireylere hizmet vermemektedir. Bu yaş grubundaki bireylerden bilerek veri toplanmaz.",
+  "privacy_section_8_content": "GOYA FLEET, kurumsal kullanıma yönelik bir insan kaynakları uygulaması olup, 18 yaşın altındaki bireylere hizmet vermemektedir. Bu yaş grubundaki bireylerden bilerek veri toplanmaz.",
   
   "privacy_section_9_title": "9. Kullanıcı Hakları",
   "privacy_section_9_content": "Kullanıcılar, kişisel verilerine erişme, düzeltme, silme ve veri taşınabilirliği haklarına sahiptir. Organizasyon verileri için yetki kontrolleri ve erişim kısıtlamaları uygulanır. Bu haklar, info@goyaapp.com adresinden kullanılabilir.",
@@ -560,15 +560,15 @@
   "language_french_desc": "Fransızca dil desteği",
   "language_spanish_desc": "İspanyolca dil desteği",
   
-  "kvkk_main_title": "GOYA HR – KVKK Aydınlatma Metni",
-  "kvkk_subtitle": "GOYA HR – Kişisel Verilerin Korunması Aydınlatma Metni (KVKK)",
+  "kvkk_main_title": "GOYA FLEET – KVKK Aydınlatma Metni",
+  "kvkk_subtitle": "GOYA FLEET – Kişisel Verilerin Korunması Aydınlatma Metni (KVKK)",
   "kvkk_effective_date": "Yürürlük Tarihi: [17.06.2025]",
   "kvkk_company": "Firma: GoyaApp Yazılım & Dijital Çözümler",
-  "kvkk_app_name": "Uygulama: GOYA HR",
+  "kvkk_app_name": "Uygulama: GOYA FLEET",
   "kvkk_contact": "İletişim: info@goyaapp.com",
   
   "kvkk_section_1_title": "1. Amaç ve Kapsam",
-  "kvkk_section_1_content": "Bu Aydınlatma Metni, 6698 sayılı Kişisel Verilerin Korunması Kanunu (\"KVKK\") uyarınca, GoyaApp Yazılım & Dijital Çözümler tarafından sağlanan GOYA HR insan kaynakları yönetim platformu kapsamında işlenen kişisel verilere ilişkin bilgilendirme amacıyla hazırlanmıştır.",
+  "kvkk_section_1_content": "Bu Aydınlatma Metni, 6698 sayılı Kişisel Verilerin Korunması Kanunu (\"KVKK\") uyarınca, GoyaApp Yazılım & Dijital Çözümler tarafından sağlanan GOYA FLEET insan kaynakları yönetim platformu kapsamında işlenen kişisel verilere ilişkin bilgilendirme amacıyla hazırlanmıştır.",
   
   "kvkk_section_2_title": "2. Veri Sorumlusu",
   "kvkk_section_2_content": "KVKK kapsamında, veri sorumlusu sıfatıyla kişisel verilerinizi aşağıda belirtilen çerçevede işliyoruz:",
@@ -597,7 +597,7 @@
   "kvkk_section_5_bullet_4": "İlgili kişilerin açık rızasının bulunması",
   
   "kvkk_section_6_title": "6. Verilerin Aktarılması",
-  "kvkk_section_6_content": "GOYA HR, çalışan verilerinizi izinsiz üçüncü kişilerle paylaşmaz. Ancak aşağıdaki durumlarda yasal çerçevede paylaşım mümkündür:",
+  "kvkk_section_6_content": "GOYA FLEET, çalışan verilerinizi izinsiz üçüncü kişilerle paylaşmaz. Ancak aşağıdaki durumlarda yasal çerçevede paylaşım mümkündür:",
   "kvkk_section_6_bullet_1": "Resmi kurumlar ve yasal yükümlülükler kapsamında",
   "kvkk_section_6_bullet_2": "Bulut tabanlı altyapı hizmetleri kapsamında hizmet alınan sağlayıcılar (Firebase, Google vb.)",
   
@@ -605,7 +605,7 @@
   "kvkk_section_7_content": "İnsan kaynakları verileri, ilgili iş hukuku mevzuatında öngörülen süreler boyunca veya işlenme amacının gerektirdiği süre kadar saklanır. Süre sonunda veriler silinir, yok edilir veya anonim hale getirilir.",
   
   "kvkk_section_8_title": "8. KVKK Kapsamındaki Haklarınız",
-  "kvkk_section_8_intro": "GOYA HR kullanıcıları ve çalışanlar, KVKK madde 11 uyarınca şu haklara sahiptir:",
+  "kvkk_section_8_intro": "GOYA FLEET kullanıcıları ve çalışanlar, KVKK madde 11 uyarınca şu haklara sahiptir:",
   "kvkk_section_8_bullet_1": "Kişisel verilerinin işlenip işlenmediğini öğrenme",
   "kvkk_section_8_bullet_2": "Kişisel verileri işlenmişse buna ilişkin bilgi talep etme",
   "kvkk_section_8_bullet_3": "İşleme amacını ve amacına uygun kullanılıp kullanılmadığını öğrenme",
@@ -620,7 +620,7 @@
   "kvkk_section_9_content": "Yukarıdaki haklarınıza ilişkin taleplerinizi info@goyaapp.com adresine e-posta göndererek iletebilirsiniz. Başvurular, en geç 30 gün içinde yanıtlanır.",
   
   "kvkk_section_10_title": "10. Güncellemeler",
-  "kvkk_section_10_content": "GoyaApp, bu aydınlatma metninde değişiklik yapma hakkını saklı tutar. Güncel sürüm her zaman GOYA HR platformu veya web sitesi üzerinden erişilebilir olacaktır.",
+  "kvkk_section_10_content": "GoyaApp, bu aydınlatma metninde değişiklik yapma hakkını saklı tutar. Güncel sürüm her zaman GOYA FLEET platformu veya web sitesi üzerinden erişilebilir olacaktır.",
   
   "kvkk_close": "Kapat",
   "kvkk_title": "KVKK Aydınlatma Metni",
@@ -683,7 +683,7 @@
   "contact_faq_question2": "Teknik destek için sizi telefonla arayabilir miyim?",
   "contact_faq_answer2": "Evet, mesai saatleri içinde yukarıda belirtilen telefon numarasından teknik destek ekibimize ulaşabilirsiniz.",
   
-  "contact_faq_question3": "HR sisteminizde özel entegrasyon talep edebilir miyim?",
+  "contact_faq_question3": "FLEET sisteminizde özel entegrasyon talep edebilir miyim?",
   "contact_faq_answer3": "Elbette. Özel entegrasyon talepleriniz için iletişim formunu doldurabilir ya da doğrudan bizimle iletişime geçebilirsiniz. Uzman ekibimiz ihtiyaçlarınızı değerlendirip size özel çözümler sunacaktır.",
   
   "contact_faq_question4": "Ödeme ile ilgili sorunlarımda kime ulaşmalıyım?",
@@ -736,18 +736,18 @@
   
   "aboutus_our_history": "Tarihçemiz",
   "aboutus_history_2005_title": "2005 - Kuruluş",
-  "aboutus_history_2005_description": "HR Yazılım, bir grup girişimci tarafından küçük bir ofiste kuruldu. İlk sürüm temel müşteri takip özellikleriyle piyasaya sürüldü.",
+  "aboutus_history_2005_description": "FLEET Yazılım, bir grup girişimci tarafından küçük bir ofiste kuruldu. İlk sürüm temel müşteri takip özellikleriyle piyasaya sürüldü.",
   "aboutus_history_2008_title": "2008 - İlk Büyük Müşteriler",
   "aboutus_history_2008_description": "Büyük kurumsal müşteriler edinmeye başladık ve ekibimizi genişlettik. Ürünümüze raporlama ve analiz özellikleri eklendi.",
   "aboutus_history_2012_title": "2012 - Uluslararası Genişleme",
   "aboutus_history_2012_description": "Uluslararası pazarlara açılarak ilk yurt dışı ofisimizi Almanya'da açtık. Çoklu dil desteği ve bölgesel özelleştirmeler ürünümüze eklendi.",
   "aboutus_history_2015_title": "2015 - Mobil Dönüşüm",
-  "aboutus_history_2015_description": "Mobil HR uygulamamızı piyasaya sürdük ve bulut tabanlı çözümlerimizi geliştirdik. Bu sayede kullanıcıların her yerden erişim sağlaması mümkün hale geldi.",
+  "aboutus_history_2015_description": "Mobil FLEET uygulamamızı piyasaya sürdük ve bulut tabanlı çözümlerimizi geliştirdik. Bu sayede kullanıcıların her yerden erişim sağlaması mümkün hale geldi.",
   "aboutus_history_2020_title": "2020 - Yapay Zeka Entegrasyonu",
   "aboutus_history_2020_description": "Yapay zeka ve makine öğrenimi teknolojilerini ürünümüze entegre ederek akıllı tahminler, otomatik öneriler ve gelişmiş analitik özellikler sunduk.",
   "aboutus_history_today": "Bugün",
   "aboutus_history_today_title": "Günümüz - Sürekli İnovasyon",
-  "aboutus_history_today_description": "200'den fazla çalışanımız ve 15 ülkede ofislerimizle HR endüstrisinde öncü konumundayız. Sürekli yenilikçi çözümler geliştirmeye ve müşterilerimizin başarısını desteklemeye devam ediyoruz.",
+  "aboutus_history_today_description": "200'den fazla çalışanımız ve 15 ülkede ofislerimizle FLEET endüstrisinde öncü konumundayız. Sürekli yenilikçi çözümler geliştirmeye ve müşterilerimizin başarısını desteklemeye devam ediyoruz.",
 
   
   "sales_activities_title": "Satış Aktiviteleri",
@@ -1059,7 +1059,7 @@
 
   "faq_category_leads": "🏢 Departman-Pozisyon Paneli",
   "faq_leads_q1": "Departman-Pozisyon Paneline nasıl ulaşabilirim?",
-  "faq_leads_a1": "GOYA HR uygulamasında oturum açtıktan sonra yan menüden 'Departman-Pozisyon' seçeneğine tıklayarak panele erişebilirsiniz.",
+  "faq_leads_a1": "GOYA FLEET uygulamasında oturum açtıktan sonra yan menüden 'Departman-Pozisyon' seçeneğine tıklayarak panele erişebilirsiniz.",
   "faq_leads_q2": "Yeni bir departman nasıl eklerim?",
   "faq_leads_a2": "Panelin üst bölümündeki 'Departman Ekle' butonuna tıklayın. Açılan pencerede departman adını girin ve 'Ekle' butonuna tıklayın. Ekran boyutu küçükse, 'Departman Ekle' butonu sağ alt köşede bir yüzen buton olarak görünebilir.", 
   "faq_leads_q3": "Departman adını nasıl düzenleyebilirim?",
@@ -1118,18 +1118,18 @@
   "faq_subscription_a7": "Evet, istediğiniz zaman 'Planı Yükselt' seçeneğini kullanabilirsiniz.",
   "cookies_title": "Çerez Politikası",
   "cookies_close": "Kapat",
-  "cookies_main_title": "GOYA HR – Çerez Politikası",
+  "cookies_main_title": "GOYA FLEET – Çerez Politikası",
   "cookies_effective_date": "Yürürlük Tarihi: [17.06.2025]",
   "cookies_company": "Firma: GoyaApp Yazılım & Dijital Çözümler",
-  "cookies_app_name": "Uygulama Adı: GOYA HR",
+  "cookies_app_name": "Uygulama Adı: GOYA FLEET",
   "cookies_contact": "İletişim: info@goyaapp.com",
-  "cookies_intro": "Bu çerez politikası, GoyaApp Yazılım & Dijital Çözümler (\"biz\", \"GoyaApp\") tarafından geliştirilen GOYA HR web sitesi ve/veya mobil uygulaması (\"uygulama\") üzerinden yürütülen çerez kullanımını açıklar.",
+  "cookies_intro": "Bu çerez politikası, GoyaApp Yazılım & Dijital Çözümler (\"biz\", \"GoyaApp\") tarafından geliştirilen GOYA FLEET web sitesi ve/veya mobil uygulaması (\"uygulama\") üzerinden yürütülen çerez kullanımını açıklar.",
   
   "cookies_section_1_title": "1. Çerez Nedir?",
   "cookies_section_1_content": "Çerezler (cookies), bir web sitesi veya uygulama tarafından tarayıcınıza veya cihazınıza yerleştirilen küçük metin dosyalarıdır. Bu dosyalar, tercihlerinizi hatırlamak, oturumunuzu yönetmek, analiz yapmak veya deneyiminizi kişiselleştirmek amacıyla kullanılabilir.",
   
   "cookies_section_2_title": "2. Kullanılan Çerez Türleri",
-  "cookies_section_2_content": "GOYA HR sisteminde, aşağıdaki çerez türleri sadece web sürümünde veya desteklenen platformlarda kullanılabilir:",
+  "cookies_section_2_content": "GOYA FLEET sisteminde, aşağıdaki çerez türleri sadece web sürümünde veya desteklenen platformlarda kullanılabilir:",
   "cookies_section_2_essential": "Zorunlu Çerezler: Oturum yönetimi ve güvenlik için gereklidir. İnsan kaynakları sisteminin temel fonksiyonlarını sağlar.",
   "cookies_section_2_functional": "İşlevsellik Çerezleri: Dil, para birimi gibi tercihlerinizi hatırlamak için kullanılır.",
   "cookies_section_2_analytics": "Performans ve Analitik Çerezleri: Ziyaret edilen sayfalar, departman raporları, çalışan istatistikleri gibi anonim veriler toplayarak sistemin iyileştirilmesini sağlar. (örn. Google Analytics)",
@@ -1151,7 +1151,7 @@
   "cookies_section_4_mobile": "Mobil tarayıcılar: Tarayıcı ayarları > Site ayarları > Çerezler",
   
   "cookies_section_5_title": "5. Açık Rıza ve Kabul",
-  "cookies_section_5_content": "GOYA HR insan kaynakları platformunu kullanarak bu çerez politikasını kabul etmiş sayılırsınız. İlk girişte gösterilen bilgilendirme ekranı (çerez bannerı) aracılığıyla açık rızanız alınır.",
+  "cookies_section_5_content": "GOYA FLEET insan kaynakları platformunu kullanarak bu çerez politikasını kabul etmiş sayılırsınız. İlk girişte gösterilen bilgilendirme ekranı (çerez bannerı) aracılığıyla açık rızanız alınır.",
   
   "cookies_section_6_title": "6. Üçüncü Taraflara Ait Çerezler",
   "cookies_section_6_content": "İK platformumuz, zaman zaman üçüncü taraf yazılımlar (ör. Firebase, Google, bordro sistemleri vb.) ile çalışabilir. Bu servislerin kendi çerez politikaları geçerlidir. Bu çerezlerin kontrolü, ilgili üçüncü tarafların sorumluluğundadır.",
@@ -1162,7 +1162,7 @@
   "cookies_section_8_title": "8. İletişim",
   "cookies_section_8_content": "Bu çerez politikası hakkında her türlü sorunuz için bizimle iletişime geçebilirsiniz: E-posta: info@goyaapp.com",
 
-  "hr_subscription_plan": "HR Abonelik Planı",
+  "hr_subscription_plan": "FLEET Abonelik Planı",
   "hr_expired_contracts": "Sona Eren Sözleşmeler",
   "hr_avg_skill_level": "Ortalama Yetenek Seviyesi",
   "hr_skills": "Yetenekler",

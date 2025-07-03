@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../services/firestore_service.dart';
 import '../../models/contract.dart';
 import 'package:uuid/uuid.dart';
@@ -79,9 +80,10 @@ class ContractManagement {
     final contractTypeCtrl = TextEditingController();
     final startDateCtrl = TextEditingController();
     final endDateCtrl = TextEditingController();
-    final vehicleIdCtrl = TextEditingController(); // <-- Eklendi
-    final referenceCtrl = TextEditingController(); // <-- Eklendi
-    String? selectedEmployeeId; // <-- eklendi
+    final vehicleIdCtrl = TextEditingController(); // Hidden controller for vehicle ID
+    final vehiclePlateCtrl = TextEditingController(); // New controller for displaying plate
+    String? selectedEmployeeId;
+    String? selectedVehiclePlate;
 
     // Get screen dimensions for responsive layout
     final screenWidth = MediaQuery.of(context).size.width;
@@ -139,12 +141,18 @@ class ContractManagement {
                         context,
                         employeeNameCtrl,
                         contractTypeCtrl,
-                        vehicleIdCtrl, // <-- Eklendi
-                        referenceCtrl, // <-- Eklendi
+                        vehicleIdCtrl, // ID controller (hidden)
+                        vehiclePlateCtrl, // Pass plate controller for display
                         isMobile,
-                        (String id, String name) { // <-- callback eklendi
+                        (String id, String name) {
                           selectedEmployeeId = id;
                           employeeNameCtrl.text = name;
+                        },
+                        // Vehicle selection callback
+                        (String id, String plate) {
+                          vehicleIdCtrl.text = id; // Store ID in hidden controller
+                          vehiclePlateCtrl.text = plate; // Show plate in visible field
+                          selectedVehiclePlate = plate;
                         },
                       ),
                       SizedBox(height: isMobile ? 12 : 16),
@@ -169,10 +177,10 @@ class ContractManagement {
                             contractTypeCtrl,
                             startDateCtrl,
                             endDateCtrl,
-                            vehicleIdCtrl, // <-- Eklendi
-                            referenceCtrl, // <-- Eklendi
+                            vehicleIdCtrl,
                             refreshContracts,
-                            selectedEmployeeId, // <-- eklendi
+                            selectedEmployeeId,
+                            selectedVehiclePlate,
                           );
                         },
                         tr('common_cancel'), // 'İptal'
@@ -257,10 +265,11 @@ class ContractManagement {
     BuildContext context,
     TextEditingController employeeNameCtrl,
     TextEditingController contractTypeCtrl,
-    TextEditingController vehicleIdCtrl, // <-- Eklendi
-    TextEditingController referenceCtrl, // <-- Eklendi
+    TextEditingController vehicleIdCtrl, // ID controller (hidden)
+    TextEditingController vehiclePlateCtrl, // New parameter for plate display
     bool isMobile,
-    [void Function(String, String)? onEmployeeSelected] // <-- callback parametresi eklendi
+    [void Function(String, String)? onEmployeeSelected,
+     void Function(String, String)? onVehicleSelected]
   ) {
     return Card(
       elevation: 0,
@@ -380,11 +389,12 @@ class ContractManagement {
             
             SizedBox(height: isMobile ? 16 : 20),
 
-            // Vehicle ID field (text)
+            // Vehicle field (now using plate controller for display)
             TextField(
-              controller: vehicleIdCtrl,
+              controller: vehiclePlateCtrl, // Use plate controller instead of ID
+              readOnly: true,
               decoration: InputDecoration(
-                labelText: 'Araç ID', // veya tr('contracts_vehicle_id')
+                labelText: tr('contracts_select_vehicle', gender: 'Araç Seçin'),
                 labelStyle: TextStyle(
                   color: Colors.grey[600],
                   fontSize: isMobile ? 13 : 14,
@@ -406,360 +416,75 @@ class ContractManagement {
                   color: Colors.grey[500],
                   size: isMobile ? 18 : 24,
                 ),
+                suffixIcon: Icon(
+                  Icons.arrow_drop_down,
+                  color: Colors.grey[500],
+                  size: isMobile ? 24 : 28,
+                ),
                 filled: true,
                 fillColor: Colors.white,
-                helperText: isMobile ? null : 'Sözleşmeye ait araç ID girin',
+                helperText: isMobile ? null : tr('contracts_select_vehicle_helper', gender: 'Araç seçin'),
                 helperStyle: TextStyle(fontSize: isMobile ? 10 : 12, color: Colors.grey[600]),
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: isMobile ? 12 : 16,
                   vertical: isMobile ? 10 : 16
                 ),
               ),
+              onTap: () {
+                _showVehicleSelectionDialog(
+                  context, 
+                  vehicleIdCtrl, // Still pass ID controller for value storage
+                  isMobile, 
+                  onVehicleSelected, 
+                  vehiclePlateCtrl // Pass plate controller as additional parameter
+                );
+              },
             ),
+            
             SizedBox(height: isMobile ? 16 : 20),
 
-            // Reference field (text)
-            TextField(
-              controller: referenceCtrl,
-              decoration: InputDecoration(
-                labelText: 'Referans', // veya tr('contracts_reference')
-                labelStyle: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: isMobile ? 13 : 14,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(isMobile ? 8 : 12),
-                  borderSide: BorderSide(color: Colors.grey[300]!),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(isMobile ? 8 : 12),
-                  borderSide: BorderSide(color: Colors.grey[300]!),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(isMobile ? 8 : 12),
-                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
-                ),
-                prefixIcon: Icon(
-                  Icons.link,
-                  color: Colors.grey[500],
-                  size: isMobile ? 18 : 24,
-                ),
-                filled: true,
-                fillColor: Colors.white,
-                helperText: isMobile ? null : 'Referans veya açıklama girin',
-                helperStyle: TextStyle(fontSize: isMobile ? 10 : 12, color: Colors.grey[600]),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: isMobile ? 12 : 16,
-                  vertical: isMobile ? 10 : 16
-                ),
-              ),
-            ),
+            // Reference field (text) kaldırıldı
+            // TextField(
+            //   controller: referenceCtrl,
+            //   decoration: InputDecoration(
+            //     labelText: 'Referans',
+            //     labelStyle: TextStyle(
+            //       color: Colors.grey[600],
+            //       fontSize: isMobile ? 13 : 14,
+            //     ),
+            //     border: OutlineInputBorder(
+            //       borderRadius: BorderRadius.circular(isMobile ? 8 : 12),
+            //       borderSide: BorderSide(color: Colors.grey[300]!),
+            //     ),
+            //     enabledBorder: OutlineInputBorder(
+            //       borderRadius: BorderRadius.circular(isMobile ? 8 : 12),
+            //       borderSide: BorderSide(color: Colors.grey[300]!),
+            //     ),
+            //     focusedBorder: OutlineInputBorder(
+            //       borderRadius: BorderRadius.circular(isMobile ? 8 : 12),
+            //       borderSide: BorderSide(color: Theme.of(context).primaryColor),
+            //     ),
+            //     prefixIcon: Icon(
+            //       Icons.link,
+            //       color: Colors.grey[500],
+            //       size: isMobile ? 18 : 24,
+            //     ),
+            //     filled: true,
+            //     fillColor: Colors.white,
+            //     helperText: isMobile ? null : 'Referans veya açıklama girin',
+            //     helperStyle: TextStyle(fontSize: isMobile ? 10 : 12, color: Colors.grey[600]),
+            //     contentPadding: EdgeInsets.symmetric(
+            //       horizontal: isMobile ? 12 : 16,
+            //       vertical: isMobile ? 10 : 16
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),
     );
   }
   
-  // New helper method to show employee selection dialog
-  static void _showEmployeeSelectionDialog(
-    BuildContext context,
-    TextEditingController controller,
-    bool isMobile,
-    [void Function(String, String)? onEmployeeSelected] // <-- callback parametresi eklendi
-  ) {
-    final dialogWidth = isMobile 
-        ? MediaQuery.of(context).size.width * 0.95
-        : MediaQuery.of(context).size.width * 0.7;
-    
-    final dialogHeight = isMobile 
-        ? MediaQuery.of(context).size.height * 0.8
-        : MediaQuery.of(context).size.height * 0.7;
-        
-    showDialog(
-      context: context,
-      builder: (context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          insetPadding: EdgeInsets.symmetric(
-            horizontal: isMobile ? 10 : 20,
-            vertical: isMobile ? 20 : 40,
-          ),
-          child: Container(
-            width: dialogWidth,
-            height: dialogHeight,
-            padding: const EdgeInsets.all(0),
-            child: Column(
-              children: [
-                // Header
-                Container(
-                  padding: EdgeInsets.all(isMobile ? 16 : 20),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withOpacity(0.1),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      topRight: Radius.circular(16),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.people,
-                        color: Theme.of(context).primaryColor,
-                        size: isMobile ? 20 : 24,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          tr('contracts_select_employee'), // 'Çalışan Seçin'
-                          style: TextStyle(
-                            fontSize: isMobile ? 16 : 18,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).primaryColor,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close),
-                        splashRadius: 20,
-                      ),
-                    ],
-                  ),
-                ),
-                
-                // Employee list
-                Expanded(
-                  child: FutureBuilder<List<Map<String, dynamic>>>(
-                    future: _fetchEmployeesForSelection(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      }
-                      
-                      if (snapshot.hasError) {
-                        return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.error_outline,
-                                size: 48,
-                                color: Colors.red[300],
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                tr('contracts_employee_load_error'), // 'Çalışanlar yüklenirken hata oluştu'
-                                style: TextStyle(
-                                  fontSize: isMobile ? 14 : 16,
-                                  color: Colors.red[600],
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                snapshot.error.toString(),
-                                style: TextStyle(
-                                  fontSize: isMobile ? 12 : 14,
-                                  color: Colors.grey[600],
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 16),
-                              ElevatedButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  _showEmployeeSelectionDialog(context, controller, isMobile, onEmployeeSelected);
-                                },
-                                child: Text(tr('common_try_again')), // 'Tekrar Dene'
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-                      
-                      final employees = snapshot.data ?? [];
-                      
-                      if (employees.isEmpty) {
-                        return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.people_outline,
-                                size: 64,
-                                color: Colors.grey[400],
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                tr('contracts_no_employees_found'), // 'Henüz çalışan kaydı bulunamadı'
-                                style: TextStyle(
-                                  fontSize: isMobile ? 16 : 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                tr('contracts_add_employees_first'), // 'Önce çalışan modülünden çalışan ekleyin'
-                                style: TextStyle(
-                                  fontSize: isMobile ? 14 : 16,
-                                  color: Colors.grey[500],
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-                      
-                      return ListView.builder(
-                        padding: const EdgeInsets.all(8),
-                        itemCount: employees.length,
-                        itemBuilder: (context, index) {
-                          final employee = employees[index];
-                          final isSelected = controller.text == employee['name'];
-                          
-                          return Card(
-                            margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                            elevation: isSelected ? 4 : 1,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              side: BorderSide(
-                                color: isSelected 
-                                    ? Theme.of(context).primaryColor 
-                                    : Colors.grey[200]!,
-                                width: isSelected ? 2 : 1,
-                              ),
-                            ),
-                            child: InkWell(
-                              onTap: () {
-                                controller.text = employee['name'];
-                                if (onEmployeeSelected != null) {
-                                  onEmployeeSelected(employee['id'], employee['name']);
-                                }
-                                Navigator.pop(context);
-                              },
-                              borderRadius: BorderRadius.circular(12),
-                              child: Container(
-                                padding: EdgeInsets.all(isMobile ? 12 : 16),
-                                child: Row(
-                                  children: [
-                                    // Avatar
-                                    CircleAvatar(
-                                      radius: isMobile ? 20 : 24,
-                                      backgroundColor: isSelected 
-                                          ? Theme.of(context).primaryColor 
-                                          : Colors.grey[300],
-                                      child: Text(
-                                        employee['name'].isNotEmpty 
-                                            ? employee['name'][0].toUpperCase()
-                                            : '?',
-                                        style: TextStyle(
-                                          fontSize: isMobile ? 16 : 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: isSelected ? Colors.white : Colors.grey[700],
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 16),
-                                    
-                                    // Employee details
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            employee['name'],
-                                            style: TextStyle(
-                                              fontSize: isMobile ? 14 : 16,
-                                              fontWeight: FontWeight.bold,
-                                              color: isSelected 
-                                                  ? Theme.of(context).primaryColor 
-                                                  : Colors.black87,
-                                            ),
-                                          ),
-                                          if (employee['email'].isNotEmpty) ...[
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              employee['email'],
-                                              style: TextStyle(
-                                                fontSize: isMobile ? 12 : 14,
-                                                color: Colors.grey[600],
-                                              ),
-                                            ),
-                                          ],
-                                          if (employee['position'].isNotEmpty) ...[
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              employee['position'],
-                                              style: TextStyle(
-                                                fontSize: isMobile ? 12 : 14,
-                                                color: Colors.grey[500],
-                                                fontStyle: FontStyle.italic,
-                                              ),
-                                            ),
-                                          ],
-                                        ],
-                                      ),
-                                    ),
-                                    
-                                    // Selection indicator
-                                    Icon(
-                                      isSelected 
-                                          ? Icons.radio_button_checked 
-                                          : Icons.radio_button_unchecked,
-                                      color: isSelected 
-                                          ? Theme.of(context).primaryColor 
-                                          : Colors.grey[400],
-                                      size: isMobile ? 20 : 24,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-                
-                // Footer with action buttons
-                Container(
-                  padding: EdgeInsets.all(isMobile ? 12 : 16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[50],
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(16),
-                      bottomRight: Radius.circular(16),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: Text(
-                          tr('common_cancel'), // 'Vazgeç'
-                          style: TextStyle(
-                            color: Colors.grey[700],
-                            fontSize: isMobile ? 14 : 16,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-        },
-      );
-  }
-
   // Helper method to fetch employees from Firestore
   static Future<List<Map<String, dynamic>>> _fetchEmployeesForSelection() async {
     try {
@@ -769,17 +494,26 @@ class ContractManagement {
         throw Exception('Oturum açmanız gerekiyor');
       }
 
-      // Fetch employees from Firestore
-      final employees = await _firestoreService.fetchEmployees(userId: currentUser.uid);
+      // Fetch employees directly from Firestore
+      final employeesSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .collection('employees')
+          .orderBy('name', descending: false)
+          .get();
       
-      // Convert Employee objects to Map for easier handling
-      return employees.map((employee) => {
-        'id': employee.id,
-        'name': employee.name,
-        'email': employee.email,
-        'position': employee.position,
-        'departmentId': employee.departmentId,
-        'status': employee.status.toString(),
+      // Convert snapshot to Map list
+      return employeesSnapshot.docs.map((doc) {
+        final data = doc.data();
+        return {
+          'id': doc.id,
+          'name': data['name'] ?? '',
+          'email': data['email'] ?? '',
+          'position': data['position'] ?? '',
+          'phone': data['phone'] ?? '',
+          'departmentId': data['departmentId'] ?? '',
+          'status': data['status'] ?? 'active',
+        };
       }).toList();
       
     } catch (e) {
@@ -788,13 +522,423 @@ class ContractManagement {
     }
   }
 
+  // New helper method to show employee selection dialog with improved UI
+  static void _showEmployeeSelectionDialog(
+    BuildContext context,
+    TextEditingController controller,
+    bool isMobile,
+    [void Function(String, String)? onEmployeeSelected]
+  ) {
+    final dialogWidth = isMobile 
+        ? MediaQuery.of(context).size.width * 0.95
+        : MediaQuery.of(context).size.width * 0.7;
+    
+    final dialogHeight = isMobile 
+        ? MediaQuery.of(context).size.height * 0.8
+        : MediaQuery.of(context).size.height * 0.7;
+        
+    // Add a search controller for filtering employees
+    final searchController = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              insetPadding: EdgeInsets.symmetric(
+                horizontal: isMobile ? 10 : 20,
+                vertical: isMobile ? 20 : 40,
+              ),
+              child: Container(
+                width: dialogWidth,
+                height: dialogHeight,
+                padding: const EdgeInsets.all(0),
+                child: Column(
+                  children: [
+                    // Header
+                    Container(
+                      padding: EdgeInsets.all(isMobile ? 16 : 20),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor.withOpacity(0.1),
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          topRight: Radius.circular(16),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.people,
+                            color: Theme.of(context).primaryColor,
+                            size: isMobile ? 20 : 24,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              tr('contracts_select_employee'), // 'Çalışan Seçin'
+                              style: TextStyle(
+                                fontSize: isMobile ? 16 : 18,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).primaryColor,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () => Navigator.pop(context),
+                            icon: const Icon(Icons.close),
+                            splashRadius: 20,
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    // Search bar
+                    Padding(
+                      padding: EdgeInsets.all(isMobile ? 12 : 16),
+                      child: TextField(
+                        controller: searchController,
+                        decoration: InputDecoration(
+                          hintText: tr('search_employees'), // 'Çalışan ara...'
+                          prefixIcon: Icon(Icons.search),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey[300]!),
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey[50],
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                        ),
+                        onChanged: (value) {
+                          // Force update the UI when search text changes
+                          setState(() {});
+                        },
+                      ),
+                    ),
+                    
+                    // Employee list
+                    Expanded(
+                      child: FutureBuilder<List<Map<String, dynamic>>>(
+                        future: _fetchEmployeesForSelection(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+                          
+                          if (snapshot.hasError) {
+                            return Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.error_outline,
+                                    size: 48,
+                                    color: Colors.red[300],
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    tr('contracts_employee_load_error'), // 'Çalışanlar yüklenirken hata oluştu'
+                                    style: TextStyle(
+                                      fontSize: isMobile ? 14 : 16,
+                                      color: Colors.red[600],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    snapshot.error.toString(),
+                                    style: TextStyle(
+                                      fontSize: isMobile ? 12 : 14,
+                                      color: Colors.grey[600],
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                      _showEmployeeSelectionDialog(context, controller, isMobile, onEmployeeSelected);
+                                    },
+                                    child: Text(tr('common_try_again')), // 'Tekrar Dene'
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                          
+                          List<Map<String, dynamic>> employees = snapshot.data ?? [];
+                          
+                          // Filter employees based on search text
+                          final searchText = searchController.text.toLowerCase();
+                          if (searchText.isNotEmpty) {
+                            employees = employees.where((employee) {
+                              return employee['name'].toString().toLowerCase().contains(searchText) ||
+                                     (employee['email'] != null && employee['email'].toString().toLowerCase().contains(searchText)) ||
+                                     (employee['position'] != null && employee['position'].toString().toLowerCase().contains(searchText));
+                            }).toList();
+                          }
+                          
+                          if (employees.isEmpty) {
+                            return Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.people_outline,
+                                    size: 64,
+                                    color: Colors.grey[400],
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    searchText.isNotEmpty
+                                        ? tr('no_search_results') // 'Arama sonucu bulunamadı'
+                                        : tr('contracts_no_employees_found'), // 'Henüz çalışan kaydı bulunamadı'
+                                    style: TextStyle(
+                                      fontSize: isMobile ? 16 : 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    searchText.isNotEmpty
+                                        ? tr('try_different_search') // 'Farklı bir arama terimi deneyin'
+                                        : tr('contracts_add_employees_first'), // 'Önce çalışan modülünden çalışan ekleyin'
+                                    style: TextStyle(
+                                      fontSize: isMobile ? 14 : 16,
+                                      color: Colors.grey[500],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                          
+                          return ListView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            itemCount: employees.length,
+                            itemBuilder: (context, index) {
+                              final employee = employees[index];
+                              final isSelected = controller.text == employee['name'];
+                              
+                              return Card(
+                                margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                                elevation: isSelected ? 4 : 1,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  side: BorderSide(
+                                    color: isSelected 
+                                        ? Theme.of(context).primaryColor 
+                                        : Colors.grey[200]!,
+                                    width: isSelected ? 2 : 1,
+                                  ),
+                                ),
+                                child: InkWell(
+                                  onTap: () {
+                                    controller.text = employee['name'];
+                                    if (onEmployeeSelected != null) {
+                                      onEmployeeSelected(employee['id'], employee['name']);
+                                    }
+                                    Navigator.pop(context);
+                                  },
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Container(
+                                    padding: EdgeInsets.all(isMobile ? 12 : 16),
+                                    child: Row(
+                                      children: [
+                                        // Avatar with first letter or profile picture
+                                        CircleAvatar(
+                                          radius: isMobile ? 20 : 24,
+                                          backgroundColor: isSelected 
+                                              ? Theme.of(context).primaryColor 
+                                              : _getColorFromName(employee['name']),
+                                          backgroundImage: employee['imageUrl'] != null && employee['imageUrl'].toString().isNotEmpty
+                                              ? NetworkImage(employee['imageUrl'])
+                                              : null,
+                                          child: employee['imageUrl'] == null || employee['imageUrl'].toString().isEmpty
+                                              ? Text(
+                                                  employee['name'].isNotEmpty 
+                                                      ? employee['name'][0].toUpperCase()
+                                                      : '?',
+                                                  style: TextStyle(
+                                                    fontSize: isMobile ? 16 : 18,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white,
+                                                  ),
+                                                )
+                                              : null,
+                                        ),
+                                        const SizedBox(width: 16),
+                                        
+                                        // Employee details
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                employee['name'],
+                                                style: TextStyle(
+                                                  fontSize: isMobile ? 14 : 16,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: isSelected 
+                                                      ? Theme.of(context).primaryColor 
+                                                      : Colors.black87,
+                                                ),
+                                              ),
+                                              if (employee['email'] != null && employee['email'].toString().isNotEmpty) ...[
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  employee['email'],
+                                                  style: TextStyle(
+                                                    fontSize: isMobile ? 12 : 14,
+                                                    color: Colors.grey[600],
+                                                  ),
+                                                ),
+                                              ],
+                                              if (employee['position'] != null && employee['position'].toString().isNotEmpty) ...[
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  employee['position'],
+                                                  style: TextStyle(
+                                                    fontSize: isMobile ? 12 : 14,
+                                                    color: Colors.grey[500],
+                                                    fontStyle: FontStyle.italic,
+                                                  ),
+                                                ),
+                                              ],
+                                            ],
+                                          ),
+                                        ),
+                                        
+                                        // Phone info if available
+                                        if (employee['phone'] != null && employee['phone'].toString().isNotEmpty)
+                                          Container(
+                                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                            margin: EdgeInsets.only(right: 8),
+                                            decoration: BoxDecoration(
+                                              color: Colors.grey[100],
+                                              borderRadius: BorderRadius.circular(8),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(Icons.phone, size: 14, color: Colors.grey[600]),
+                                                SizedBox(width: 4),
+                                                Text(
+                                                  employee['phone'],
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.grey[700],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        
+                                        // Selection indicator
+                                        Icon(
+                                          isSelected 
+                                              ? Icons.radio_button_checked 
+                                              : Icons.radio_button_unchecked,
+                                          color: isSelected 
+                                              ? Theme.of(context).primaryColor 
+                                              : Colors.grey[400],
+                                          size: isMobile ? 20 : 24,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                    
+                    // Footer with action buttons
+                    Container(
+                      padding: EdgeInsets.all(isMobile ? 12 : 16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[50],
+                        borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(16),
+                          bottomRight: Radius.circular(16),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Employee count
+                          FutureBuilder<List<Map<String, dynamic>>>(
+                            future: _fetchEmployeesForSelection(),
+                            builder: (context, snapshot) {
+                              final count = snapshot.data?.length ?? 0;
+                              return Text(
+                                tr('total_employees', args: [count.toString()]), // 'Toplam çalışan: $count'
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: isMobile ? 12 : 14,
+                                ),
+                              );
+                            }
+                          ),
+                          
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: Text(
+                              tr('common_cancel'), // 'Vazgeç'
+                              style: TextStyle(
+                                color: Colors.grey[700],
+                                fontSize: isMobile ? 14 : 16,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+        );
+      },
+    );
+  }
+  
+  // Helper function to generate color from name for avatar
+  static Color _getColorFromName(String name) {
+    if (name.isEmpty) return Colors.blue;
+    
+    // Simple hash function for name
+    int hash = 0;
+    for (var i = 0; i < name.length; i++) {
+      hash = name.codeUnitAt(i) + ((hash << 5) - hash);
+    }
+    
+    // Convert to color
+    final hue = (hash % 360).abs();
+    return HSLColor.fromAHSL(1.0, hue.toDouble(), 0.6, 0.5).toColor();
+  }
+
   // Edit contract method
   static void editContract(BuildContext context, Map<String, dynamic> contract, Function refreshContracts) {
     final employeeNameCtrl = TextEditingController(text: contract['employeeName'] ?? contract['employee']);
     final contractTypeCtrl = TextEditingController(text: contract['type']);
     final startDateCtrl = TextEditingController(text: contract['startDate']);
     final endDateCtrl = TextEditingController(text: contract['endDate']);
-    String? selectedEmployeeId = contract['employeeId']; // <-- eklendi
+    final vehicleIdCtrl = TextEditingController(text: contract['vehicleId'] ?? '');
+    final vehiclePlateCtrl = TextEditingController(text: contract['vehiclePlate'] ?? '');
+    String? selectedEmployeeId = contract['employeeId'];
+// Initialize with existing plate
 
     // Get screen dimensions for responsive layout
     final screenWidth = MediaQuery.of(context).size.width;
@@ -852,12 +996,18 @@ class ContractManagement {
                         context,
                         employeeNameCtrl,
                         contractTypeCtrl,
-                        TextEditingController(text: contract['vehicleId'] ?? ''),
-                        TextEditingController(text: contract['reference'] ?? ''),
+                        vehicleIdCtrl,
+                        vehiclePlateCtrl, // Pass plate controller
                         isMobile,
                         (String id, String name) {
                           selectedEmployeeId = id;
                           employeeNameCtrl.text = name;
+                        },
+                        // Vehicle selection callback
+                        (String id, String plate) {
+                          vehicleIdCtrl.text = id;
+                          vehiclePlateCtrl.text = plate;
+// Now properly defined
                         },
                       ),
                       SizedBox(height: isMobile ? 12 : 16),
@@ -1361,12 +1511,11 @@ class ContractManagement {
                             ),
                           ),
                         ),
-                      );
+                         );
                     },
                   ),
                 ),
 
-                
                 // Footer with action button
                 Container(
                   padding: EdgeInsets.all(isMobile ? 12 : 16),
@@ -1401,6 +1550,409 @@ class ContractManagement {
       );
   }
 
+  // Helper method to fetch vehicles from Firestore
+  static Future<List<Map<String, dynamic>>> _fetchVehiclesForSelection() async {
+    try {
+      // Check if user is authenticated
+      final User? currentUser = ContractManagement._auth.currentUser;
+      if (currentUser == null) {
+        throw Exception('Oturum açmanız gerekiyor');
+      }
+
+      // Fetch vehicles directly from Firestore
+      final vehiclesSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .collection('vehicles')
+          .orderBy('model', descending: false)
+          .get();
+      
+      // Convert snapshot to Map list
+      return vehiclesSnapshot.docs.map((doc) {
+        final data = doc.data();
+        return {
+          'id': doc.id,
+          'model': data['model'] ?? '',
+          'plate': data['plate'] ?? '',
+          'year': data['year'] != null ? data['year'].toString() : '',
+        };
+      }).toList();
+      
+    } catch (e) {
+      print('Error fetching vehicles for selection: $e');
+      throw e;
+    }
+  }
+
+  // New helper method to show vehicle selection dialog with improved UI
+  static void _showVehicleSelectionDialog(
+    BuildContext context,
+    TextEditingController idController, // Store ID here
+    bool isMobile,
+    [void Function(String, String)? onVehicleSelected,
+     TextEditingController? plateController] // Optional plate controller
+  ) {
+    final dialogWidth = isMobile 
+        ? MediaQuery.of(context).size.width * 0.95
+        : MediaQuery.of(context).size.width * 0.7;
+    
+    final dialogHeight = isMobile 
+        ? MediaQuery.of(context).size.height * 0.8
+        : MediaQuery.of(context).size.height * 0.7;
+        
+    // Add a search controller for filtering vehicles
+    final searchController = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              insetPadding: EdgeInsets.symmetric(
+                horizontal: isMobile ? 10 : 20,
+                vertical: isMobile ? 20 : 40,
+              ),
+              child: Container(
+                width: dialogWidth,
+                height: dialogHeight,
+                padding: const EdgeInsets.all(0),
+                child: Column(
+                  children: [
+                    // Header
+                    Container(
+                      padding: EdgeInsets.all(isMobile ? 16 : 20),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor.withOpacity(0.1),
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          topRight: Radius.circular(16),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.directions_car,
+                            color: Theme.of(context).primaryColor,
+                            size: isMobile ? 20 : 24,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              tr('contracts_select_vehicle', gender: 'Araç Seçin'),
+                              style: TextStyle(
+                                fontSize: isMobile ? 16 : 18,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).primaryColor,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () => Navigator.pop(context),
+                            icon: const Icon(Icons.close),
+                            splashRadius: 20,
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    // Search bar
+                    Padding(
+                      padding: EdgeInsets.all(isMobile ? 12 : 16),
+                      child: TextField(
+                        controller: searchController,
+                        decoration: InputDecoration(
+                          hintText: tr('search_vehicles', gender: 'Araç ara...'),
+                          prefixIcon: Icon(Icons.search),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey[300]!),
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey[50],
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                        ),
+                        onChanged: (value) {
+                          // Force update the UI when search text changes
+                          setState(() {});
+                        },
+                      ),
+                    ),
+                    
+                    // Vehicle list
+                    Expanded(
+                      child: FutureBuilder<List<Map<String, dynamic>>>(
+                        future: _fetchVehiclesForSelection(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+                          
+                          if (snapshot.hasError) {
+                            return Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.error_outline,
+                                    size: 48,
+                                    color: Colors.red[300],
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    tr('contracts_vehicle_load_error', gender: 'Araçlar yüklenirken hata oluştu'),
+                                    style: TextStyle(
+                                      fontSize: isMobile ? 14 : 16,
+                                      color: Colors.red[600],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    snapshot.error.toString(),
+                                    style: TextStyle(
+                                      fontSize: isMobile ? 12 : 14,
+                                      color: Colors.grey[600],
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                      _showVehicleSelectionDialog(context, idController, isMobile);
+                                    },
+                                    child: Text(tr('common_try_again', gender: 'Tekrar Dene')),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                          
+                          List<Map<String, dynamic>> vehicles = snapshot.data ?? [];
+                          
+                          // Filter vehicles based on search text
+                          final searchText = searchController.text.toLowerCase();
+                          if (searchText.isNotEmpty) {
+                            vehicles = vehicles.where((vehicle) {
+                              return vehicle['model'].toString().toLowerCase().contains(searchText) ||
+                                     vehicle['plate'].toString().toLowerCase().contains(searchText);
+                            }).toList();
+                          }
+                          
+                          if (vehicles.isEmpty) {
+                            return Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.directions_car_outlined,
+                                    size: 64,
+                                    color: Colors.grey[400],
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    searchText.isNotEmpty
+                                        ? tr('no_search_results',)
+                                        : tr('contracts_no_vehicles_found',),
+                                    style: TextStyle(
+                                      fontSize: isMobile ? 16 : 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    searchText.isNotEmpty
+                                        ? tr('try_different_search', )
+                                        : tr('contracts_add_vehicles_first',),
+                                    style: TextStyle(
+                                      fontSize: isMobile ? 14 : 16,
+                                      color: Colors.grey[500],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                          
+                          return ListView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            itemCount: vehicles.length,
+                            itemBuilder: (context, index) {
+                              final vehicle = vehicles[index];
+                              final isSelected = idController.text == vehicle['id'];
+                              
+                              return Card(
+                                margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                                elevation: isSelected ? 4 : 1,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  side: BorderSide(
+                                    color: isSelected 
+                                        ? Theme.of(context).primaryColor 
+                                        : Colors.grey[200]!,
+                                    width: isSelected ? 2 : 1,
+                                  ),
+                                ),
+                                child: InkWell(
+                                  onTap: () {
+                                    // Set the ID to the hidden controller
+                                    idController.text = vehicle['id'];
+                                    
+                                    // Set the plate to the display controller if provided
+                                    if (plateController != null) {
+                                      plateController.text = vehicle['plate'];
+                                    }
+                                    
+                                    // Call the callback if provided
+                                    if (onVehicleSelected != null) {
+                                      onVehicleSelected(vehicle['id'], vehicle['plate']);
+                                    }
+                                    
+                                    Navigator.pop(context);
+                                  },
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Container(
+                                    padding: EdgeInsets.all(isMobile ? 12 : 16),
+                                    child: Row(
+                                      children: [
+                                        // Vehicle icon or indicator
+                                        Container(
+                                          padding: const EdgeInsets.all(8),
+                                          decoration: BoxDecoration(
+                                            color: isSelected 
+                                                ? Theme.of(context).primaryColor.withOpacity(0.1)
+                                                : Colors.grey[100],
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Icon(
+                                            Icons.directions_car,
+                                            color: isSelected 
+                                                ? Theme.of(context).primaryColor 
+                                                : Colors.grey[700],
+                                            size: isMobile ? 20 : 24,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        
+                                        // Vehicle details
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                vehicle['model'],
+                                                style: TextStyle(
+                                                  fontSize: isMobile ? 14 : 16,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: isSelected 
+                                                      ? Theme.of(context).primaryColor 
+                                                      : Colors.black87,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                vehicle['plate'],
+                                                style: TextStyle(
+                                                  fontSize: isMobile ? 12 : 14,
+                                                  color: Colors.grey[700],
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                              if (vehicle['year'] != null && vehicle['year'].toString().isNotEmpty) ...[
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  tr('vehicle_year', gender: 'Model Yılı: {0}', args: [vehicle['year']]),
+                                                  style: TextStyle(
+                                                    fontSize: isMobile ? 11 : 12,
+                                                    color: Colors.grey[600],
+                                                  ),
+                                                ),
+                                              ],
+                                            ],
+                                          ),
+                                        ),
+                                        
+                                        // Selection indicator
+                                        Icon(
+                                          isSelected 
+                                              ? Icons.radio_button_checked 
+                                              : Icons.radio_button_unchecked,
+                                          color: isSelected 
+                                              ? Theme.of(context).primaryColor 
+                                              : Colors.grey[400],
+                                          size: isMobile ? 20 : 24,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                    
+                    // Footer with action buttons
+                    Container(
+                      padding: EdgeInsets.all(isMobile ? 12 : 16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[50],
+                        borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(16),
+                          bottomRight: Radius.circular(16),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Vehicle count
+                          FutureBuilder<List<Map<String, dynamic>>>(
+                            future: _fetchVehiclesForSelection(),
+                            builder: (context, snapshot) {
+                              final count = snapshot.data?.length ?? 0;
+                              return Text(
+                                tr('total_vehicles', gender: 'Toplam araç: {0}', args: [count.toString()]),
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: isMobile ? 12 : 14,
+                                ),
+                              );
+                            }
+                          ),
+                          
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: Text(
+                              tr('common_cancel', gender: 'Vazgeç'),
+                              style: TextStyle(
+                                color: Colors.grey[700],
+                                fontSize: isMobile ? 14 : 16,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+        );
+      },
+    );
+  }
+
   // Helper method to handle adding a contract
   static void _handleAddContract(
     BuildContext context,
@@ -1408,19 +1960,19 @@ class ContractManagement {
     TextEditingController contractTypeCtrl,
     TextEditingController startDateCtrl,
     TextEditingController endDateCtrl,
-    TextEditingController vehicleIdCtrl, // <-- Eklendi
-    TextEditingController referenceCtrl, // <-- Eklendi
+    TextEditingController vehicleIdCtrl,
     Function refreshContracts,
-    String? selectedEmployeeId, // <-- eklendi
+    String? selectedEmployeeId,
+    String? selectedVehiclePlate,
   ) {
     // Validate inputs
     if (employeeNameCtrl.text.isEmpty ||
         contractTypeCtrl.text.isEmpty ||
         startDateCtrl.text.isEmpty ||
         endDateCtrl.text.isEmpty ||
-        vehicleIdCtrl.text.isEmpty || // <-- Eklendi
-        referenceCtrl.text.isEmpty || // <-- Eklendi
-        selectedEmployeeId == null) {
+        vehicleIdCtrl.text.isEmpty ||
+        selectedEmployeeId == null ||
+        selectedVehiclePlate == null) {
       InfoCard.showInfoCard(
         context,
         tr('contracts_fill_all_fields'),
@@ -1469,20 +2021,27 @@ class ContractManagement {
     
     // Create a unique ID for the new contract
     final contractId = uuid.v4();
-    
+
+    // --- CONTRACT TYPE FIELD DÜZENLEME ---
+    // contractTypeCtrl.text kullanıcıya gösterilen isim, firebase'e hem 'type' hem 'reference' alanı olarak ekleniyor.
+    // 'type' alanı firebase'de contractTypeCtrl.text olarak kaydedilecek.
+    // 'reference' alanı ise ayrı bir açıklama/referans için kullanılıyor (referenceCtrl.text).
+    // Eğer firebase'de 'type' alanı yoksa, eklenmeli.
+
     // Create a contract object
     final contract = Contract(
       id: contractId,
       employeeId: selectedEmployeeId,
       employeeName: employeeNameCtrl.text,
-      vehicleId: vehicleIdCtrl.text, // <-- Eklendi
-      reference: referenceCtrl.text, // <-- Eklendi
+      vehicleId: vehicleIdCtrl.text,
+      vehiclePlate: selectedVehiclePlate,
+      reference: contractTypeCtrl.text, // <-- referans yerine contractTypeCtrl.text atanıyor
       startDate: startDate,
       endDate: endDate,
       status: ContractStatus.ongoing,
-      createdAt: DateTime.now(), // <-- eklendi
+      createdAt: DateTime.now(),
     );
-    
+
     // Show loading indicator
     showDialog(
       context: context,
@@ -1532,8 +2091,8 @@ class ContractManagement {
     TextEditingController startDateCtrl,
     TextEditingController endDateCtrl,
     Function refreshContracts,
-    String? selectedEmployeeId, // <-- eklendi
-    Map<String, dynamic> contract, // <-- added contract map parameter
+    String? selectedEmployeeId,
+    Map<String, dynamic> contract,
   ) {
     // Validate inputs
     if (employeeNameCtrl.text.isEmpty ||
@@ -1587,21 +2146,26 @@ class ContractManagement {
       return;
     }
     
+    // --- CONTRACT TYPE FIELD DÜZENLEME ---
+    // contractTypeCtrl.text firebase'de 'type' alanı olarak güncellenmeli.
+    // reference alanı ayrı tutulmalı (contract['reference']).
+
     // Create an updated contract object
     final updatedContract = Contract(
       id: contractId,
       employeeId: selectedEmployeeId,
       employeeName: employeeNameCtrl.text,
-      vehicleId: '', // <-- Eklendi, uygun şekilde doldurulmalı
+      vehicleId: contract['vehicleId'] ?? '',
+      vehiclePlate: contract['vehiclePlate'] ?? '', // Use existing plate from contract
       reference: contractTypeCtrl.text,
       startDate: startDate,
       endDate: endDate,
       status: ContractStatus.ongoing,
       createdAt: contract['createdAt'] != null
           ? DateTime.tryParse(contract['createdAt'].toString()) ?? DateTime.now()
-          : DateTime.now(), // <-- eklendi/güncellendi
+          : DateTime.now(),
     );
-    
+
     // Show loading indicator
     showDialog(
       context: context,
@@ -1612,7 +2176,7 @@ class ContractManagement {
     );
     
     // Update the contract in Firestore
-    _firestoreService.updateContract(updatedContract, currentUser.uid)
+    ContractManagement._firestoreService.updateContract(updatedContract, currentUser.uid)
       .then((_) {
         // Close loading dialog and contract dialog
         Navigator.pop(context); // Close loading dialog
@@ -1645,7 +2209,7 @@ class ContractManagement {
   }
 
   // Delete contract method - change from instance method to static method
-  static void deleteContract(BuildContext context, Map<String, dynamic> contract, Function refreshContracts) {
+  void deleteContract(BuildContext context, Map<String, dynamic> contract, Function refreshContracts) {
     // Check if user is authenticated
     final User? currentUser = ContractManagement._auth.currentUser;
     if (currentUser == null) {
@@ -1689,4 +2253,4 @@ class ContractManagement {
         );
       });
   }
-}
+  }

@@ -4,6 +4,9 @@ import '../../widgets/side_menu.dart';
 import '../../services/odometer_service.dart';
 import '../../models/odometer_record.dart';
 import 'add_odometers.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../services/firestore_service.dart'; // Add FirestoreService import
 
 class OdometersPage extends StatefulWidget {
   const OdometersPage({super.key});
@@ -13,6 +16,7 @@ class OdometersPage extends StatefulWidget {
 
 class _OdometersPageState extends State<OdometersPage> with SingleTickerProviderStateMixin {
   final svc = OdometerService();
+  final FirestoreService _firestoreService = FirestoreService(); // Add FirestoreService
   late AnimationController _controller;
   final TextEditingController _searchController = TextEditingController();
   List<bool> _isStatsHovering = [];
@@ -30,6 +34,13 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
   List<OdometerRecord> _allRecords = [];
   List<OdometerRecord> _displayedRecords = [];
   List<OdometerRecord> _filteredRecords = [];
+  
+  // Add map to store vehicle plate information
+  Map<String, String> _vehiclePlates = {};
+
+  // Firebase reference
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   void initState() {
@@ -53,21 +64,104 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
     _isSmallScreen = screenWidth < 650;
     _isMediumScreen = screenWidth >= 650 && screenWidth < 1024;
   }
+  
+  // Add method to load vehicle plates
+  Future<void> _loadVehiclePlates() async {
+    final User? currentUser = _auth.currentUser;
+    if (currentUser == null) return;
+    
+    try {
+      final vehicles = await _firestoreService.fetchVehiclesWithDetails(userId: currentUser.uid);
+      
+      final Map<String, String> plates = {};
+      for (var vehicle in vehicles) {
+        plates[vehicle.id] = vehicle.plate;
+      }
+      
+      if (mounted) {
+        setState(() {
+          _vehiclePlates = plates;
+        });
+      }
+    } catch (e) {
+      print('Error loading vehicle plates: $e');
+    }
+  }
 
   void _loadOdometerData() {
     setState(() {
       _isLoading = true;
     });
-    Future.delayed(const Duration(milliseconds: 800), () {
-      final items = svc.getAll();
+
+    // Get current user
+    final User? currentUser = _auth.currentUser;
+    if (currentUser == null) {
       setState(() {
-        _allRecords = items;
-        _totalRecords = items.length;
-        _totalPages = (_totalRecords / _pageSize).ceil();
-        if (_totalPages == 0) _totalPages = 1;
         _isLoading = false;
+        _allRecords = [];
+        _totalRecords = 0;
+        _totalPages = 1;
       });
       _updateDisplayedRecords();
+      return;
+    }
+    
+    // Load vehicle plates first, then load odometers
+    _loadVehiclePlates().then((_) {
+      // Fetch data from Firestore
+      _firestore
+          .collection('users')
+          .doc(currentUser.uid)
+          .collection('odometers')
+          .orderBy('date', descending: true)
+          .get()
+          .then((querySnapshot) {
+            final List<OdometerRecord> fetchedRecords = [];
+            
+            for (var doc in querySnapshot.docs) {
+              final data = doc.data();
+              
+              // Convert Firestore timestamp to DateTime
+              DateTime recordDate;
+              if (data['date'] is Timestamp) {
+                recordDate = (data['date'] as Timestamp).toDate();
+              } else if (data['date'] is DateTime) {
+                recordDate = data['date'];
+              } else {
+                recordDate = DateTime.now(); // Fallback
+              }
+              
+              fetchedRecords.add(OdometerRecord(
+                id: data['id'] ?? doc.id,
+                vehicleId: data['vehicleId'] ?? '',
+                driver: data['driver'] ?? '',
+                date: recordDate,
+                value: (data['value'] is int) 
+                    ? (data['value'] as int).toDouble()
+                    : (data['value'] as double?) ?? 0.0,
+              ));
+            }
+            
+            setState(() {
+              _allRecords = fetchedRecords;
+              _totalRecords = fetchedRecords.length;
+              _totalPages = (_totalRecords / _pageSize).ceil();
+              if (_totalPages == 0) _totalPages = 1;
+              _isLoading = false;
+            });
+            
+            _updateDisplayedRecords();
+          })
+          .catchError((error) {
+            print('Error loading odometer data: $error');
+            setState(() {
+              _isLoading = false;
+              _allRecords = [];
+              _totalRecords = 0;
+              _totalPages = 1;
+            });
+            _updateDisplayedRecords();
+          });
     });
   }
 
@@ -146,7 +240,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
     _setScreenSizeBreakpoints(context);
     return Scaffold(
       appBar: const TopBar(),
-      drawer: const SideMenu(currentPage: 'odometers'),
+      drawer: const SideMenu(currentPage: 'odometer'),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -364,15 +458,6 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
               ),
               const SizedBox(width: 16),
               OutlinedButton.icon(
-                icon: const Icon(Icons.upload_file),
-                label: const Text('İçe Aktar'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                ),
-                onPressed: () => _importOdometers(context),
-              ),
-              const SizedBox(width: 12),
-              OutlinedButton.icon(
                 icon: const Icon(Icons.download),
                 label: const Text('Dışa Aktar'),
                 style: OutlinedButton.styleFrom(
@@ -426,20 +511,6 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
           ),
           Row(
             children: [
-              ElevatedButton.icon(
-                icon: const Icon(Icons.upload_file),
-                label: const Text('İçe Aktar'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.secondary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
-                onPressed: () => _importOdometers(context),
-              ),
-              const SizedBox(width: 16),
               ElevatedButton.icon(
                 icon: const Icon(Icons.download),
                 label: const Text('Dışa Aktar'),
@@ -799,7 +870,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
                             Expanded(
                               flex: 2,
                               child: Text(
-                                'Araç ID',
+                                'Araç', // Changed from 'Araç ID' to 'Araç'
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.grey[700],
@@ -839,6 +910,11 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
                         itemCount: _filteredRecords.length,
                         itemBuilder: (context, index) {
                           final record = _filteredRecords[index];
+                          // Get vehicle plate from map, or show placeholder if not found
+                          final vehiclePlate = record.vehicleId.isEmpty 
+                              ? '(Araç yok)' 
+                              : _vehiclePlates[record.vehicleId] ?? record.vehicleId;
+                              
                           return Container(
                             margin: const EdgeInsets.only(bottom: 8),
                             decoration: BoxDecoration(
@@ -855,7 +931,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
                                     Expanded(
                                       flex: 2,
                                       child: Text(
-                                        record.vehicleId.isEmpty ? '(Araç yok)' : record.vehicleId,
+                                        vehiclePlate,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
@@ -930,7 +1006,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
       ],
     );
   }
-
+  
   Widget _buildSimplifiedPagination() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -1216,17 +1292,53 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
           ),
           ElevatedButton(
             onPressed: () {
-              svc.remove(record.id);
-              _loadOdometerData();
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Kilometre kaydı silindi'),
-                  backgroundColor: Colors.red,
-                ),
-              );
+              // Delete from Firestore
+              final User? currentUser = _auth.currentUser;
+              if (currentUser != null) {
+                _firestore
+                    .collection('users')
+                    .doc(currentUser.uid)
+                    .collection('odometers')
+                    .doc(record.id)
+                    .delete()
+                    .then((_) {
+                      // Also delete from local service for backward compatibility
+                      svc.remove(record.id);
+                      _loadOdometerData();
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Kilometre kaydı silindi'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    })
+                    .catchError((error) {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Hata: $error'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    });
+              } else {
+                // Fallback to local service if no user is authenticated
+                svc.remove(record.id);
+                _loadOdometerData();
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Kilometre kaydı silindi'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white, // Added foregroundColor to make text white
+            ),
             child: const Text('Sil'),
           ),
         ],

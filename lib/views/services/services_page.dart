@@ -4,7 +4,9 @@ import '../../widgets/side_menu.dart';
 import '../../services/service_service.dart';
 import '../../models/service_entry.dart';
 import '../../services/vehicle_service.dart';
-import 'add_service.dart'; // Add this import
+import 'add_service.dart';
+import '../../services/firestore_service.dart'; // Add Firestore service import
+import 'package:firebase_auth/firebase_auth.dart'; // Add Firebase Auth import
 
 class ServicesPage extends StatefulWidget {
   const ServicesPage({super.key});
@@ -15,10 +17,12 @@ class ServicesPage extends StatefulWidget {
 class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderStateMixin {
   final svc = ServiceService();
   final vehicleSvc = VehicleService();
+  final FirestoreService _firestoreService = FirestoreService(); // Add Firestore service
   late AnimationController _controller;
   final TextEditingController _searchController = TextEditingController();
   List<bool> _isStatsHovering = [];
   bool _isLoading = false;
+  String? _errorMessage;
 
   // Responsive
   late bool _isSmallScreen;
@@ -60,24 +64,96 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
   void _loadServiceData() {
     setState(() {
       _isLoading = true;
+      _errorMessage = null;
     });
-    Future.delayed(const Duration(milliseconds: 800), () {
-      final items = svc.getAll();
-      final vehicles = vehicleSvc.getAll();
-      final vehicleModels = <String, String>{};
-      for (var v in vehicles) {
-        vehicleModels[v.id] = v.model;
-      }
+    
+    // Get current user
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
       setState(() {
-        _allRecords = items;
-        _vehicleModels = vehicleModels;
-        _totalRecords = items.length;
-        _totalPages = (_totalRecords / _pageSize).ceil();
-        if (_totalPages == 0) _totalPages = 1;
         _isLoading = false;
+        _errorMessage = 'Kullanıcı oturumu bulunamadı. Lütfen tekrar giriş yapın.';
       });
-      _updateDisplayedRecords();
+      return;
+    }
+    
+    // Fetch services from Firestore
+    _firestoreService.fetchServices(userId: currentUser.uid).then((servicesData) {
+      // Convert the fetched data to ServiceEntry objects
+      final items = servicesData.map((data) {
+        return ServiceEntry(
+          id: data['id'] as String,
+          vehicleId: data['vehicleId'] as String,
+          serviceType: data['serviceType'] as String? ?? '',
+          supplier: data['supplier'] as String? ?? '',
+          driver: data['driver'] as String? ?? '',
+          date: data['date'] != null 
+              ? (data['date'] as DateTime) 
+              : DateTime.now(),
+          cost: (data['cost'] as num?)?.toDouble() ?? 0.0,
+          odometer: (data['odometer'] as num?)?.toDouble() ?? 0.0,
+          stage: _parseServiceStage(data['stage']),
+          notes: data['notes'] as String? ?? '',
+        );
+      }).toList();
+      
+      // Fetch vehicles to display model names
+      _firestoreService.fetchVehiclesWithDetails(userId: currentUser.uid).then((vehicles) {
+        final vehicleModels = <String, String>{};
+        for (var v in vehicles) {
+          vehicleModels[v.id] = v.model;
+        }
+        
+        if (mounted) {
+          setState(() {
+            _allRecords = items;
+            _vehicleModels = vehicleModels;
+            _totalRecords = items.length;
+            _totalPages = (_totalRecords / _pageSize).ceil();
+            if (_totalPages == 0) _totalPages = 1;
+            _isLoading = false;
+            _errorMessage = null;
+          });
+          _updateDisplayedRecords();
+        }
+      }).catchError((error) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            _errorMessage = 'Araçlar yüklenirken hata oluştu: $error';
+          });
+        }
+      });
+    }).catchError((error) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Servis kayıtları yüklenirken hata oluştu: $error';
+        });
+      }
     });
+  }
+  
+  // Helper function to parse service stage from string
+  ServiceStage _parseServiceStage(dynamic stage) {
+    if (stage is ServiceStage) return stage;
+    
+    if (stage is String) {
+      switch (stage) {
+        case 'ServiceStage.newService':
+        case 'newService':
+          return ServiceStage.newService;
+        case 'ServiceStage.inProgress':
+        case 'inProgress':
+          return ServiceStage.inProgress;
+        case 'ServiceStage.completed':
+        case 'completed':
+          return ServiceStage.completed;
+        default:
+          return ServiceStage.newService;
+      }
+    }
+    return ServiceStage.newService;
   }
 
   void _updateDisplayedRecords() {
@@ -157,25 +233,27 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
       drawer: const SideMenu(currentPage: 'service'),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.all(_isSmallScreen ? 16 : 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeaderSection(context),
-                    SizedBox(height: _isSmallScreen ? 24 : 32),
-                    _buildStatsSection(context, _allRecords),
-                    SizedBox(height: _isSmallScreen ? 32 : 40),
-                    _buildServicesSection(context),
-                  ],
+          : _errorMessage != null
+              ? _buildErrorState()
+              : SingleChildScrollView(
+                  child: Padding(
+                    padding: EdgeInsets.all(_isSmallScreen ? 16 : 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildHeaderSection(context),
+                        SizedBox(height: _isSmallScreen ? 24 : 32),
+                        _buildStatsSection(context, _allRecords),
+                        SizedBox(height: _isSmallScreen ? 32 : 40),
+                        _buildServicesSection(context),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ),
       floatingActionButton: _isSmallScreen ? _buildModernFAB(context) : null,
     );
   }
-
+  
   Widget _buildModernFAB(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
@@ -372,15 +450,6 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
               ),
               const SizedBox(width: 16),
               OutlinedButton.icon(
-                icon: const Icon(Icons.upload_file),
-                label: const Text('İçe Aktar'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                ),
-                onPressed: () => _importServices(context),
-              ),
-              const SizedBox(width: 12),
-              OutlinedButton.icon(
                 icon: const Icon(Icons.download),
                 label: const Text('Dışa Aktar'),
                 style: OutlinedButton.styleFrom(
@@ -434,20 +503,6 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
           ),
           Row(
             children: [
-              ElevatedButton.icon(
-                icon: const Icon(Icons.upload_file),
-                label: const Text('İçe Aktar'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.secondary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
-                onPressed: () => _importServices(context),
-              ),
-              const SizedBox(width: 16),
               ElevatedButton.icon(
                 icon: const Icon(Icons.download),
                 label: const Text('Dışa Aktar'),
@@ -839,6 +894,16 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
                               ),
                             ),
                             Expanded(
+                              flex: 3,
+                              child: Text(
+                                'Notlar',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                            ),
+                            Expanded(
                               flex: 2,
                               child: Text(
                                 'Maliyet',
@@ -891,6 +956,17 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
                                     Expanded(
                                       flex: 2,
                                       child: Text(record.serviceType.isEmpty ? '(Tür yok)' : record.serviceType),
+                                    ),
+                                    Expanded(
+                                      flex: 3,
+                                      child: Text(
+                                        record.notes.isEmpty ? '-' : record.notes,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: Colors.grey[700],
+                                        ),
+                                      ),
                                     ),
                                     Expanded(
                                       flex: 2,
@@ -1246,20 +1322,78 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
           ),
           ElevatedButton(
             onPressed: () {
-              svc.remove(service.id);
-              _loadServiceData();
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Servis kaydı silindi'),
-                  backgroundColor: Colors.red,
-                ),
-              );
+              final currentUser = FirebaseAuth.instance.currentUser;
+              if (currentUser != null) {
+                // Delete from Firestore
+                _firestoreService.deleteService(service.id, currentUser.uid).then((_) {
+                  // Also delete from local cache
+                  svc.remove(service.id);
+                  _loadServiceData();
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Servis kaydı silindi'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }).catchError((error) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Silme işlemi başarısız: $error'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                });
+              } else {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Kullanıcı oturumu bulunamadı'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             child: const Text('Sil'),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+            const SizedBox(height: 16),
+            Text(
+              'Veri yüklenirken bir hata oluştu',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.red[700]),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              _errorMessage ?? 'Bilinmeyen hata',
+              style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: _loadServiceData,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Yeniden Dene'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

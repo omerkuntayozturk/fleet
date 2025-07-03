@@ -5,6 +5,7 @@ class Contract {
   String employeeId;
   String employeeName;
   String vehicleId; // <-- Eklendi
+  String? vehiclePlate; // <-- PLATE eklendi
   String reference;
   DateTime startDate;
   DateTime endDate;
@@ -16,6 +17,7 @@ class Contract {
     required this.employeeId,
     required this.employeeName,
     required this.vehicleId, // <-- Eklendi
+    this.vehiclePlate, // <-- PLATE eklendi
     this.reference = '',
     required this.startDate,
     required this.endDate,

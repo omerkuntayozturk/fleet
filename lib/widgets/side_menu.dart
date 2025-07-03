@@ -137,7 +137,7 @@ class _SideMenuState extends State<SideMenu> {
                                 '/',
                                 isSelected: widget.currentPage == '/' || widget.currentPage == '', // Home
                               ),
-                                                                                        if (_canAccessOrgChart)
+                            if (_canAccessOrgChart)
                               _buildResponsiveMenuItem(
                                 context, 
                                 Icons.inventory_2_rounded, 
@@ -149,27 +149,33 @@ class _SideMenuState extends State<SideMenu> {
                                 context, 
                                 Icons.inventory_2_rounded, 
                                 tr('sidemenu_detail'), 
-                                '/detail',
-                                isSelected: widget.currentPage == '/detail' || widget.currentPage == 'detail',
+                                '/vehicles',
+                                isSelected: widget.currentPage == '/vehicles' || widget.currentPage == 'vehicles',
                               ),
 
                             if (_canAccessContracts)
                               _buildResponsiveMenuItem(
                                 context, 
-                                Icons.view_kanban_rounded, 
-                                tr('sidemenu_contracts'), 
+                                Icons.speed, // Changed icon to represent odometer/km reading better
+                                'Km Kaydı', // Using explicit name instead of translation key for clarity
                                 '/odometer',
-                                isSelected: widget.currentPage == '/odometer' || widget.currentPage == 'odometer',
+                                isSelected: widget.currentPage == '/odometer' || 
+                                           widget.currentPage == 'odometer' ||
+                                           widget.currentPage == '/odometers' || 
+                                           widget.currentPage == 'odometers',
                               ),
                             if (_canAccessOrgChart)
                               _buildResponsiveMenuItem(
                                 context, 
-                                Icons.inventory_2_rounded, 
-                                tr('sidemenu_orgchart'), 
+                                Icons.build, // Changed icon to wrench/tools for service
+                                'Servis Kaydı', // Using explicit name for clarity 
                                 '/service',
-                                isSelected: widget.currentPage == '/service' || widget.currentPage == 'service',
-                              ),         
-                                                          if (_canAccessDepartmentPosition)
+                                isSelected: widget.currentPage == '/service' || 
+                                           widget.currentPage == 'service' ||
+                                           widget.currentPage == '/services' || 
+                                           widget.currentPage == 'services',
+                              ),
+                            if (_canAccessDepartmentPosition)
                               _buildResponsiveMenuItem(
                                 context, 
                                 Icons.corporate_fare_rounded, 
@@ -459,6 +465,9 @@ class _SideMenuState extends State<SideMenu> {
           switch (route) {
             case '/':
               Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+              break;
+            case '/vehicles':
+              Navigator.pushReplacementNamed(context, AppRoutes.vehicles);
               break;
             case '/settings':
               Navigator.pushReplacementNamed(context, AppRoutes.settings);

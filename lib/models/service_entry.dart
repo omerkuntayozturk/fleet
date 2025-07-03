@@ -5,7 +5,7 @@ enum ServiceStage {
 }
 
 class ServiceEntry {
- String id, vehicleId, serviceType, supplier, driver;
+ String id, vehicleId, serviceType, supplier, driver, notes; // Added notes as a class field
  DateTime date;
  double cost, odometer;
  ServiceStage stage;
@@ -18,6 +18,7 @@ class ServiceEntry {
    required this.date,
    this.cost = 0,
    this.odometer = 0,
-   this.stage = ServiceStage.newService, required String notes,
+   this.stage = ServiceStage.newService,
+   required this.notes, // Changed to this.notes to properly store the value
  });
 }

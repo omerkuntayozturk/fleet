@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fleet/models/contract.dart' as contract_model;
+import 'package:fleet/models/vehicle.dart';
 import '../core/enums.dart'; // For enums
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -697,6 +698,74 @@ class FirestoreService {
     );
   }
 
+  // Fetch services for a specific user
+  Future<List<Map<String, dynamic>>> fetchServices({required String userId}) async {
+    return _handleFirestoreOperation<List<Map<String, dynamic>>>(
+      operation: () async {
+        // Create query reference
+        Query query = _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('services');
+        
+        // Apply sorting (newest first)
+        query = query.orderBy('createdAt', descending: true);
+        
+        // Execute query
+        final querySnapshot = await query.get();
+
+        return querySnapshot.docs.map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          
+          // Convert Firestore Timestamp to DateTime
+          DateTime date = DateTime.now();
+          if (data['date'] != null) {
+            if (data['date'] is Timestamp) {
+              date = (data['date'] as Timestamp).toDate();
+            } else if (data['date'] is String) {
+              date = DateTime.tryParse(data['date']) ?? DateTime.now();
+            }
+          }
+          
+          return {
+            'id': doc.id,
+            'vehicleId': data['vehicleId'] ?? '',
+            'serviceType': data['serviceType'] ?? '',
+            'date': date,
+            'cost': data['cost'] ?? 0.0,
+            'supplier': data['supplier'] ?? '',
+            'driver': data['driver'] ?? '',
+            'odometer': data['odometer'] ?? 0.0,
+            'stage': data['stage'] ?? 'newService',
+            'notes': data['notes'] ?? '',
+            'createdAt': data['createdAt'] is Timestamp ? 
+                (data['createdAt'] as Timestamp).toDate() : 
+                DateTime.now(),
+          };
+        }).toList();
+      },
+      errorMessage: 'Error fetching services',
+      defaultValue: [], // Return empty list on error
+    );
+  }
+
+  // Delete a service from Firestore
+  Future<void> deleteService(String serviceId, String userId) async {
+    return _handleFirestoreOperation(
+      operation: () async {
+        await _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('services')
+            .doc(serviceId)
+            .delete();
+            
+        return;
+      },
+      errorMessage: 'Error deleting service',
+    );
+  }
+
   // Add this helper to convert EmploymentStatus to Turkish string for export
   String employmentStatusToTurkish(EmploymentStatus status) {
     switch (status) {
@@ -761,7 +830,10 @@ class FirestoreService {
           'id': contract.id,
           'employeeId': contract.employeeId,
           'employeeName': contract.employeeName,
+          'vehicleId': contract.vehicleId,
+          'vehiclePlate': contract.vehiclePlate, // <-- PLATE eklendi
           'type': contract.reference,
+          'reference': contract.reference,
           'startDate': contract.startDate,
           'endDate': contract.endDate,
           'status': contract.status.toString(),
@@ -787,7 +859,10 @@ class FirestoreService {
         await docRef.update({
           'employeeId': contract.employeeId,
           'employeeName': contract.employeeName,
+          'vehicleId': contract.vehicleId,
+          'vehiclePlate': contract.vehiclePlate, // <-- PLATE eklendi
           'type': contract.reference,
+          'reference': contract.reference,
           'startDate': contract.startDate,
           'endDate': contract.endDate,
           'status': contract.status.toString(),
@@ -833,6 +908,7 @@ class FirestoreService {
           employeeId: data['employeeId'] ?? '',
           employeeName: data['employeeName'] ?? '',
           vehicleId: data['vehicleId'] ?? '',
+          vehiclePlate: data['vehiclePlate'], // <-- PLATE eklendi
           reference: data['type'] ?? '',
           startDate: (data['startDate'] is Timestamp)
               ? (data['startDate'] as Timestamp).toDate()
@@ -1003,6 +1079,109 @@ class FirestoreService {
         return;
       },
       errorMessage: 'Error deleting employee',
+    );
+  }
+
+  // Add vehicle to Firestore
+  Future<String> addVehicle(Vehicle vehicle, String userId) async {
+    return _handleFirestoreOperation<String>(
+      operation: () async {
+        // Generate a unique ID if not provided
+        final String vehicleId = vehicle.id.startsWith('new_') 
+            ? _firestore.collection('users').doc(userId).collection('vehicles').doc().id 
+            : vehicle.id;
+
+        // Create a copy of the vehicle with the new ID
+        final Vehicle vehicleWithId = Vehicle(
+          id: vehicleId,
+          model: vehicle.model,
+          plate: vehicle.plate,
+          year: vehicle.year,
+        );
+        
+        // Save to Firestore
+        await _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('vehicles')
+            .doc(vehicleId)
+            .set({
+              'id': vehicleId,
+              'model': vehicleWithId.model,
+              'plate': vehicleWithId.plate,
+              'year': vehicleWithId.year,
+              'createdAt': FieldValue.serverTimestamp(),
+              'updatedAt': FieldValue.serverTimestamp(),
+            });
+        
+        return vehicleId;
+      },
+      errorMessage: 'Error adding vehicle',
+    );
+  }
+
+  // Update vehicle in Firestore
+  Future<void> updateVehicle(Vehicle vehicle, String userId) async {
+    return _handleFirestoreOperation(
+      operation: () async {
+        await _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('vehicles')
+            .doc(vehicle.id)
+            .update({
+              'model': vehicle.model,
+              'plate': vehicle.plate,
+              'year': vehicle.year,
+              'updatedAt': FieldValue.serverTimestamp(),
+            });
+        
+        return;
+      },
+      errorMessage: 'Error updating vehicle',
+    );
+  }
+
+  // Delete vehicle from Firestore
+  Future<void> deleteVehicle(String vehicleId, String userId) async {
+    return _handleFirestoreOperation(
+      operation: () async {
+        await _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('vehicles')
+            .doc(vehicleId)
+            .delete();
+        
+        return;
+      },
+      errorMessage: 'Error deleting vehicle',
+    );
+  }
+
+  // Fetch vehicles from Firestore
+  Future<List<Vehicle>> fetchVehiclesWithDetails({required String userId}) async {
+    return _handleFirestoreOperation<List<Vehicle>>(
+      operation: () async {
+        final querySnapshot = await _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('vehicles')
+            .orderBy('model')
+            .get();
+        
+        return querySnapshot.docs.map((doc) {
+          final data = doc.data();
+          return Vehicle(
+            id: doc.id,
+            model: data['model'] ?? '',
+            plate: data['plate'] ?? '',
+            year: data['year'] != null ? int.tryParse(data['year'].toString()) : null,
+          );
+        }).toList();
+      },
+      errorMessage: 'Error fetching vehicles',
+      defaultValue: [], // Return empty list on error
     );
   }
 }

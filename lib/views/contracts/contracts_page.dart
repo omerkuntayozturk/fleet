@@ -1,8 +1,10 @@
 import 'package:fleet/views/contracts/add_contracts.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../widgets/top_bar.dart';
 import '../../widgets/side_menu.dart';
 import '../../services/contract_service.dart';
+import '../../services/firestore_service.dart';
 import '../../models/contract.dart';
 import 'import_contracts.dart'; // Add this import
 
@@ -14,6 +16,8 @@ class ContractsPage extends StatefulWidget {
 
 class _ContractsPageState extends State<ContractsPage> with SingleTickerProviderStateMixin {
   final svc = ContractService();
+  final FirestoreService _firestoreService = FirestoreService();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   late AnimationController _controller;
   final TextEditingController _searchController = TextEditingController();
   List<bool> _isStatsHovering = []; // List for stats cards hovering state
@@ -31,6 +35,7 @@ class _ContractsPageState extends State<ContractsPage> with SingleTickerProvider
   List<Contract> _allContracts = [];
   List<Contract> _displayedContracts = [];
   List<Contract> _filteredContracts = [];
+  Map<String, String> _vehiclePlates = {}; // vehicleId -> plate
 
   @override
   void initState() {
@@ -48,8 +53,8 @@ class _ContractsPageState extends State<ContractsPage> with SingleTickerProvider
       _filterContracts(_searchController.text);
     });
     
-    // Load contracts data
-    _loadContractsData();
+    // Load all data (contracts and vehicles)
+    _loadAllData();
   }
   
   // Set screen size breakpoints based on device
@@ -59,27 +64,37 @@ class _ContractsPageState extends State<ContractsPage> with SingleTickerProvider
     _isMediumScreen = screenWidth >= 650 && screenWidth < 1024;
   }
   
-  void _loadContractsData() {
+  // Firestore'dan sözleşmeleri çek
+  Future<List<Contract>> _fetchContractsFromFirestore() async {
+    final user = _auth.currentUser;
+    if (user == null) return [];
+    try {
+      return await _firestoreService.fetchContracts(userId: user.uid);
+    } catch (e) {
+      print('Firestore sözleşme çekme hatası: $e');
+      return [];
+    }
+  }
+
+  void _loadContractsData() async {
     setState(() {
       _isLoading = true;
     });
-    
-    // Simulate loading delay
-    Future.delayed(const Duration(milliseconds: 800), () {
-      final items = svc.getAll();
-      
-      setState(() {
-        _allContracts = items;
-        _totalContracts = items.length;
-        _totalPages = (_totalContracts / _pageSize).ceil();
-        if (_totalPages == 0) {
-          _totalPages = 1; // At least one page even if empty
-        }
-        _isLoading = false;
-      });
-      
-      _updateDisplayedContracts();
+
+    // Firestore'dan verileri çek
+    final items = await _fetchContractsFromFirestore();
+
+    setState(() {
+      _allContracts = items;
+      _totalContracts = items.length;
+      _totalPages = (_totalContracts / _pageSize).ceil();
+      if (_totalPages == 0) {
+        _totalPages = 1; // At least one page even if empty
+      }
+      _isLoading = false;
     });
+
+    _updateDisplayedContracts();
   }
   
   // Update displayed contracts based on current page
@@ -155,6 +170,37 @@ class _ContractsPageState extends State<ContractsPage> with SingleTickerProvider
   void _exportContracts(BuildContext context) {
     // Use the ContractImportExport class for exporting
     ContractImportExport.exportContracts(context, _allContracts.cast<Map<String, dynamic>>());
+  }
+
+  // Tüm verileri yükle (araçlar ve sözleşmeler)
+  void _loadAllData() async {
+    setState(() {
+      _isLoading = true;
+    });
+    await _loadVehicles();
+    _loadContractsData();
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  // Araçları Firestore'dan çek ve Map'e ata
+  Future<void> _loadVehicles() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+    try {
+      final vehicles = await _firestoreService.fetchVehiclesWithDetails(userId: user.uid);
+      setState(() {
+        _vehiclePlates = {
+          for (var v in vehicles) v.id: v.plate
+        };
+      });
+    } catch (e) {
+      print('Araçlar çekilemedi: $e');
+      setState(() {
+        _vehiclePlates = {};
+      });
+    }
   }
 
   @override
@@ -316,7 +362,6 @@ class _ContractsPageState extends State<ContractsPage> with SingleTickerProvider
         ],
       );
     } else if (_isMediumScreen) {
-      // Medium screens - remove filter button
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -359,7 +404,6 @@ class _ContractsPageState extends State<ContractsPage> with SingleTickerProvider
                   ),
                 ],
               ),
-              // Add new contract button
               ElevatedButton.icon(
                 icon: const Icon(Icons.add),
                 label: const Text('Yeni Sözleşme'),
@@ -377,7 +421,6 @@ class _ContractsPageState extends State<ContractsPage> with SingleTickerProvider
           ),
           const SizedBox(height: 16),
           
-          // Search and import/export buttons - removed filter button
           Row(
             children: [
               // Search box
@@ -406,16 +449,6 @@ class _ContractsPageState extends State<ContractsPage> with SingleTickerProvider
                 ),
               ),
               const SizedBox(width: 16),
-              // Import button
-              OutlinedButton.icon(
-                icon: const Icon(Icons.upload_file),
-                label: const Text('İçe Aktar'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                ),
-                onPressed: () => _importContracts(context),
-              ),
-              const SizedBox(width: 12),
               // Export button
               OutlinedButton.icon(
                 icon: const Icon(Icons.download),
@@ -430,7 +463,6 @@ class _ContractsPageState extends State<ContractsPage> with SingleTickerProvider
         ],
       );
     } else {
-      // Large screens - remove filter and refresh buttons
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -472,21 +504,6 @@ class _ContractsPageState extends State<ContractsPage> with SingleTickerProvider
           ),
           Row(
             children: [
-              // Import contracts button
-              ElevatedButton.icon(
-                icon: const Icon(Icons.upload_file),
-                label: const Text('İçe Aktar'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.secondary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
-                onPressed: () => _importContracts(context),
-              ),
-              const SizedBox(width: 16),
               // Export contracts button
               ElevatedButton.icon(
                 icon: const Icon(Icons.download),
@@ -1056,10 +1073,11 @@ class _ContractsPageState extends State<ContractsPage> with SingleTickerProvider
                         ),
                         child: Row(
                           children: [
+                            // Referans sütunu kaldırıldı
                             Expanded(
                               flex: 3,
                               child: Text(
-                                'Referans',
+                                'Çalışan Adı',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.grey[700],
@@ -1069,7 +1087,7 @@ class _ContractsPageState extends State<ContractsPage> with SingleTickerProvider
                             Expanded(
                               flex: 2,
                               child: Text(
-                                'Araç ID',
+                                'Araç Plaka',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.grey[700],
@@ -1139,6 +1157,14 @@ class _ContractsPageState extends State<ContractsPage> with SingleTickerProvider
                             statusColor = Colors.green;
                           }
                           
+                          // Araç plakasını bul
+                          String plate = '';
+                          if (contract.vehicleId.isNotEmpty) {
+                            plate = _vehiclePlates[contract.vehicleId] ?? '(Plaka yok)';
+                          } else {
+                            plate = '(Araç yok)';
+                          }
+
                           return Container(
                             margin: const EdgeInsets.only(bottom: 8),
                             decoration: BoxDecoration(
@@ -1152,18 +1178,18 @@ class _ContractsPageState extends State<ContractsPage> with SingleTickerProvider
                                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                                 child: Row(
                                   children: [
+                                    // Referans sütunu kaldırıldı
                                     Expanded(
                                       flex: 3,
                                       child: Text(
-                                        contract.reference.isEmpty ? '(Ref yok)' : contract.reference,
-                                        style: const TextStyle(fontWeight: FontWeight.bold),
+                                        contract.employeeName.isEmpty ? '(Çalışan yok)' : contract.employeeName,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                     Expanded(
                                       flex: 2,
                                       child: Text(
-                                        contract.vehicleId.isEmpty ? '(Araç yok)' : contract.vehicleId,
+                                        plate,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
@@ -1210,19 +1236,20 @@ class _ContractsPageState extends State<ContractsPage> with SingleTickerProvider
                                                   value: 'delete',
                                                   child: Text('Sil'),
                                                 ),
-                                                const PopupMenuItem(
-                                                  value: 'renew',
-                                                  child: Text('Yenile'),
-                                                ),
+                                                // const PopupMenuItem(
+                                                //   value: 'renew',
+                                                //   child: Text('Yenile'),
+                                                // ),
                                               ],
                                               onSelected: (value) {
                                                 if (value == 'edit') {
                                                   _editContract(contract);
                                                 } else if (value == 'delete') {
                                                   _deleteContract(contract);
-                                                } else if (value == 'renew') {
-                                                  _renewContract(contract);
                                                 }
+                                                // else if (value == 'renew') {
+                                                //   _renewContract(contract);
+                                                // }
                                               },
                                             )
                                           : Row(
@@ -1244,14 +1271,14 @@ class _ContractsPageState extends State<ContractsPage> with SingleTickerProvider
                                                   padding: const EdgeInsets.all(8),
                                                   onPressed: () => _deleteContract(contract),
                                                 ),
-                                                // Renew button
-                                                IconButton(
-                                                  icon: Icon(Icons.autorenew, color: Colors.green[600], size: 20),
-                                                  tooltip: 'Yenile',
-                                                  constraints: const BoxConstraints(),
-                                                  padding: const EdgeInsets.all(8),
-                                                  onPressed: () => _renewContract(contract),
-                                                ),
+                                                // Yenile butonu kaldırıldı
+                                                // IconButton(
+                                                //   icon: Icon(Icons.autorenew, color: Colors.green[600], size: 20),
+                                                //   tooltip: 'Yenile',
+                                                //   constraints: const BoxConstraints(),
+                                                //   padding: const EdgeInsets.all(8),
+                                                //   onPressed: () => _renewContract(contract),
+                                                // ),
                                               ],
                                             ),
                                     ),
@@ -1628,29 +1655,52 @@ class _ContractsPageState extends State<ContractsPage> with SingleTickerProvider
   }
 
   void _editContract(Contract contract) {
-    // Navigation to edit page would go here
-    // For now, just print the contract reference
-    print('Editing contract: ${contract.reference}');
+    // Format dates in DD.MM.YYYY format for the form
+    String formattedStartDate = '${contract.startDate.day.toString().padLeft(2, '0')}.${contract.startDate.month.toString().padLeft(2, '0')}.${contract.startDate.year}';
+    String formattedEndDate = '${contract.endDate.day.toString().padLeft(2, '0')}.${contract.endDate.month.toString().padLeft(2, '0')}.${contract.endDate.year}';
+    
+    // ContractManagement.editContract fonksiyonunu çağır
+    ContractManagement.editContract(
+      context,
+      {
+        'id': contract.id,
+        'employeeId': contract.employeeId,
+        'employeeName': contract.employeeName,
+        'vehicleId': contract.vehicleId,
+        'vehiclePlate': contract.vehiclePlate,
+        // In the Contract model, 'reference' contains the contract type
+        // Make sure we pass this value as both 'type' and 'reference'
+        'type': contract.reference,
+        'reference': contract.reference,
+        'startDate': formattedStartDate,
+        'endDate': formattedEndDate,
+        'createdAt': contract.createdAt,
+        'status': contract.status.toString(),
+      },
+      _loadContractsData,
+    );
   }
 
-  void _deleteContract(Contract contract) {
+  void _deleteContract(Contract contract) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Sözleşmeyi Sil'),
-        content: Text('${contract.reference.isEmpty ? "Bu sözleşmeyi" : contract.reference} silmek istediğinize emin misiniz?'),
+        content: Text('${contract.employeeName.isEmpty ? "Bu sözleşmeyi" : contract.employeeName} silmek istediğinize emin misiniz?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('İptal'),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
+              Navigator.pop(context); // Close dialog
               try {
-                // Delete contract logic
-                svc.remove(contract.id);
+                await _firestoreService.deleteContract(contract.id, user.uid);
                 _loadContractsData(); // Reload data after deletion
-                Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Sözleşme silindi'),
@@ -1658,7 +1708,6 @@ class _ContractsPageState extends State<ContractsPage> with SingleTickerProvider
                   ),
                 );
               } catch (e) {
-                Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('Hata: Sözleşme silinemedi - ${e.toString()}'),
@@ -1667,7 +1716,10 @@ class _ContractsPageState extends State<ContractsPage> with SingleTickerProvider
                 );
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white, // <-- Text color white
+            ),
             child: const Text('Sil'),
           ),
         ],

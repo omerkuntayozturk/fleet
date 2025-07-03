@@ -26,7 +26,7 @@ class AppRoutes {
   static const String service = '/service';
   static const String membershipDetails = '/membership_details'; // Add this constant
   static const String list = '/list'; // Add this constant
-  static const String detail = '/detail'; // Add this constant
+  static const String vehicles = '/vehicles'; // Add this constant
 
 
 
@@ -43,7 +43,7 @@ class AppRoutes {
     service: (_) => const ServicesPage(),
     membershipDetails: (_) => const MembershipDetailsScreen(), // Add this route
     list: (_) => const EmployeeListPage(), // Add this route
-    detail: (_) => const VehiclesPage(), // Add this route
+    vehicles: (_) => const VehiclesPage(), // Add this route
 
 
 

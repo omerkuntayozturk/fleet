@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../widgets/top_bar.dart';
 import '../../widgets/side_menu.dart';
 import '../../models/vehicle.dart';
@@ -11,7 +13,7 @@ class VehiclesPage extends StatefulWidget {
 }
 
 class _VehiclesPageState extends State<VehiclesPage> with SingleTickerProviderStateMixin {
-  // Dummy data list for demonstration
+  // Vehicle data lists
   List<Vehicle> _allVehicles = [];
   List<Vehicle> _displayedVehicles = [];
   List<Vehicle> _filteredVehicles = [];
@@ -57,23 +59,64 @@ class _VehiclesPageState extends State<VehiclesPage> with SingleTickerProviderSt
     setState(() {
       _isLoading = true;
     });
-    Future.delayed(const Duration(milliseconds: 800), () {
-      // Dummy data
-      final items = List.generate(23, (i) => Vehicle(
-        id: 'V${i+1}',
-        model: 'Model ${i+1}',
-        plate: '34ABC${i+1}',
-        year: 2015 + (i % 8),
-      ));
+
+    // Get current user
+    final User? currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
       setState(() {
-        _allVehicles = items;
-        _totalRecords = items.length;
-        _totalPages = (_totalRecords / _pageSize).ceil();
-        if (_totalPages == 0) _totalPages = 1;
         _isLoading = false;
+        _allVehicles = [];
+        _totalRecords = 0;
+        _totalPages = 1;
       });
       _updateDisplayedVehicles();
-    });
+      return;
+    }
+
+    // Fetch data from Firestore
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(currentUser.uid)
+        .collection('vehicles')
+        .get()
+        .then((querySnapshot) {
+          if (!mounted) return; // Check if still mounted
+          
+          final List<Vehicle> fetchedVehicles = [];
+          
+          for (var doc in querySnapshot.docs) {
+            final data = doc.data();
+            
+            fetchedVehicles.add(Vehicle(
+              id: doc.id,
+              model: data['model'] ?? '',
+              plate: data['plate'] ?? '',
+              year: data['year'] != null ? int.tryParse(data['year'].toString()) : null,
+            ));
+          }
+          
+          setState(() {
+            _allVehicles = fetchedVehicles;
+            _totalRecords = fetchedVehicles.length;
+            _totalPages = (_totalRecords / _pageSize).ceil();
+            if (_totalPages == 0) _totalPages = 1;
+            _isLoading = false;
+          });
+          
+          _updateDisplayedVehicles();
+        })
+        .catchError((error) {
+          if (!mounted) return; // Check if still mounted
+          
+          print('Error loading vehicle data: $error');
+          setState(() {
+            _isLoading = false;
+            _allVehicles = [];
+            _totalRecords = 0;
+            _totalPages = 1;
+          });
+          _updateDisplayedVehicles();
+        });
   }
 
   void _updateDisplayedVehicles() {
@@ -123,6 +166,14 @@ class _VehiclesPageState extends State<VehiclesPage> with SingleTickerProviderSt
     if (_currentPage < _totalPages) {
       _changePage(_currentPage + 1);
     }
+  }
+
+  // Add export method
+  void _exportVehicles(BuildContext context) {
+    // TODO: Implement export logic
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Dışa Aktar özelliği henüz eklenmedi.'), backgroundColor: Colors.blue),
+    );
   }
 
   @override
@@ -266,6 +317,15 @@ class _VehiclesPageState extends State<VehiclesPage> with SingleTickerProviderSt
               ),
             ),
           ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            icon: const Icon(Icons.download),
+            label: const Text('Dışa Aktar'),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+            onPressed: () => _exportVehicles(context),
+          ),
         ],
       );
     } else if (_isMediumScreen) {
@@ -311,18 +371,31 @@ class _VehiclesPageState extends State<VehiclesPage> with SingleTickerProviderSt
                   ),
                 ],
               ),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.add),
-                label: const Text('Yeni Araç'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+              Row(
+                children: [
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.download),
+                    label: const Text('Dışa Aktar'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                    onPressed: () => _exportVehicles(context),
                   ),
-                ),
-                onPressed: _addNewVehicle,
+                  const SizedBox(width: 16),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.add),
+                    label: const Text('Yeni Araç'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    onPressed: _addNewVehicle,
+                  ),
+                ],
               ),
             ],
           ),
@@ -400,6 +473,20 @@ class _VehiclesPageState extends State<VehiclesPage> with SingleTickerProviderSt
           Row(
             children: [
               ElevatedButton.icon(
+                icon: const Icon(Icons.download),
+                label: const Text('Dışa Aktar'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.tertiary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                onPressed: () => _exportVehicles(context),
+              ),
+              const SizedBox(width: 16),
+              ElevatedButton.icon(
                 icon: const Icon(Icons.add),
                 label: const Text('Yeni Araç'),
                 style: ElevatedButton.styleFrom(
@@ -450,6 +537,7 @@ class _VehiclesPageState extends State<VehiclesPage> with SingleTickerProviderSt
     int oldestYear = 0;
     int newestYear = 0;
     String mostCommonModel = '-';
+    
     if (items.isNotEmpty) {
       oldestYear = items.map((v) => v.year ?? 0).reduce((a, b) => a < b ? a : b);
       newestYear = items.map((v) => v.year ?? 0).reduce((a, b) => a > b ? a : b);
@@ -457,15 +545,18 @@ class _VehiclesPageState extends State<VehiclesPage> with SingleTickerProviderSt
       for (var v in items) {
         modelCounts[v.model] = (modelCounts[v.model] ?? 0) + 1;
       }
-      mostCommonModel = modelCounts.entries.reduce((a, b) => a.value > b.value ? a : b).key;
+      mostCommonModel = modelCounts.entries.isNotEmpty 
+          ? modelCounts.entries.reduce((a, b) => a.value > b.value ? a : b).key
+          : '-';
     }
+    
     final List<Map<String, dynamic>> cards = [
       {
         'icon': Icons.directions_car,
         'title': 'Toplam Araç',
         'value': '$totalVehicles',
         'color': Colors.indigo,
-        'trend': '+2%',
+        'trend': '',
         'isUp': true,
       },
       {
@@ -1140,101 +1231,152 @@ class _VehiclesPageState extends State<VehiclesPage> with SingleTickerProviderSt
   }
 
   void _editVehicle(Vehicle vehicle) {
-    final modelController = TextEditingController(text: vehicle.model);
-    final plateController = TextEditingController(text: vehicle.plate);
-    final yearController = TextEditingController(text: vehicle.year?.toString() ?? '');
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Araç Bilgisi Düzenle'),
-        content: SizedBox(
-          width: 300,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                decoration: const InputDecoration(
-                  labelText: 'Model',
-                  hintText: 'Araç modelini girin',
-                ),
-                controller: modelController,
+    // Keep a reference to the BuildContext before async operations
+    final currentContext = context;
+    
+    VehicleManagement.showEditVehicleDialog(
+      currentContext,
+      vehicle,
+      (updatedVehicle) async {
+        // Store a reference to the messenger outside the async operation
+        final scaffoldMessenger = ScaffoldMessenger.of(currentContext);
+        
+        if (!mounted) return; // Check if still mounted
+        
+        setState(() {
+          _isLoading = true;
+        });
+        
+        try {
+          // Get current user
+          final user = FirebaseAuth.instance.currentUser;
+          if (user == null) {
+            throw Exception('You must be logged in to update vehicles');
+          }
+          
+          // Update in Firestore
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection('vehicles')
+              .doc(updatedVehicle.id)
+              .update({
+                'model': updatedVehicle.model,
+                'plate': updatedVehicle.plate,
+                'year': updatedVehicle.year,
+                'updatedAt': FieldValue.serverTimestamp(),
+              });
+          
+          // Reload data to ensure we have the latest
+          if (mounted) {
+            _loadVehicleData();
+            
+            // Show success message
+            scaffoldMessenger.showSnackBar(
+              const SnackBar(
+                content: Text('Araç bilgisi güncellendi'),
+                backgroundColor: Colors.green,
               ),
-              const SizedBox(height: 16),
-              TextField(
-                decoration: const InputDecoration(
-                  labelText: 'Plaka',
-                  hintText: 'Araç plakasını girin',
-                ),
-                controller: plateController,
+            );
+          }
+        } catch (e) {
+          print('Error updating vehicle: $e');
+          
+          if (mounted) {
+            setState(() {
+              _isLoading = false;
+            });
+            
+            // Show error message
+            scaffoldMessenger.showSnackBar(
+              SnackBar(
+                content: Text('Araç güncellenirken hata oluştu: ${e.toString()}'),
+                backgroundColor: Colors.red,
               ),
-              const SizedBox(height: 16),
-              TextField(
-                decoration: const InputDecoration(
-                  labelText: 'Yıl',
-                  hintText: 'Araç yılı',
-                ),
-                keyboardType: TextInputType.number,
-                controller: yearController,
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('İptal'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              vehicle.model = modelController.text;
-              vehicle.plate = plateController.text;
-              vehicle.year = int.tryParse(yearController.text);
-              setState(() {});
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Araç bilgisi güncellendi'),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            },
-            child: const Text('Kaydet'),
-          ),
-        ],
-      ),
+            );
+          }
+        }
+      },
     );
   }
 
   void _deleteVehicle(Vehicle vehicle) {
+    // Keep a reference to the BuildContext before async operations
+    final currentContext = context;
+    
     showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
+      context: currentContext,
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Araç Sil'),
         content: const Text('Bu aracı silmek istediğinize emin misiniz?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('İptal'),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
+              // Store a reference to the messenger outside the async operation
+              final scaffoldMessenger = ScaffoldMessenger.of(dialogContext);
+              
+              // Close dialog first to prevent context issues
+              Navigator.pop(dialogContext);
+              
+              if (!mounted) return; // Check if still mounted
+              
               setState(() {
-                _allVehicles.removeWhere((v) => v.id == vehicle.id);
-                _totalRecords = _allVehicles.length;
-                _totalPages = (_totalRecords / _pageSize).ceil();
-                if (_totalPages == 0) _totalPages = 1;
-                _currentPage = 1;
+                _isLoading = true;
               });
-              _updateDisplayedVehicles();
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Araç silindi'),
-                  backgroundColor: Colors.red,
-                ),
-              );
+              
+              try {
+                // Get current user
+                final user = FirebaseAuth.instance.currentUser;
+                if (user == null) {
+                  throw Exception('You must be logged in to delete vehicles');
+                }
+                
+                // Delete from Firestore
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(user.uid)
+                    .collection('vehicles')
+                    .doc(vehicle.id)
+                    .delete();
+                
+                // Reload data to ensure we have the latest
+                if (mounted) {
+                  _loadVehicleData();
+                  
+                  // Show success message
+                  scaffoldMessenger.showSnackBar(
+                    const SnackBar(
+                      content: Text('Araç başarıyla silindi'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              } catch (e) {
+                print('Error deleting vehicle: $e');
+                
+                if (mounted) {
+                  setState(() {
+                    _isLoading = false;
+                  });
+                  
+                  // Show error message
+                  scaffoldMessenger.showSnackBar(
+                    SnackBar(
+                      content: Text('Araç silinirken hata oluştu: ${e.toString()}'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
             child: const Text('Sil'),
           ),
         ],
@@ -1243,26 +1385,71 @@ class _VehiclesPageState extends State<VehiclesPage> with SingleTickerProviderSt
   }
 
   void _addNewVehicle() {
-    showDialog(
-      context: context,
-      builder: (context) => AddVehicleDialog(
-        onAdd: (newVehicle) {
-          setState(() {
-            _allVehicles.add(newVehicle);
-            _totalRecords = _allVehicles.length;
-            _totalPages = (_totalRecords / _pageSize).ceil();
-            if (_totalPages == 0) _totalPages = 1;
-            _currentPage = 1;
-          });
-          _updateDisplayedVehicles();
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Yeni araç eklendi'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        },
-      ),
+    // Keep a reference to the BuildContext before async operations
+    final currentContext = context;
+    
+    // Use the VehicleManagement class from add_vehicle.dart
+    VehicleManagement.showAddVehicleDialog(
+      currentContext,
+      (newVehicle) async {
+        // Store a reference to the messenger outside the async operation
+        final scaffoldMessenger = ScaffoldMessenger.of(currentContext);
+        
+        if (!mounted) return; // Check if still mounted
+        
+        setState(() {
+          _isLoading = true;
+        });
+        
+        try {
+          // Get current user
+          final user = FirebaseAuth.instance.currentUser;
+          if (user == null) {
+            throw Exception('You must be logged in to add vehicles');
+          }
+          
+          // Add to Firestore
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection('vehicles')
+              .add({
+                'model': newVehicle.model,
+                'plate': newVehicle.plate,
+                'year': newVehicle.year,
+                'createdAt': FieldValue.serverTimestamp(),
+              });
+          
+          // Reload data to ensure we have the latest
+          if (mounted) {
+            _loadVehicleData();
+            
+            // Show success message
+            scaffoldMessenger.showSnackBar(
+              const SnackBar(
+                content: Text('Yeni araç eklendi'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          }
+        } catch (e) {
+          print('Error adding vehicle: $e');
+          
+          if (mounted) {
+            setState(() {
+              _isLoading = false;
+            });
+            
+            // Show error message
+            scaffoldMessenger.showSnackBar(
+              SnackBar(
+                content: Text('Araç eklenirken hata oluştu: ${e.toString()}'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      },
     );
   }
 }
