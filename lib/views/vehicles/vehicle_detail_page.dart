@@ -5,6 +5,8 @@ import '../../widgets/top_bar.dart';
 import '../../widgets/side_menu.dart';
 import '../../models/vehicle.dart';
 import 'add_vehicle.dart';
+import 'import_vehicle.dart';
+import '../../info_card.dart';
 
 class VehiclesPage extends StatefulWidget {
   const VehiclesPage({super.key});
@@ -170,10 +172,7 @@ class _VehiclesPageState extends State<VehiclesPage> with SingleTickerProviderSt
 
   // Add export method
   void _exportVehicles(BuildContext context) {
-    // TODO: Implement export logic
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Dışa Aktar özelliği henüz eklenmedi.'), backgroundColor: Colors.blue),
-    );
+    VehicleImportExport.exportVehicles(context);
   }
 
   @override
@@ -811,128 +810,260 @@ class _VehiclesPageState extends State<VehiclesPage> with SingleTickerProviderSt
               ),
         ),
         const SizedBox(height: 16),
-        _filteredVehicles.isEmpty
-            ? _buildEmptyState()
-            : Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
+        _isLoading 
+            ? const Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      // Table header
-                      Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                          borderRadius: BorderRadius.circular(8),
+                  padding: EdgeInsets.all(32.0),
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            : _filteredVehicles.isEmpty
+                ? _buildEmptyState()
+                : Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
                         ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: 2,
-                              child: Text(
-                                'Model',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey[700],
-                                ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          // Table Header (only visible on medium and large screens)
+                          if (!_isSmallScreen)
+                            Container(
+                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[100],
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: Text(
-                                'Plaka',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey[700],
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: Text(
-                                'Yıl',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey[700],
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              width: _isSmallScreen ? 50 : 100,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: _filteredVehicles.length,
-                        itemBuilder: (context, index) {
-                          final vehicle = _filteredVehicles[index];
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 8),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey[200]!),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(8),
-                              onTap: () => _editVehicle(vehicle),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      flex: 2,
-                                      child: Text(
-                                        vehicle.model,
-                                        overflow: TextOverflow.ellipsis,
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    flex: 2,
+                                    child: Text(
+                                      'Model',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey[700],
                                       ),
                                     ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: Text(vehicle.plate),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Text(
+                                      'Plaka',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey[700],
+                                      ),
                                     ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: Text(vehicle.year?.toString() ?? '-'),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Text(
+                                      'Yıl',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey[700],
+                                      ),
                                     ),
-                                    SizedBox(
-                                      width: _isSmallScreen ? 50 : 100,
-                                      child: _isSmallScreen
-                                          ? PopupMenuButton(
-                                              icon: Icon(Icons.more_vert, color: Colors.grey[600]),
-                                              itemBuilder: (context) => [
-                                                const PopupMenuItem(
-                                                  value: 'edit',
-                                                  child: Text('Düzenle'),
+                                  ),
+                                  const SizedBox(width: 100),
+                                ],
+                              ),
+                            ),
+                          const SizedBox(height: 8),
+
+                          // Vehicle Rows
+                          if (_isSmallScreen)
+                            // Card layout for small screens
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: _filteredVehicles.length,
+                              itemBuilder: (context, index) {
+                                final vehicle = _filteredVehicles[index];
+                                return Container(
+                                  margin: const EdgeInsets.only(bottom: 12),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.grey[200]!),
+                                    borderRadius: BorderRadius.circular(12),
+                                    color: Colors.grey[50],
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Container(
+                                              padding: const EdgeInsets.all(8),
+                                              decoration: BoxDecoration(
+                                                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: Icon(
+                                                Icons.directions_car,
+                                                color: Theme.of(context).primaryColor,
+                                                size: 18,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Text(
+                                                vehicle.model,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 16,
                                                 ),
-                                                const PopupMenuItem(
-                                                  value: 'delete',
-                                                  child: Text('Sil'),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                              decoration: BoxDecoration(
+                                                color: Colors.blue.withOpacity(0.1),
+                                                borderRadius: BorderRadius.circular(12),
+                                              ),
+                                              child: Text(
+                                                vehicle.plate,
+                                                style: TextStyle(
+                                                  color: Colors.blue[700],
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
+                                            const SizedBox(width: 6),
+                                            Expanded(
+                                              child: Text(
+                                                vehicle.year != null ? "Yıl: ${vehicle.year}" : "Yıl: -",
+                                                style: TextStyle(
+                                                  color: vehicle.year != null
+                                                      ? Colors.grey[800]
+                                                      : Colors.grey[400],
+                                                  fontSize: 13,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          children: [
+                                            IconButton(
+                                              icon: Icon(Icons.edit_outlined, color: Colors.blue[600], size: 20),
+                                              tooltip: 'Düzenle',
+                                              constraints: const BoxConstraints(),
+                                              padding: const EdgeInsets.all(8),
+                                              onPressed: () => _editVehicle(vehicle),
+                                            ),
+                                            IconButton(
+                                              icon: Icon(Icons.delete_outline, color: Colors.red[600], size: 20),
+                                              tooltip: 'Sil',
+                                              constraints: const BoxConstraints(),
+                                              padding: const EdgeInsets.all(8),
+                                              onPressed: () => _deleteVehicle(vehicle),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            )
+                          else
+                            // Table layout for medium and large screens
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: _filteredVehicles.length,
+                              itemBuilder: (context, index) {
+                                final vehicle = _filteredVehicles[index];
+                                return Container(
+                                  margin: const EdgeInsets.only(bottom: 8),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.grey[200]!),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(8),
+                                    onTap: () => _editVehicle(vehicle),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            flex: 2,
+                                            child: Row(
+                                              children: [
+                                                Container(
+                                                  padding: const EdgeInsets.all(8),
+                                                  decoration: BoxDecoration(
+                                                    color: Theme.of(context).primaryColor.withOpacity(0.1),
+                                                    borderRadius: BorderRadius.circular(8),
+                                                  ),
+                                                  child: Icon(
+                                                    Icons.directions_car,
+                                                    color: Theme.of(context).primaryColor,
+                                                    size: 16,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 12),
+                                                Expanded(
+                                                  child: Text(
+                                                    vehicle.model,
+                                                    style: const TextStyle(
+                                                      fontWeight: FontWeight.w500,
+                                                    ),
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
                                                 ),
                                               ],
-                                              onSelected: (value) {
-                                                if (value == 'edit') {
-                                                  _editVehicle(vehicle);
-                                                } else if (value == 'delete') {
-                                                  _deleteVehicle(vehicle);
-                                                }
-                                              },
-                                            )
-                                          : Row(
+                                            ),
+                                          ),
+                                          Expanded(
+                                            flex: 2,
+                                            child: Text(
+                                              vehicle.plate,
+                                              style: TextStyle(
+                                                color: Colors.grey[800],
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                          Expanded(
+                                            flex: 2,
+                                            child: Text(
+                                              vehicle.year?.toString() ?? '-',
+                                              style: TextStyle(
+                                                color: vehicle.year != null
+                                                    ? Colors.grey[800]
+                                                    : Colors.grey[400],
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            width: 100,
+                                            child: Row(
                                               mainAxisAlignment: MainAxisAlignment.end,
                                               children: [
                                                 IconButton(
@@ -951,24 +1082,25 @@ class _VehiclesPageState extends State<VehiclesPage> with SingleTickerProviderSt
                                                 ),
                                               ],
                                             ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ],
-                                ),
-                              ),
+                                  ),
+                                );
+                              },
                             ),
-                          );
-                        },
-                      ),
-                      if (_searchController.text.isEmpty && _totalPages > 1)
-                        _isSmallScreen
-                            ? _buildSimplifiedPagination()
-                            : _isMediumScreen
-                                ? _buildMediumPaginationControls()
-                                : _buildPaginationControls(),
-                    ],
+
+                        if (_searchController.text.isEmpty && _totalPages > 1)
+                          _isSmallScreen 
+                            ? _buildSimplifiedPagination() 
+                            : _isMediumScreen 
+                              ? _buildMediumPaginationControls()
+                              : _buildPaginationControls(),
+                      ],
+                    ),
                   ),
                 ),
-              ),
       ],
     );
   }
@@ -1239,7 +1371,7 @@ class _VehiclesPageState extends State<VehiclesPage> with SingleTickerProviderSt
       vehicle,
       (updatedVehicle) async {
         // Store a reference to the messenger outside the async operation
-        final scaffoldMessenger = ScaffoldMessenger.of(currentContext);
+        ScaffoldMessenger.of(currentContext);
         
         if (!mounted) return; // Check if still mounted
         
@@ -1270,13 +1402,11 @@ class _VehiclesPageState extends State<VehiclesPage> with SingleTickerProviderSt
           // Reload data to ensure we have the latest
           if (mounted) {
             _loadVehicleData();
-            
-            // Show success message
-            scaffoldMessenger.showSnackBar(
-              const SnackBar(
-                content: Text('Araç bilgisi güncellendi'),
-                backgroundColor: Colors.green,
-              ),
+            InfoCard.showInfoCard(
+              currentContext,
+              'Araç bilgisi güncellendi',
+              Colors.green,
+              icon: Icons.check_circle,
             );
           }
         } catch (e) {
@@ -1286,13 +1416,11 @@ class _VehiclesPageState extends State<VehiclesPage> with SingleTickerProviderSt
             setState(() {
               _isLoading = false;
             });
-            
-            // Show error message
-            scaffoldMessenger.showSnackBar(
-              SnackBar(
-                content: Text('Araç güncellenirken hata oluştu: ${e.toString()}'),
-                backgroundColor: Colors.red,
-              ),
+            InfoCard.showInfoCard(
+              currentContext,
+              'Araç güncellenirken hata oluştu: ${e.toString()}',
+              Colors.red,
+              icon: Icons.error,
             );
           }
         }
@@ -1317,7 +1445,7 @@ class _VehiclesPageState extends State<VehiclesPage> with SingleTickerProviderSt
           ElevatedButton(
             onPressed: () async {
               // Store a reference to the messenger outside the async operation
-              final scaffoldMessenger = ScaffoldMessenger.of(dialogContext);
+              ScaffoldMessenger.of(dialogContext);
               
               // Close dialog first to prevent context issues
               Navigator.pop(dialogContext);
@@ -1346,13 +1474,11 @@ class _VehiclesPageState extends State<VehiclesPage> with SingleTickerProviderSt
                 // Reload data to ensure we have the latest
                 if (mounted) {
                   _loadVehicleData();
-                  
-                  // Show success message
-                  scaffoldMessenger.showSnackBar(
-                    const SnackBar(
-                      content: Text('Araç başarıyla silindi'),
-                      backgroundColor: Colors.green,
-                    ),
+                  InfoCard.showInfoCard(
+                    currentContext,
+                    'Araç başarıyla silindi',
+                    Colors.green,
+                    icon: Icons.check_circle,
                   );
                 }
               } catch (e) {
@@ -1362,13 +1488,11 @@ class _VehiclesPageState extends State<VehiclesPage> with SingleTickerProviderSt
                   setState(() {
                     _isLoading = false;
                   });
-                  
-                  // Show error message
-                  scaffoldMessenger.showSnackBar(
-                    SnackBar(
-                      content: Text('Araç silinirken hata oluştu: ${e.toString()}'),
-                      backgroundColor: Colors.red,
-                    ),
+                  InfoCard.showInfoCard(
+                    currentContext,
+                    'Araç silinirken hata oluştu: ${e.toString()}',
+                    Colors.red,
+                    icon: Icons.error,
                   );
                 }
               }
@@ -1385,67 +1509,78 @@ class _VehiclesPageState extends State<VehiclesPage> with SingleTickerProviderSt
   }
 
   void _addNewVehicle() {
-    // Keep a reference to the BuildContext before async operations
     final currentContext = context;
-    
-    // Use the VehicleManagement class from add_vehicle.dart
+
     VehicleManagement.showAddVehicleDialog(
       currentContext,
       (newVehicle) async {
-        // Store a reference to the messenger outside the async operation
-        final scaffoldMessenger = ScaffoldMessenger.of(currentContext);
-        
-        if (!mounted) return; // Check if still mounted
-        
+        // Duplicate plate validation (show warning and do not close dialog)
+        final plateExists = _allVehicles.any(
+          (v) => v.plate.trim().toLowerCase() == newVehicle.plate.trim().toLowerCase()
+        );
+        if (plateExists) {
+          showDialog(
+            context: currentContext,
+            builder: (ctx) => AlertDialog(
+              title: const Text('Uyarı'),
+              content: const Text('Bu plaka ile kayıtlı bir araç zaten mevcut!'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text('Tamam'),
+                ),
+              ],
+            ),
+          );
+          return; // Do not proceed, keep dialog open and do not add
+        }
+
         setState(() {
           _isLoading = true;
         });
-        
+
         try {
           // Get current user
           final user = FirebaseAuth.instance.currentUser;
           if (user == null) {
             throw Exception('You must be logged in to add vehicles');
           }
-          
+
           // Add to Firestore
           await FirebaseFirestore.instance
               .collection('users')
               .doc(user.uid)
               .collection('vehicles')
-              .add({
+              .doc(newVehicle.id)
+              .set({
+                'id': newVehicle.id,
                 'model': newVehicle.model,
                 'plate': newVehicle.plate,
                 'year': newVehicle.year,
                 'createdAt': FieldValue.serverTimestamp(),
+                'updatedAt': FieldValue.serverTimestamp(),
               });
-          
-          // Reload data to ensure we have the latest
+
           if (mounted) {
             _loadVehicleData();
-            
-            // Show success message
-            scaffoldMessenger.showSnackBar(
-              const SnackBar(
-                content: Text('Yeni araç eklendi'),
-                backgroundColor: Colors.green,
-              ),
+            InfoCard.showInfoCard(
+              currentContext,
+              'Yeni araç eklendi',
+              Colors.green,
+              icon: Icons.check_circle,
             );
           }
         } catch (e) {
           print('Error adding vehicle: $e');
-          
           if (mounted) {
             setState(() {
               _isLoading = false;
             });
-            
-            // Show error message
-            scaffoldMessenger.showSnackBar(
-              SnackBar(
-                content: Text('Araç eklenirken hata oluştu: ${e.toString()}'),
-                backgroundColor: Colors.red,
-              ),
+            InfoCard.showInfoCard(
+              currentContext,
+              'Araç eklenirken hata oluştu: ${e.toString()}',
+              Colors.red,
+              icon: Icons.error,
             );
           }
         }
@@ -1453,4 +1588,3 @@ class _VehiclesPageState extends State<VehiclesPage> with SingleTickerProviderSt
     );
   }
 }
-

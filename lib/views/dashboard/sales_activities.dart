@@ -1,9 +1,11 @@
+import 'package:fleet/services/firestore_service.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:intl/intl.dart';
 import '../../services/user_service.dart'; // Import UserService
 import 'package:firebase_auth/firebase_auth.dart'; // Kullanıcı id için
-import '../../services/contract_service.dart'; // Import ContractService
+import '../../services/employee_service.dart'; // EmployeeService import edildi
+import '../../services/firebase_service.dart'; // Firestore erişimi için ekle
 
 // Convert to StatefulWidget
 class SalesActivities extends StatefulWidget {
@@ -39,8 +41,8 @@ class SalesActivities extends StatefulWidget {
 
 class _SalesActivitiesState extends State<SalesActivities> {
   final UserService _userService = UserService();
-  final ContractService _contractService = ContractService(); // Add ContractService instance
-// FirestoreService örneği
+  final EmployeeService _employeeService = EmployeeService(); // EmployeeService örneği
+  final FirestoreService _firestoreService = FirestoreService(); // Firestore servisi eklendi
   String _currencySymbol = '₺'; // Default currency symbol
   String _selectedDateRange = 'this_month'; // Default to "this month"
   DateTimeRange? _customDateRange; // Store custom date range when selected
@@ -50,7 +52,13 @@ class _SalesActivitiesState extends State<SalesActivities> {
   int _endingSoonContracts = 0;
   int _completedContracts = 0;
   bool _statsLoading = true;
-  double _averageContractDuration = 0; // Ortalama sözleşme süresi (gün)
+// Ortalama sözleşme süresi (gün)
+  double _totalOdometer = 0; // Toplam kilometre (tarih filtresine göre)
+  int _totalVehicles = 0; // Toplam araç sayısı
+  int _totalServiceEntries = 0; // Toplam servis kaydı
+  int _totalEmployees = 0; // Toplam çalışan sayısı
+
+  // Araç ve son km bilgisini tutmak için yeni bir liste
 
   // Define date range options with icons and labels
   final List<Map<String, dynamic>> _dateRangeOptions = [
@@ -68,13 +76,14 @@ class _SalesActivitiesState extends State<SalesActivities> {
     super.initState();
     _loadCurrencySymbol();
     _loadContractStats(); // Sözleşme istatistiklerini yükle
+    _loadOdometerStats(); // Odometer bilgisini yükle
+    _loadVehicleStats(); // Araç bilgisini yükle
+    _loadServiceEntryStats(); // Servis kaydı bilgisini yükle
+    _loadEmployeeStats(); // Çalışan bilgisini yükle
   }
 
   // Load user's currency symbol
   Future<void> _loadCurrencySymbol() async {
-    setState(() {
-    });
-
     try {
       final currencyCode = await _userService.getUserCurrency();
       if (currencyCode != null) {
@@ -88,8 +97,8 @@ class _SalesActivitiesState extends State<SalesActivities> {
           _currencySymbol = '₺'; // Default to Turkish Lira
         });
       }
-    } catch (e) {
-      debugPrint('Error loading currency symbol: $e');
+    } catch (e, st) {
+      debugPrint('Error loading currency symbol: $e\n$st');
       setState(() {
         _currencySymbol = '₺'; // Default to Turkish Lira
       });
@@ -203,41 +212,61 @@ class _SalesActivitiesState extends State<SalesActivities> {
   }
   
   // Notify parent component about date change
-  void _notifyParentOfDateChange() {
-    if (widget.onDateRangeChanged != null) {
-      if (_selectedDateRange == 'custom' && _customDateRange == null) {
-        final now = DateTime.now();
-        _customDateRange = DateTimeRange(
-          start: now.subtract(const Duration(days: 7)),
-          end: now,
+  void _notifyParentOfDateChange() async {
+    try {
+      if (widget.onDateRangeChanged != null) {
+        if (_selectedDateRange == 'custom' && _customDateRange == null) {
+          final now = DateTime.now();
+          _customDateRange = DateTimeRange(
+            start: now.subtract(const Duration(days: 7)),
+            end: now,
+          );
+        }
+        widget.onDateRangeChanged!(
+          _selectedDateRange,
+          customDateRange: _selectedDateRange == 'custom' ? _customDateRange : null,
         );
       }
-      widget.onDateRangeChanged!(_selectedDateRange,
-          customDateRange: _selectedDateRange == 'custom' ? _customDateRange : null);
+      setState(() {
+        _statsLoading = true;
+      });
+
+      // Her yükleme fonksiyonunu sırayla çağır, böylece biri hata verirse diğerleri yine de çalışır.
+      await _loadContractStats();
+      await _loadOdometerStats();
+      await _loadVehicleStats();
+      await _loadServiceEntryStats();
+
+      setState(() {
+        _statsLoading = false;
+      });
+    } catch (e, st) {
+      debugPrint('Error in _notifyParentOfDateChange: $e\n$st');
+      setState(() {
+        _statsLoading = false;
+      });
     }
-    _loadContractStats(); // Tarih aralığı değişince istatistikleri güncelle
   }
 
   // Firestore'dan aktif, yakında bitecek ve tamamlanan sözleşme sayılarını ve ortalama süreyi çek
   Future<void> _loadContractStats() async {
-    setState(() {
-      _statsLoading = true;
-    });
-
     try {
+      setState(() {
+        _statsLoading = true;
+      });
+
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         setState(() {
           _activeContracts = 0;
           _endingSoonContracts = 0;
           _completedContracts = 0;
-          _averageContractDuration = 0;
           _statsLoading = false;
         });
         return;
       }
 
-      // Tarih aralığı belirle
+      // Tarih aralığını belirle
       DateTime? startDate;
       DateTime? endDate;
       if (_selectedDateRange == 'custom' && _customDateRange != null) {
@@ -245,7 +274,125 @@ class _SalesActivitiesState extends State<SalesActivities> {
         endDate = _customDateRange!.end;
       } else {
         final now = DateTime.now();
-        // Set appropriate date range based on selection
+        switch (_selectedDateRange) {
+          case 'today':
+            startDate = DateTime(now.year, now.month, now.day);
+            endDate = now;
+            break;
+          case 'yesterday':
+            final yesterday = now.subtract(const Duration(days: 1));
+            startDate = DateTime(yesterday.year, yesterday.month, yesterday.day);
+            endDate = DateTime(yesterday.year, yesterday.month, yesterday.day, 23, 59, 59);
+            break;
+          case 'last_week':
+            startDate = now.subtract(const Duration(days: 7));
+            endDate = now;
+            break;
+          case 'last_month':
+            startDate = DateTime(now.year, now.month - 1, now.day);
+            endDate = now;
+            break;
+          case 'this_month':
+            startDate = DateTime(now.year, now.month, 1);
+            endDate = now;
+            break;
+          case 'all_time':
+            startDate = DateTime(2000, 1, 1); // Çok eski bir tarih
+            endDate = DateTime(2100, 1, 1);  // Uzak gelecek tarihi
+            break;
+          default:
+            startDate = DateTime(now.year, now.month, 1);
+            endDate = now;
+            break;
+        }
+      }
+
+      debugPrint('Loading contracts from $startDate to $endDate');
+      
+      // Firestore'dan sözleşmeleri çek
+      final contracts = await _firestoreService.fetchContracts(userId: user.uid);
+      
+      // İstatistikleri hesapla
+      int active = 0;
+      int endingSoon = 0;
+      int completed = 0;
+      final now = DateTime.now();
+      
+      debugPrint('Toplam ${contracts.length} sözleşme bulundu.');
+      
+      for (final contract in contracts) {
+        // Debug çıktıları ekleyelim
+        debugPrint('Sözleşme ID: ${contract.id}, Durum: ${contract.status}, Bitiş: ${contract.endDate}');
+        
+        // Aktif sözleşme kontrolü - String ve enum kontrolleri birlikte
+        bool isActive = false;
+        
+        // Durumu string olarak kontrol et (Firestore'dan string formatında gelmiş olabilir)
+        final statusStr = contract.status.toString();
+        if (statusStr.contains('ongoing') || statusStr == 'ContractStatus.ongoing') {
+          isActive = true;
+        }
+        
+        // Bitiş tarihi kontrolü
+        if (isActive || contract.endDate.isAfter(now)) {
+          // Sözleşme aktif
+          active++;
+          debugPrint('Aktif sözleşme: ${contract.id}, bitiş: ${contract.endDate}');
+          
+          // Yakında bitecek mi kontrol et (30 gün içinde)
+          final daysUntilEnd = contract.endDate.difference(now).inDays;
+          if (daysUntilEnd <= 30 && daysUntilEnd >= 0) {
+            endingSoon++;
+            debugPrint('Yakında bitecek: ${contract.id}, kalan gün: $daysUntilEnd');
+          }
+        } 
+        // Tamamlanmış sözleşmeler
+        else if (contract.status.toString().contains('expired') || 
+                 contract.status.toString().contains('terminated') ||
+                 contract.endDate.isBefore(now)) {
+          completed++;
+          debugPrint('Tamamlanmış sözleşme: ${contract.id}');
+        }
+      }
+
+      debugPrint('Aktif: $active, Yakında bitecek: $endingSoon, Tamamlanmış: $completed');
+
+      setState(() {
+        _activeContracts = active;
+        _endingSoonContracts = endingSoon;
+        _completedContracts = completed;
+        _statsLoading = false;
+      });
+    } catch (e, st) {
+      debugPrint('Error loading contract stats: $e\n$st');
+      setState(() {
+        _activeContracts = 0;
+        _endingSoonContracts = 0;
+        _completedContracts = 0;
+        _statsLoading = false;
+      });
+    }
+  }
+
+  // Toplam kilometreyi Firestore'dan, seçilen tarih filtresine göre hesapla
+  Future<void> _loadOdometerStats() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        setState(() {
+          _totalOdometer = 0;
+        });
+        return;
+      }
+
+      // Tarih aralığını belirle
+      DateTime? startDate;
+      DateTime? endDate;
+      if (_selectedDateRange == 'custom' && _customDateRange != null) {
+        startDate = _customDateRange!.start;
+        endDate = _customDateRange!.end;
+      } else {
+        final now = DateTime.now();
         switch (_selectedDateRange) {
           case 'today':
             startDate = DateTime(now.year, now.month, now.day);
@@ -272,65 +419,200 @@ class _SalesActivitiesState extends State<SalesActivities> {
         }
       }
 
-      debugPrint('Loading contracts from $startDate to $endDate');
+      // Firestore'dan odometer kayıtlarını çek (createdAt'e göre filtrele)
+      final firestore = FirebaseService().firestore;
+      final odometerQuery = firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('odometers')
+          .where('createdAt', isGreaterThanOrEqualTo: startDate)
+          .where('createdAt', isLessThanOrEqualTo: endDate);
 
-      int active = 0;
-      int endingSoon = 0;
-      int completed = 0;
-      int totalDuration = 0;
-      int contractCountForAvg = 0;
-      final now = DateTime.now();
-      
-      // Get the contracts from the service
-      final contracts = _contractService.getAll();
+      final odometerSnapshot = await odometerQuery.get();
 
-      for (final contract in contracts) {
-        // Calculate total duration for average
-        contractCountForAvg++;
-        
-        // Add contract duration calculation
-        totalDuration += contract.durationInDays.toInt();
-              
-        // Check contract status - this is the key part that needs fixing
-        if (contract.endDate.isAfter(now)) {
-          // Contract is still active (not expired)
-          active++;
-          
-          // Check if ending soon (within 30 days)
-          if (contract.endDate.difference(now).inDays <= 30) {
-            endingSoon++;
-            debugPrint('Contract ending soon: ${contract.id}, ends on ${contract.endDate}');
-          }
-        }
-        
-        // Check completed contracts
-        if ( 
-            contract.endDate.isBefore(now)) {
-          completed++;
+      double total = 0;
+      List<Map<String, dynamic>> vehicleOdoList = [];
+
+      // Her kaydı işle
+      for (final doc in odometerSnapshot.docs) {
+        final data = doc.data();
+        final value = (data['value'] ?? 0).toDouble();
+        total += value;
+
+        // Araç detayları için (model/plate) Firestore'dan çekmek gerekirse burada eklenebilir
+        vehicleOdoList.add({
+          'model': data['vehicleModel'] ?? '',
+          'plate': data['vehiclePlate'] ?? '',
+          'lastOdometer': value,
+        });
+      }
+
+      setState(() {
+        _totalOdometer = total;
+      });
+    } catch (e, st) {
+      debugPrint('Error loading odometer stats: $e\n$st');
+      setState(() {
+        _totalOdometer = 0;
+      });
+    }
+  }
+
+  // Toplam araç sayısını Firestore'dan, seçilen tarih filtresine göre hesapla
+  Future<void> _loadVehicleStats() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        setState(() {
+          _totalVehicles = 0;
+        });
+        return;
+      }
+
+      // Tarih aralığını belirle
+      DateTime? startDate;
+      DateTime? endDate;
+      if (_selectedDateRange == 'custom' && _customDateRange != null) {
+        startDate = _customDateRange!.start;
+        endDate = _customDateRange!.end;
+      } else {
+        final now = DateTime.now();
+        switch (_selectedDateRange) {
+          case 'today':
+            startDate = DateTime(now.year, now.month, now.day);
+            endDate = now;
+            break;
+          case 'yesterday':
+            final yesterday = now.subtract(const Duration(days: 1));
+            startDate = DateTime(yesterday.year, yesterday.month, yesterday.day);
+            endDate = DateTime(yesterday.year, yesterday.month, yesterday.day, 23, 59, 59);
+            break;
+          case 'last_week':
+            startDate = now.subtract(const Duration(days: 7));
+            endDate = now;
+            break;
+          case 'last_month':
+            startDate = DateTime(now.year, now.month - 1, now.day);
+            endDate = now;
+            break;
+          case 'this_month':
+          default:
+            startDate = DateTime(now.year, now.month, 1);
+            endDate = now;
+            break;
         }
       }
 
-      double avgDuration = contractCountForAvg > 0
-          ? totalDuration / contractCountForAvg
-          : 0;
+      // Firestore'dan araç kayıtlarını çek (createdAt'e göre filtrele)
+      final firestore = FirebaseService().firestore;
+      final vehiclesQuery = firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('vehicles')
+          .where('createdAt', isGreaterThanOrEqualTo: startDate)
+          .where('createdAt', isLessThanOrEqualTo: endDate);
 
-      debugPrint('Active contracts: $active, Ending soon: $endingSoon, Completed: $completed');
+      final vehiclesSnapshot = await vehiclesQuery.get();
 
       setState(() {
-        _activeContracts = active;
-        _endingSoonContracts = endingSoon;
-        _completedContracts = completed;
-        _averageContractDuration = avgDuration;
-        _statsLoading = false;
+        _totalVehicles = vehiclesSnapshot.size;
       });
-    } catch (e) {
-      debugPrint('Error loading contract stats: $e');
+    } catch (e, st) {
+      debugPrint('Error loading vehicle stats: $e\n$st');
       setState(() {
-        _activeContracts = 0;
-        _endingSoonContracts = 0;
-        _completedContracts = 0;
-        _averageContractDuration = 0;
-        _statsLoading = false;
+        _totalVehicles = 0;
+      });
+    }
+  }
+
+  // Toplam servis kaydı sayısını Firestore'dan, seçilen tarih filtresine göre hesapla
+  Future<void> _loadServiceEntryStats() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        setState(() {
+          _totalServiceEntries = 0;
+        });
+        return;
+      }
+
+      // Tarih aralığını belirle
+      DateTime? startDate;
+      DateTime? endDate;
+      if (_selectedDateRange == 'custom' && _customDateRange != null) {
+        startDate = _customDateRange!.start;
+        endDate = _customDateRange!.end;
+      } else {
+        final now = DateTime.now();
+        switch (_selectedDateRange) {
+          case 'today':
+            startDate = DateTime(now.year, now.month, now.day);
+            endDate = now;
+            break;
+          case 'yesterday':
+            final yesterday = now.subtract(const Duration(days: 1));
+            startDate = DateTime(yesterday.year, yesterday.month, yesterday.day);
+            endDate = DateTime(yesterday.year, yesterday.month, yesterday.day, 23, 59, 59);
+            break;
+          case 'last_week':
+            startDate = now.subtract(const Duration(days: 7));
+            endDate = now;
+            break;
+          case 'last_month':
+            startDate = DateTime(now.year, now.month - 1, now.day);
+            endDate = now;
+            break;
+          case 'this_month':
+          default:
+            startDate = DateTime(now.year, now.month, 1);
+            endDate = now;
+            break;
+        }
+      }
+
+      // Firestore'dan servis kayıtlarını çek (createdAt'e göre filtrele)
+      final firestore = FirebaseService().firestore;
+      final servicesQuery = firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('services')
+          .where('createdAt', isGreaterThanOrEqualTo: startDate)
+          .where('createdAt', isLessThanOrEqualTo: endDate);
+
+      final servicesSnapshot = await servicesQuery.get();
+
+      // Her servise giden aracın id'sini benzersiz olarak say
+      final vehicleIds = <String>{};
+      for (final doc in servicesSnapshot.docs) {
+        final data = doc.data();
+        final vehicleId = data['vehicleId'];
+        if (vehicleId != null && vehicleId.toString().isNotEmpty) {
+          vehicleIds.add(vehicleId.toString());
+        }
+      }
+
+      setState(() {
+        _totalServiceEntries = vehicleIds.length;
+      });
+    } catch (e, st) {
+      debugPrint('Error loading service entry stats: $e\n$st');
+      setState(() {
+        _totalServiceEntries = 0;
+      });
+    }
+  }
+
+  // Toplam çalışan sayısını hesapla
+  Future<void> _loadEmployeeStats() async {
+    try {
+      final employees = await _employeeService.getAll();
+      setState(() {
+        _totalEmployees = employees.length;
+      });
+    } catch (e, st) {
+      debugPrint('Error loading employee stats: $e\n$st');
+      setState(() {
+        _totalEmployees = 0;
       });
     }
   }
@@ -442,9 +724,9 @@ class _SalesActivitiesState extends State<SalesActivities> {
                       Colors.blue,
                     ),
                     _buildStatCardData(
-                      Icons.timeline,
-                      tr('hr_avg_contract_duration'),
-                      '${_averageContractDuration.toStringAsFixed(1)} ' + tr('hr_days'),
+                      Icons.people, // Çalışanlar için uygun ikon
+                      tr('hr_employees'), // Çeviri anahtarı: çalışanlar
+                      '$_totalEmployees',
                       Colors.amber,
                     ),
                   ],
@@ -458,21 +740,21 @@ class _SalesActivitiesState extends State<SalesActivities> {
                   context,
                   [
                     _buildStatCardData(
-                      Icons.business,
-                      tr('hr_departments'),
-                      '${widget.totalDepartments}',
+                      Icons.speed,
+                      tr('hr_total_odometer'),
+                      _totalOdometer.toStringAsFixed(0) + ' km',
                       Colors.purple,
                     ),
                     _buildStatCardData(
-                      Icons.people,
-                      tr('hr_employees'),
-                      '${widget.totalEmployees}',
+                      Icons.directions_car,
+                      tr('hr_vehicles'),
+                      '$_totalVehicles',
                       Colors.teal,
                     ),
                     _buildStatCardData(
-                      Icons.star,
-                      tr('hr_skills'),
-                      '${widget.totalSkills}',
+                      Icons.build,
+                      tr('hr_service_entries'),
+                      '$_totalServiceEntries',
                       Colors.deepOrange,
                     ),
                     _buildStatCardData(

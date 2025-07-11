@@ -308,16 +308,14 @@ class _AddEmployeeFormState extends State<AddEmployeeForm> {
   void _updateStatusText() {
     switch (_selectedStatus) {
       case EmploymentStatus.active:
-        _statusController.text = 'Aktif';
-        break;
-      case EmploymentStatus.onLeave:
-        _statusController.text = 'İzinli';
+        _statusController.text = tr('employee_status_active');
         break;
       case EmploymentStatus.terminated:
-        _statusController.text = 'İşten Ayrılmış';
+        _statusController.text = tr('employee_status_inactive');
         break;
-      case EmploymentStatus.resigned:
-        _statusController.text = 'İstifa Etmiş';
+      // Remove other cases
+      default:
+        _statusController.text = tr('employee_status_active');
         break;
     }
   }
@@ -346,7 +344,7 @@ class _AddEmployeeFormState extends State<AddEmployeeForm> {
       // Get current user
       final currentUser = _auth.currentUser;
       if (currentUser == null) {
-        throw Exception('Kullanıcı oturum açmamış!');
+        throw Exception(tr('employee_error_not_logged_in'));
       }
 
       // Generate unique ID for the employee or use existing if in edit mode
@@ -390,8 +388,8 @@ class _AddEmployeeFormState extends State<AddEmployeeForm> {
         InfoCard.showInfoCard(
           context,
           _isEditMode 
-              ? '${employeeData.name} başarıyla güncellendi' 
-              : '${employeeData.name} başarıyla eklendi',
+              ? tr('employee_success_update', namedArgs: {'name': employeeData.name})
+              : tr('employee_success_add', namedArgs: {'name': employeeData.name}),
           Colors.green,
           icon: Icons.check_circle,
         );
@@ -400,8 +398,8 @@ class _AddEmployeeFormState extends State<AddEmployeeForm> {
       if (mounted) {
         setState(() {
           _errorMessage = _isEditMode 
-              ? 'Çalışan güncellenirken hata: $e' 
-              : 'Çalışan eklenirken hata: $e';
+              ? tr('employee_error_update', namedArgs: {'error': e.toString()})
+              : tr('employee_error_add', namedArgs: {'error': e.toString()});
         });
       }
     } finally {
@@ -525,6 +523,10 @@ class _AddEmployeeFormState extends State<AddEmployeeForm> {
                     if (value == null || value.trim().isEmpty) {
                       return 'employee_name_required'.tr();
                     }
+                    final nameRegExp = RegExp(r"^[a-zA-ZğüşöçıİĞÜŞÖÇ\s]{2,}$");
+                    if (!nameRegExp.hasMatch(value.trim())) {
+                      return tr('employee_name_invalid_format');
+                    }
                     return null;
                   },
                 ),
@@ -562,12 +564,12 @@ class _AddEmployeeFormState extends State<AddEmployeeForm> {
                   ),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
-                    if (value != null && value.isNotEmpty) {
-                      // Basic email validation
-                      final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                      if (!emailRegex.hasMatch(value)) {
-                        return 'employee_email_invalid'.tr();
-                      }
+                    if (value == null || value.trim().isEmpty) {
+                      return tr('employee_email_required');
+                    }
+                    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                    if (!emailRegex.hasMatch(value.trim())) {
+                      return 'employee_email_invalid'.tr();
                     }
                     return null;
                   },
@@ -605,6 +607,16 @@ class _AddEmployeeFormState extends State<AddEmployeeForm> {
                     ),
                   ),
                   keyboardType: TextInputType.phone,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return tr('employee_phone_required');
+                    }
+                    final phoneRegExp = RegExp(r'^\+?\d{10,}$');
+                    if (!phoneRegExp.hasMatch(value.trim())) {
+                      return tr('employee_phone_invalid_format');
+                    }
+                    return null;
+                  },
                 ),
               ],
             ),
@@ -709,36 +721,34 @@ class EmploymentStatusSelectionDialog extends StatelessWidget {
     required this.onStatusSelected,
   }) : super(key: key);
 
-  // Get status details for UI rendering
+  // Only two statuses: Aktif and Pasif
+  List<EmploymentStatus> get _statusOptions => [
+    EmploymentStatus.active,
+    EmploymentStatus.terminated, // Use as "Pasif"
+  ];
+
   Map<String, dynamic> _getStatusDetails(EmploymentStatus status) {
     switch (status) {
       case EmploymentStatus.active:
         return {
-          'name': 'employee_status_active'.tr(),
-          'description': 'employee_status_active_desc'.tr(),
+          'name': tr('employee_status_active'),
+          'description': tr('employee_status_active_description'),
           'icon': Icons.check_circle,
           'color': Colors.green,
         };
-      case EmploymentStatus.onLeave:
-        return {
-          'name': 'employee_status_onleave'.tr(),
-          'description': 'employee_status_onleave_desc'.tr(),
-          'icon': Icons.event_busy,
-          'color': Colors.orange,
-        };
       case EmploymentStatus.terminated:
         return {
-          'name': 'employee_status_terminated'.tr(),
-          'description': 'employee_status_terminated_desc'.tr(),
+          'name': tr('employee_status_inactive'),
+          'description': tr('employee_status_inactive_description'),
           'icon': Icons.do_not_disturb,
           'color': Colors.red,
         };
-      case EmploymentStatus.resigned:
+      default:
         return {
-          'name': 'employee_status_resigned'.tr(),
-          'description': 'employee_status_resigned_desc'.tr(),
-          'icon': Icons.exit_to_app,
-          'color': Colors.blueGrey,
+          'name': tr('employee_status_active'),
+          'description': '',
+          'icon': Icons.check_circle,
+          'color': Colors.green,
         };
     }
   }
@@ -791,7 +801,7 @@ class EmploymentStatusSelectionDialog extends StatelessWidget {
           Expanded(
             child: ListView(
               shrinkWrap: true,
-              children: EmploymentStatus.values.map((status) {
+              children: _statusOptions.map((status) {
                 final statusInfo = _getStatusDetails(status);
                 final isSelected = status == currentStatus;
                 

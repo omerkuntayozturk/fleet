@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../models/vehicle.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart'; // Add this import for input formatters
+import 'package:easy_localization/easy_localization.dart'; // Add Easy Localization import
 
 // Responsive breakpoints ve yardımcı fonksiyonlar
 class VehicleManagement {
@@ -126,7 +128,7 @@ class VehicleManagement {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                title,
+                title.tr(),
                 style: TextStyle(
                   fontSize: isMobile ? 16 : 20,
                   fontWeight: FontWeight.bold,
@@ -135,7 +137,7 @@ class VehicleManagement {
               ),
               SizedBox(height: isMobile ? 2 : 4),
               Text(
-                subtitle,
+                subtitle.tr(),
                 style: TextStyle(
                   fontSize: isMobile ? 12 : 14,
                   color: Colors.grey[600],
@@ -193,7 +195,7 @@ class VehicleManagement {
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
-                  : Text(submitText),
+                  : Text(submitText.tr()),
             ),
           ),
           const SizedBox(height: 8),
@@ -210,7 +212,7 @@ class VehicleManagement {
                 textStyle: const TextStyle(fontSize: 14),
               ),
               child: Text(
-                cancelText,
+                cancelText.tr(),
                 style: TextStyle(color: Colors.grey[700]),
               ),
             ),
@@ -231,7 +233,7 @@ class VehicleManagement {
               side: BorderSide(color: Colors.grey[400]!),
             ),
             child: Text(
-              cancelText,
+              cancelText.tr(),
               style: TextStyle(color: Colors.grey[700]),
             ),
           ),
@@ -255,7 +257,7 @@ class VehicleManagement {
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
                   )
-                : Text(submitText),
+                : Text(submitText.tr()),
           ),
         ],
       );
@@ -298,7 +300,7 @@ class _AddVehicleDialogState extends State<AddVehicleDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Yeni Araç Ekle',
+              tr('vehicle_add_title'),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).primaryColor,
@@ -312,7 +314,7 @@ class _AddVehicleDialogState extends State<AddVehicleDialog> {
                   TextFormField(
                     controller: _modelController,
                     decoration: InputDecoration(
-                      labelText: 'Model',
+                      labelText: tr('vehicle_field_model'),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -320,7 +322,7 @@ class _AddVehicleDialogState extends State<AddVehicleDialog> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Lütfen araç modelini girin';
+                        return tr('vehicle_error_model_required');
                       }
                       return null;
                     },
@@ -329,7 +331,7 @@ class _AddVehicleDialogState extends State<AddVehicleDialog> {
                   TextFormField(
                     controller: _plateController,
                     decoration: InputDecoration(
-                      labelText: 'Plaka',
+                      labelText: tr('vehicle_field_plate'),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -337,7 +339,7 @@ class _AddVehicleDialogState extends State<AddVehicleDialog> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Lütfen araç plakasını girin';
+                        return tr('vehicle_error_plate_required');
                       }
                       return null;
                     },
@@ -346,7 +348,7 @@ class _AddVehicleDialogState extends State<AddVehicleDialog> {
                   TextFormField(
                     controller: _yearController,
                     decoration: InputDecoration(
-                      labelText: 'Yıl',
+                      labelText: tr('vehicle_field_year'),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -357,10 +359,10 @@ class _AddVehicleDialogState extends State<AddVehicleDialog> {
                       if (value != null && value.isNotEmpty) {
                         final year = int.tryParse(value);
                         if (year == null) {
-                          return 'Geçerli bir yıl giriniz';
+                          return tr('vehicle_error_year_invalid');
                         }
                         if (year < 1900 || year > DateTime.now().year + 1) {
-                          return 'Geçerli bir yıl aralığı giriniz';
+                          return tr('vehicle_error_year_range');
                         }
                       }
                       return null;
@@ -375,7 +377,7 @@ class _AddVehicleDialogState extends State<AddVehicleDialog> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('İptal'),
+                  child: Text(tr('vehicle_button_cancel')),
                 ),
                 const SizedBox(width: 16),
                 ElevatedButton(
@@ -407,7 +409,7 @@ class _AddVehicleDialogState extends State<AddVehicleDialog> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Text('Kaydet'),
+                  child: Text(tr('vehicle_button_save')),
                 ),
               ],
             ),
@@ -435,6 +437,23 @@ class _AddVehicleFormState extends State<AddVehicleForm> {
 
   bool _isSubmitting = false;
   String? _errorMessage;
+  bool _plateExistsError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _plateController.addListener(() {
+      if (_plateExistsError) {
+        setState(() {
+          _plateExistsError = false;
+        });
+        // Sadece plaka alanını yeniden doğrula
+        if (_formKey.currentState != null) {
+          _formKey.currentState!.validate();
+        }
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -442,6 +461,65 @@ class _AddVehicleFormState extends State<AddVehicleForm> {
     _plateController.dispose();
     _yearController.dispose();
     super.dispose();
+  }
+
+  // Plaka normalize fonksiyonu (büyük harf, boşluk sil)
+  String _normalizePlate(String plate) {
+    return plate.replaceAll(RegExp(r'\s+'), '').toUpperCase();
+  }
+
+  // Add input formatters and validation rules
+  String? _validateModel(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return tr('vehicle_error_model_required');
+    }
+    if (value.trim().length < 2) {
+      return tr('vehicle_error_model_min_length');
+    }
+    if (value.trim().length > 50) {
+      return tr('vehicle_error_model_max_length');
+    }
+    return null;
+  }
+
+  String? _validatePlate(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return tr('vehicle_error_plate_required');
+    }
+    final plateRegex = RegExp(r'^[0-9]{1,2}\s*[A-Za-z]{1,3}\s*[0-9]{1,4}$');
+    if (!plateRegex.hasMatch(value.trim())) {
+      return tr('vehicle_error_plate_format');
+    }
+    if (_plateExistsError) {
+      return tr('vehicle_error_plate_exists');
+    }
+    return null;
+  }
+
+  String? _validateYear(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return tr('vehicle_error_year_required');
+    }
+    
+    // Sadece sayı kontrolü
+    if (!RegExp(r'^\d+$').hasMatch(value)) {
+      return tr('vehicle_error_year_numeric');
+    }
+    
+    final year = int.tryParse(value);
+    if (year == null) {
+      return tr('vehicle_error_year_invalid');
+    }
+    
+    final currentYear = DateTime.now().year;
+    if (year < 1900) {
+      return tr('vehicle_error_year_min');
+    }
+    if (year > currentYear + 1) {
+      return tr('vehicle_error_year_max', namedArgs: {'year': (currentYear + 1).toString()});
+    }
+    
+    return null;
   }
 
   Widget _buildFormCard(String title, List<Widget> children) {
@@ -470,43 +548,72 @@ class _AddVehicleFormState extends State<AddVehicleForm> {
           ],
         ),
       ),
-    );
+      );
   }
 
   Future<void> _saveVehicle() async {
     if (_formKey.currentState?.validate() != true) return;
-    
+
     setState(() {
       _isSubmitting = true;
       _errorMessage = null;
     });
-    
-    // Store context reference before async operation
+
     final currentContext = context;
-    
+
     try {
-      // Get current user
       final User? currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) {
-        throw Exception('You must be logged in to add vehicles');
+        throw Exception(tr('vehicle_error_login_required'));
       }
-      
-      // Generate a unique ID for the vehicle
+
+      final vehiclesSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .collection('vehicles')
+          .get();
+
+      final newPlateNorm = _normalizePlate(_plateController.text);
+
+      bool plateExists = vehiclesSnapshot.docs.any((doc) {
+        final data = doc.data();
+        final existingPlate = data['plate'] ?? '';
+        return _normalizePlate(existingPlate) == newPlateNorm;
+      });
+
+      if (plateExists) {
+        setState(() {
+          _isSubmitting = false;
+          _plateExistsError = true;
+        });
+        // Sadece plaka alanını yeniden doğrula
+        if (_formKey.currentState != null) {
+          _formKey.currentState!.validate();
+        }
+        return;
+      } else {
+        // Plaka çakışması yoksa hata sıfırlanır
+        if (_plateExistsError) {
+          setState(() {
+            _plateExistsError = false;
+          });
+        }
+      }
+
+      // 2. Araç ekleme işlemi
       final String vehicleId = FirebaseFirestore.instance.collection('users')
           .doc(currentUser.uid)
           .collection('vehicles')
           .doc()
           .id;
-      
-      // Create vehicle object
+
       final newVehicle = Vehicle(
         id: vehicleId,
         model: _modelController.text.trim(),
         plate: _plateController.text.trim(),
         year: int.tryParse(_yearController.text),
       );
-      
-      // Save to Firestore
+
       await FirebaseFirestore.instance
           .collection('users')
           .doc(currentUser.uid)
@@ -520,18 +627,16 @@ class _AddVehicleFormState extends State<AddVehicleForm> {
             'createdAt': FieldValue.serverTimestamp(),
             'updatedAt': FieldValue.serverTimestamp(),
           });
-      
-      // Call the onAdd callback with the new vehicle
+
       widget.onAdd(newVehicle);
-      
-      // Check if still mounted before popping
+
       if (mounted) {
         Navigator.of(currentContext).pop();
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = 'Araç eklenirken hata: $e';
+          _errorMessage = tr('vehicle_error_save', namedArgs: {'error': e.toString()});
           _isSubmitting = false;
         });
       }
@@ -550,21 +655,21 @@ class _AddVehicleFormState extends State<AddVehicleForm> {
           children: [
             VehicleManagement.buildResponsiveHeader(
               context,
-              'Yeni Araç Ekle',
-              'Filo listenize yeni bir araç ekleyin',
+              'vehicle_add_title',
+              'vehicle_add_subtitle',
               Icons.directions_car,
               Theme.of(context).primaryColor,
               widget.isMobile,
             ),
             SizedBox(height: widget.isMobile ? 20 : 32),
             _buildFormCard(
-              'Araç Bilgileri',
+              tr('vehicle_information_title'),
               [
                 TextFormField(
                   controller: _modelController,
                   decoration: InputDecoration(
-                    labelText: 'Model *',
-                    hintText: 'Araç modelini girin',
+                    labelText: tr('vehicle_field_model_required'),
+                    hintText: tr('vehicle_hint_model'),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(widget.isMobile ? 8 : 12),
                       borderSide: BorderSide(color: Colors.grey[300]!),
@@ -589,14 +694,17 @@ class _AddVehicleFormState extends State<AddVehicleForm> {
                       vertical: widget.isMobile ? 10 : 16,
                     ),
                   ),
-                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Model gerekli' : null,
+                  validator: _validateModel,
+                  textCapitalization: TextCapitalization.words,
+                  maxLength: 50,
+                  buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
                 ),
                 SizedBox(height: widget.isMobile ? 16 : 20),
                 TextFormField(
                   controller: _plateController,
                   decoration: InputDecoration(
-                    labelText: 'Plaka *',
-                    hintText: 'Araç plakasını girin',
+                    labelText: tr('vehicle_field_plate_required'),
+                    hintText: tr('vehicle_hint_plate'),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(widget.isMobile ? 8 : 12),
                       borderSide: BorderSide(color: Colors.grey[300]!),
@@ -621,14 +729,19 @@ class _AddVehicleFormState extends State<AddVehicleForm> {
                       vertical: widget.isMobile ? 10 : 16,
                     ),
                   ),
-                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Plaka gerekli' : null,
+                  validator: _validatePlate,
+                  textCapitalization: TextCapitalization.characters,
+                  inputFormatters: [
+                    // Alfanumerik karakterlere izin ver
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9A-Za-z\s]')),
+                  ],
                 ),
                 SizedBox(height: widget.isMobile ? 16 : 20),
                 TextFormField(
                   controller: _yearController,
                   decoration: InputDecoration(
-                    labelText: 'Yıl *',
-                    hintText: 'Araç yılı',
+                    labelText: tr('vehicle_field_year_required'),
+                    hintText: tr('vehicle_hint_year', namedArgs: {'year': DateTime.now().year.toString()}),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(widget.isMobile ? 8 : 12),
                       borderSide: BorderSide(color: Colors.grey[300]!),
@@ -654,14 +767,13 @@ class _AddVehicleFormState extends State<AddVehicleForm> {
                     ),
                   ),
                   keyboardType: TextInputType.number,
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) return 'Yıl gerekli';
-                    final year = int.tryParse(v);
-                    if (year == null || year < 1900 || year > DateTime.now().year + 1) {
-                      return 'Geçerli bir yıl girin';
-                    }
-                    return null;
-                  },
+                  validator: _validateYear,
+                  inputFormatters: [
+                    // Sadece sayılara izin ver
+                    FilteringTextInputFormatter.digitsOnly,
+                    // Maksimum 4 basamaklı sayı
+                    LengthLimitingTextInputFormatter(4),
+                  ],
                 ),
               ],
             ),
@@ -693,8 +805,8 @@ class _AddVehicleFormState extends State<AddVehicleForm> {
               context,
               () => Navigator.pop(context),
               _saveVehicle,
-              'İptal',
-              'Ekle',
+              'vehicle_button_cancel',
+              'vehicle_button_add',
               Theme.of(context).primaryColor,
               widget.isMobile,
               _isSubmitting,
@@ -731,14 +843,25 @@ class _EditVehicleFormState extends State<EditVehicleForm> {
 
   bool _isSubmitting = false;
   String? _errorMessage;
+  bool _plateExistsError = false; // Plaka çakışma hatası için
 
   @override
   void initState() {
     super.initState();
-    // Initialize controllers with existing vehicle data
     _modelController = TextEditingController(text: widget.vehicle.model);
     _plateController = TextEditingController(text: widget.vehicle.plate);
     _yearController = TextEditingController(text: widget.vehicle.year?.toString() ?? '');
+
+    _plateController.addListener(() {
+      if (_plateExistsError) {
+        setState(() {
+          _plateExistsError = false;
+        });
+        if (_formKey.currentState != null) {
+          _formKey.currentState!.validate();
+        }
+      }
+    });
   }
 
   @override
@@ -747,6 +870,68 @@ class _EditVehicleFormState extends State<EditVehicleForm> {
     _plateController.dispose();
     _yearController.dispose();
     super.dispose();
+  }
+
+  // Plaka normalize fonksiyonu (büyük harf, boşluk sil)
+  String _normalizePlate(String plate) {
+    return plate.replaceAll(RegExp(r'\s+'), '').toUpperCase();
+  }
+
+  // Add the same validation methods
+  String? _validateModel(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return tr('vehicle_error_model_required');
+    }
+    if (value.trim().length < 2) {
+      return tr('vehicle_error_model_min_length');
+    }
+    if (value.trim().length > 50) {
+      return tr('vehicle_error_model_max_length');
+    }
+    return null;
+  }
+
+  String? _validatePlate(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return tr('vehicle_error_plate_required');
+    }
+    
+    // Türk plaka formatı için basit bir regex
+    // İl kodu (1-81) + harf(lar) + rakam(lar)
+    final plateRegex = RegExp(r'^[0-9]{1,2}\s*[A-Za-z]{1,3}\s*[0-9]{1,4}$');
+    if (!plateRegex.hasMatch(value.trim())) {
+      return tr('vehicle_error_plate_format');
+    }
+    if (_plateExistsError) {
+      return tr('vehicle_error_plate_exists');
+    }
+    return null;
+  }
+
+  String? _validateYear(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return tr('vehicle_error_year_required');
+    }
+    
+    // Sadece sayı kontrolü
+    if (!RegExp(r'^\d+$').hasMatch(value)) {
+      return tr('vehicle_error_year_numeric');
+    }
+    
+    final year = int.tryParse(value);
+    if (year == null) {
+      return tr('vehicle_error_year_invalid');
+    }
+    
+    final currentYear = DateTime.now().year;
+    if (year < 1900) {
+      return tr('vehicle_error_year_min');
+    }
+    if (year > currentYear + 1) {
+      return tr('vehicle_error_year_max', namedArgs: {'year': (currentYear + 1).toString()});
+    }
+    
+    return null;
   }
 
   Widget _buildFormCard(String title, List<Widget> children) {
@@ -775,7 +960,7 @@ class _EditVehicleFormState extends State<EditVehicleForm> {
           ],
         ),
       ),
-    );
+      );
   }
 
   Future<void> _updateVehicle() async {
@@ -792,9 +977,43 @@ class _EditVehicleFormState extends State<EditVehicleForm> {
       // Get current user
       final User? currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) {
-        throw Exception('You must be logged in to update vehicles');
+        throw Exception(tr('vehicle_error_login_required'));
       }
       
+      // Plaka çakışma kontrolü (kendi kaydı hariç)
+      final vehiclesSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .collection('vehicles')
+          .get();
+
+      final newPlateNorm = _normalizePlate(_plateController.text);
+      final currentVehicleId = widget.vehicle.id;
+
+      bool plateExists = vehiclesSnapshot.docs.any((doc) {
+        final data = doc.data();
+        final existingPlate = data['plate'] ?? '';
+        final existingId = data['id'] ?? doc.id;
+        return existingId != currentVehicleId && _normalizePlate(existingPlate) == newPlateNorm;
+      });
+
+      if (plateExists) {
+        setState(() {
+          _isSubmitting = false;
+          _plateExistsError = true;
+        });
+        if (_formKey.currentState != null) {
+          _formKey.currentState!.validate();
+        }
+        return;
+      } else {
+        if (_plateExistsError) {
+          setState(() {
+            _plateExistsError = false;
+          });
+        }
+      }
+
       // Create updated vehicle object
       final updatedVehicle = Vehicle(
         id: widget.vehicle.id,
@@ -826,7 +1045,7 @@ class _EditVehicleFormState extends State<EditVehicleForm> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = 'Araç güncellenirken hata: $e';
+          _errorMessage = tr('vehicle_error_update', namedArgs: {'error': e.toString()});
           _isSubmitting = false;
         });
       }
@@ -840,7 +1059,6 @@ class _EditVehicleFormState extends State<EditVehicleForm> {
     final isNewVehicle = widget.vehicle.id.startsWith('new_');
     final headerTitle = isNewVehicle ? 'Yeni Araç Ekle' : 'Araç Düzenle';
     final headerSubtitle = isNewVehicle ? 'Filo listenize yeni bir araç ekleyin' : 'Araç bilgilerini güncelleyin';
-    final actionButtonText = isNewVehicle ? 'Ekle' : 'Güncelle';
 
     return SingleChildScrollView(
       child: Form(
@@ -859,13 +1077,13 @@ class _EditVehicleFormState extends State<EditVehicleForm> {
             ),
             SizedBox(height: widget.isMobile ? 20 : 32),
             _buildFormCard(
-              'Araç Bilgileri',
+              tr('vehicle_information_title'),
               [
                 TextFormField(
                   controller: _modelController,
                   decoration: InputDecoration(
-                    labelText: 'Model *',
-                    hintText: 'Araç modelini girin',
+                    labelText: tr('vehicle_field_model_required'),
+                    hintText: tr('vehicle_hint_model'),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(widget.isMobile ? 8 : 12),
                       borderSide: BorderSide(color: Colors.grey[300]!),
@@ -890,14 +1108,17 @@ class _EditVehicleFormState extends State<EditVehicleForm> {
                       vertical: widget.isMobile ? 10 : 16,
                     ),
                   ),
-                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Model gerekli' : null,
+                  validator: _validateModel,
+                  textCapitalization: TextCapitalization.words,
+                  maxLength: 50,
+                  buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
                 ),
                 SizedBox(height: widget.isMobile ? 16 : 20),
                 TextFormField(
                   controller: _plateController,
                   decoration: InputDecoration(
-                    labelText: 'Plaka *',
-                    hintText: 'Araç plakasını girin',
+                    labelText: tr('vehicle_field_plate_required'),
+                    hintText: tr('vehicle_hint_plate'),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(widget.isMobile ? 8 : 12),
                       borderSide: BorderSide(color: Colors.grey[300]!),
@@ -922,14 +1143,19 @@ class _EditVehicleFormState extends State<EditVehicleForm> {
                       vertical: widget.isMobile ? 10 : 16,
                     ),
                   ),
-                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Plaka gerekli' : null,
+                  validator: _validatePlate,
+                  textCapitalization: TextCapitalization.characters,
+                  inputFormatters: [
+                    // Alfanumerik karakterlere izin ver
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9A-Za-z\s]')),
+                  ],
                 ),
                 SizedBox(height: widget.isMobile ? 16 : 20),
                 TextFormField(
                   controller: _yearController,
                   decoration: InputDecoration(
-                    labelText: 'Yıl *',
-                    hintText: 'Araç yılı',
+                    labelText: tr('vehicle_field_year_required'),
+                    hintText: tr('vehicle_hint_year', namedArgs: {'year': DateTime.now().year.toString()}),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(widget.isMobile ? 8 : 12),
                       borderSide: BorderSide(color: Colors.grey[300]!),
@@ -955,14 +1181,13 @@ class _EditVehicleFormState extends State<EditVehicleForm> {
                     ),
                   ),
                   keyboardType: TextInputType.number,
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) return 'Yıl gerekli';
-                    final year = int.tryParse(v);
-                    if (year == null || year < 1900 || year > DateTime.now().year + 1) {
-                      return 'Geçerli bir yıl girin';
-                    }
-                    return null;
-                  },
+                  validator: _validateYear,
+                  inputFormatters: [
+                    // Sadece sayılara izin ver
+                    FilteringTextInputFormatter.digitsOnly,
+                    // Maksimum 4 basamaklı sayı
+                    LengthLimitingTextInputFormatter(4),
+                  ],
                 ),
               ],
             ),
@@ -994,8 +1219,8 @@ class _EditVehicleFormState extends State<EditVehicleForm> {
               context,
               () => Navigator.pop(context),
               _updateVehicle,
-              'İptal',
-              actionButtonText,
+              'vehicle_button_cancel',
+              isNewVehicle ? 'vehicle_button_add' : 'vehicle_button_update',
               Theme.of(context).primaryColor,
               widget.isMobile,
               _isSubmitting,

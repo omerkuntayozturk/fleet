@@ -8,6 +8,7 @@ import 'ai.dart';
 import 'sales_activities.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'dart:async'; // For subscription timer
+import '../contracts/add_contracts.dart'; // Add this import for add_contracts
 
 class DashboardPage extends StatefulWidget {
   final bool? showSubscriptionSuccess; // Add parameter to show subscription success
@@ -44,7 +45,6 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
   // Data storage - updated for HR models
   String? _currentUserId;
   bool _isLoadingMembership = true;
-  bool _isSearching = false;
   
   // User profile data
   String _profileName = '';
@@ -130,7 +130,6 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
     final query = _searchController.text.trim().toLowerCase();
     
     setState(() {
-      _isSearching = query.isNotEmpty;
       
       if (query.isEmpty) {
         // If search is empty, show all contracts
@@ -315,16 +314,32 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
     setState(() {
       _currentDateRange = dateRange;
       _customDateRange = customDateRange;
-      _isLoadingMembership = true;
+      // _isLoadingMembership = true; // Bunu kaldır - SalesActivities zaten kendi loading state'ini yönetiyor
     });
     
-    // Reload data with the new date filter
-    _loadFilteredData();
+    // Artık _loadFilteredData çağrılmasına gerek yok, SalesActivities kendi verisini yükleyecek
+    // _loadFilteredData();
   }
   
   // Load all filtered data based on current date range
   Future<void> _loadFilteredData() async {
-    // Load only membership data, as other data types have been removed
+    try {
+      setState(() {
+        _isLoadingMembership = true;
+      });
+
+      // Burada gerekli filtrelenmiş verileri yükleyin
+      await _loadMembershipPlan();
+      
+      setState(() {
+        _isLoadingMembership = false;
+      });
+    } catch (e) {
+      debugPrint('Error loading filtered data: $e');
+      setState(() {
+        _isLoadingMembership = false;
+      });
+    }
   }
   
   // Get date range for current filter
@@ -659,40 +674,32 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
           
           const SizedBox(height: 24),
           
-          // Search field and refresh button aligned horizontally on mobile
+          // Row of buttons - Add New Rental button added to the left of refresh button
           Row(
             children: [
-              Expanded(
-                child: FadeTransition(
-                  opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
-                    CurvedAnimation(
-                      parent: _controller,
-                      curve: const Interval(0.5, 1.0, curve: Curves.easeOut),
-                    ),
-                  ),
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: tr('dashboard_search_placeholder'),
-                      prefixIcon: const Icon(Icons.search),
-                      suffixIcon: _isSearching 
-                        ? IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: _clearSearch,
-                          )
-                        : null,
-                      filled: true,
-                      fillColor: Colors.grey[100],
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                    ),
+              // New Rental button
+              ElevatedButton.icon(
+                icon: const Icon(Icons.add_circle_outline, size: 20),
+                label: Text(tr('contracts_add_new_button')),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
                   ),
                 ),
+                onPressed: () {
+                  if (_currentUserId != null) {
+                    ContractManagement.addNewContract(
+                      context, 
+                      () => _loadData() // Refresh data after adding contract
+                    );
+                  }
+                },
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 12), // Space between buttons
+              // Refresh button
               ElevatedButton.icon(
                 icon: const Icon(Icons.refresh, size: 20),
                 label: Text(tr('dashboard_refresh')),
@@ -784,46 +791,34 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
                 ),
               ),
               
-              // Right side: search and refresh button aligned
+              // Right side: Add New Rental button and refresh button
               Flexible(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: _isMediumScreen(context) ? 250 : 300,
-                      ),
-                      child: FadeTransition(
-                        opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
-                          CurvedAnimation(
-                            parent: _controller,
-                            curve: const Interval(0.5, 1.0, curve: Curves.easeOut),
-                          ),
-                        ),
-                        child: TextField(
-                          controller: _searchController,
-                          decoration: InputDecoration(
-                            hintText: tr('dashboard_search_placeholder'),
-                            prefixIcon: const Icon(Icons.search),
-                            suffixIcon: _isSearching 
-                              ? IconButton(
-                                  icon: const Icon(Icons.clear),
-                                  onPressed: _clearSearch,
-                                )
-                              : null,
-                            filled: true,
-                            fillColor: Colors.grey[100],
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide: BorderSide.none,
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                          ),
+                    // New Rental button
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.add_circle_outline, size: 20),
+                      label: Text(tr('contracts_add_new_button')),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).primaryColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
                         ),
                       ),
+                      onPressed: () {
+                        if (_currentUserId != null) {
+                          ContractManagement.addNewContract(
+                            context, 
+                            () => _loadData() // Refresh data after adding contract
+                          );
+                        }
+                      },
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 16), // Space between buttons
+                    // Refresh button
                     ElevatedButton.icon(
                       icon: const Icon(Icons.refresh, size: 20),
                       label: Text(tr('dashboard_refresh')),

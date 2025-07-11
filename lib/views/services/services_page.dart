@@ -7,6 +7,9 @@ import '../../services/vehicle_service.dart';
 import 'add_service.dart';
 import '../../services/firestore_service.dart'; // Add Firestore service import
 import 'package:firebase_auth/firebase_auth.dart'; // Add Firebase Auth import
+import 'import_service.dart'; // <-- Add this import
+import '../../info_card.dart'; // InfoCard importu eklendi
+import 'package:easy_localization/easy_localization.dart'; // Add Easy Localization import
 
 class ServicesPage extends StatefulWidget {
   const ServicesPage({super.key});
@@ -207,15 +210,16 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
 
   // Dummy import/export methods
   void _importServices(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('İçe Aktar özelliği henüz eklenmedi.'), backgroundColor: Colors.blue),
+    InfoCard.showInfoCard(
+      context,
+      tr('service_import_not_available'),
+      Colors.blue,
+      icon: Icons.info_outline,
     );
   }
 
   void _exportServices(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Dışa Aktar özelliği henüz eklenmedi.'), backgroundColor: Colors.blue),
-    );
+    ServiceImportExport.exportServices(context);
   }
 
   @override
@@ -316,7 +320,7 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
               curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
             )),
             child: Text(
-              'Servis Kayıtları',
+              tr('service_page_title'),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).primaryColor,
@@ -332,7 +336,7 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
               ),
             ),
             child: Text(
-              'Araç bakım ve servis işlemlerini takip edin',
+              tr('service_page_subtitle'),
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     color: Colors.grey[600],
                   ),
@@ -349,7 +353,7 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Servis kaydı ara...',
+                hintText: tr('service_search_hint'),
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: Colors.grey[100],
@@ -382,7 +386,7 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
                       curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
                     )),
                     child: Text(
-                      'Servis Kayıtları',
+                      tr('service_page_title'),
                       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).primaryColor,
@@ -398,7 +402,7 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
                       ),
                     ),
                     child: Text(
-                      'Araç bakım ve servis işlemlerini takip edin',
+                      tr('service_page_subtitle'),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             color: Colors.grey[600],
                           ),
@@ -408,7 +412,7 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
               ),
               ElevatedButton.icon(
                 icon: const Icon(Icons.add),
-                label: const Text('Yeni Servis'),
+                label: Text(tr('service_button_new_service')),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).primaryColor,
                   foregroundColor: Colors.white,
@@ -435,7 +439,7 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      hintText: 'Servis kaydı ara...',
+                      hintText: tr('service_search_hint'),
                       prefixIcon: const Icon(Icons.search),
                       filled: true,
                       fillColor: Colors.grey[100],
@@ -451,7 +455,7 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
               const SizedBox(width: 16),
               OutlinedButton.icon(
                 icon: const Icon(Icons.download),
-                label: const Text('Dışa Aktar'),
+                label: Text(tr('service_button_export')),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
@@ -477,7 +481,7 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
                   curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
                 )),
                 child: Text(
-                  'Servis Kayıtları',
+                  tr('service_page_title'),
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).primaryColor,
@@ -493,7 +497,7 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
                   ),
                 ),
                 child: Text(
-                  'Araç bakım ve servis işlemlerini takip edin',
+                  tr('service_page_subtitle'),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: Colors.grey[600],
                       ),
@@ -505,7 +509,7 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
             children: [
               ElevatedButton.icon(
                 icon: const Icon(Icons.download),
-                label: const Text('Dışa Aktar'),
+                label: Text(tr('service_button_export')),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).colorScheme.tertiary,
                   foregroundColor: Colors.white,
@@ -519,7 +523,7 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
               const SizedBox(width: 16),
               ElevatedButton.icon(
                 icon: const Icon(Icons.add),
-                label: const Text('Yeni Servis'),
+                label: Text(tr('service_button_new_service')),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).primaryColor,
                   foregroundColor: Colors.white,
@@ -543,7 +547,7 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      hintText: 'Servis kaydı ara...',
+                      hintText: tr('service_search_hint'),
                       prefixIcon: const Icon(Icons.search),
                       filled: true,
                       fillColor: Colors.grey[100],
@@ -572,7 +576,7 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
 
     for (var service in items) {
       totalCost += service.cost;
-      final type = service.serviceType.isEmpty ? 'Belirsiz' : service.serviceType;
+      final type = service.serviceType.isEmpty ? tr('service_stats_unknown') : service.serviceType;
       serviceTypeCount[type] = (serviceTypeCount[type] ?? 0) + 1;
       if (serviceTypeCount[type]! > maxCount) {
         maxCount = serviceTypeCount[type]!;
@@ -584,7 +588,7 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
     final List<Map<String, dynamic>> cards = [
       {
         'icon': Icons.build,
-        'title': 'Toplam Servis',
+        'title': tr('service_stats_total_services'),
         'value': '${items.length}',
         'color': Colors.purple,
         'trend': '+3%',
@@ -592,15 +596,15 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
       },
       {
         'icon': Icons.attach_money,
-        'title': 'Toplam Maliyet',
-        'value': '${totalCost.toStringAsFixed(2)} TL',
+        'title': tr('service_stats_total_cost'),
+        'value': '${totalCost.toStringAsFixed(2)}',
         'color': Colors.orange,
         'trend': '+5%',
         'isUp': true,
       },
       {
         'icon': Icons.category,
-        'title': 'En Sık Servis',
+        'title': tr('service_stats_most_common'),
         'value': mostCommonService,
         'color': Colors.blue,
         'trend': '+2%',
@@ -608,8 +612,8 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
       },
       {
         'icon': Icons.calculate,
-        'title': 'Ortalama Maliyet',
-        'value': '${averageCost.toStringAsFixed(2)} TL',
+        'title': tr('service_stats_average_cost'),
+        'value': '${averageCost.toStringAsFixed(2)}',
         'color': Colors.green,
         'trend': '-1%',
         'isUp': false,
@@ -628,7 +632,7 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Servis İstatistikleri',
+              tr('service_stats_title'),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -664,7 +668,7 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Servis İstatistikleri',
+              tr('service_stats_title'),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -830,7 +834,7 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Servis Listesi',
+          tr('service_list_title'),
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -854,188 +858,442 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     children: [
-                      // Table header
-                      Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                          borderRadius: BorderRadius.circular(8),
+                      // Table Header (only visible on medium and large screens)
+                      if (!_isSmallScreen)
+                        Container(
+                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  tr('service_column_vehicle'),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  tr('service_column_date'),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  tr('service_column_type'),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                              ),
+                              if (!_isMediumScreen)
+                                Expanded(
+                                  flex: 2,
+                                  child: Text(
+                                    tr('service_column_notes'),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey[700],
+                                    ),
+                                  ),
+                                ),
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  tr('service_column_cost'),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 100),
+                            ],
+                          ),
                         ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: 2,
-                              child: Text(
-                                'Araç',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey[700],
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: Text(
-                                'Tarih',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey[700],
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: Text(
-                                'Servis Türü',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey[700],
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 3,
-                              child: Text(
-                                'Notlar',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey[700],
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: Text(
-                                'Maliyet',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey[700],
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              width: _isSmallScreen ? 50 : 100,
-                            ),
-                          ],
-                        ),
-                      ),
                       const SizedBox(height: 8),
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: _filteredRecords.length,
-                        itemBuilder: (context, index) {
-                          final record = _filteredRecords[index];
-                          final vehicleModel = record.vehicleId.isEmpty
-                              ? '(Araç yok)'
-                              : _vehicleModels[record.vehicleId] ?? record.vehicleId;
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 8),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey[200]!),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(8),
-                              onTap: () => _editServiceEntry(record),
+
+                      // Service Records
+                      if (_isSmallScreen)
+                        // Card layout for small screens
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _filteredRecords.length,
+                          itemBuilder: (context, index) {
+                            final record = _filteredRecords[index];
+                            final vehicleModel = record.vehicleId.isEmpty
+                                ? tr('service_no_vehicle')
+                                : _vehicleModels[record.vehicleId] ?? record.vehicleId;
+                            
+                            Color statusColor;
+                            String statusText;
+                            
+                            switch (record.stage) {
+                              case ServiceStage.newService:
+                                statusText = tr('service_status_new');
+                                statusColor = Colors.blue;
+                                break;
+                              case ServiceStage.inProgress:
+                                statusText = tr('service_status_in_progress');
+                                statusColor = Colors.orange;
+                                break;
+                              case ServiceStage.completed:
+                                statusText = tr('service_status_completed');
+                                statusColor = Colors.green;
+                                break;
+                              default:
+                                statusText = tr('service_status_new');
+                                statusColor = Colors.blue;
+                            }
+                            
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 12),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey[200]!),
+                                borderRadius: BorderRadius.circular(12),
+                                color: Colors.grey[50],
+                              ),
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                                child: Row(
+                                padding: const EdgeInsets.all(12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Expanded(
-                                      flex: 2,
-                                      child: Text(
-                                        vehicleModel,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: Text(_formatDate(record.date)),
-                                    ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: Text(record.serviceType.isEmpty ? '(Tür yok)' : record.serviceType),
-                                    ),
-                                    Expanded(
-                                      flex: 3,
-                                      child: Text(
-                                        record.notes.isEmpty ? '-' : record.notes,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          color: Colors.grey[700],
+                                    Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(8),
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(context).primaryColor.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Icon(
+                                            Icons.build,
+                                            color: Theme.of(context).primaryColor,
+                                            size: 18,
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: Text('${record.cost.toStringAsFixed(2)} TL'),
-                                    ),
-                                    SizedBox(
-                                      width: _isSmallScreen ? 50 : 100,
-                                      child: _isSmallScreen
-                                          ? PopupMenuButton(
-                                              icon: Icon(Icons.more_vert, color: Colors.grey[600]),
-                                              itemBuilder: (context) => [
-                                                const PopupMenuItem(
-                                                  value: 'edit',
-                                                  child: Text('Düzenle'),
-                                                ),
-                                                const PopupMenuItem(
-                                                  value: 'delete',
-                                                  child: Text('Sil'),
-                                                ),
-                                              ],
-                                              onSelected: (value) {
-                                                if (value == 'edit') {
-                                                  _editServiceEntry(record);
-                                                } else if (value == 'delete') {
-                                                  _deleteServiceEntry(record);
-                                                }
-                                              },
-                                            )
-                                          : Row(
-                                              mainAxisAlignment: MainAxisAlignment.end,
-                                              children: [
-                                                IconButton(
-                                                  icon: Icon(Icons.edit_outlined, color: Colors.blue[600], size: 20),
-                                                  tooltip: 'Düzenle',
-                                                  constraints: const BoxConstraints(),
-                                                  padding: const EdgeInsets.all(8),
-                                                  onPressed: () => _editServiceEntry(record),
-                                                ),
-                                                IconButton(
-                                                  icon: Icon(Icons.delete_outline, color: Colors.red[600], size: 20),
-                                                  tooltip: 'Sil',
-                                                  constraints: const BoxConstraints(),
-                                                  padding: const EdgeInsets.all(8),
-                                                  onPressed: () => _deleteServiceEntry(record),
-                                                ),
-                                              ],
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            vehicleModel,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 16,
                                             ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: statusColor.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Text(
+                                            statusText,
+                                            style: TextStyle(
+                                              color: statusColor,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
+                                        const SizedBox(width: 6),
+                                        Expanded(
+                                          child: Text(
+                                            _formatDate(record.date),
+                                            style: TextStyle(
+                                              color: Colors.grey[800],
+                                              fontSize: 13,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        Icon(Icons.category, size: 16, color: Colors.grey[600]),
+                                        const SizedBox(width: 6),
+                                        Expanded(
+                                          child: Text(
+                                            record.serviceType.isEmpty ? tr('service_no_type') : record.serviceType,
+                                            style: TextStyle(
+                                              color: Colors.grey[800],
+                                              fontSize: 13,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        Icon(Icons.attach_money, size: 16, color: Colors.grey[600]),
+                                        const SizedBox(width: 6),
+                                        Expanded(
+                                          child: Text(
+                                            '${record.cost.toStringAsFixed(2)} ${tr('service_currency_unit')}',
+                                            style: TextStyle(
+                                              color: Colors.grey[800],
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 13,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    if (record.notes.isNotEmpty) ...[
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          Icon(Icons.notes, size: 16, color: Colors.grey[600]),
+                                          const SizedBox(width: 6),
+                                          Expanded(
+                                            child: Text(
+                                              record.notes,
+                                              style: TextStyle(
+                                                color: Colors.grey[700],
+                                                fontSize: 13,
+                                                fontStyle: FontStyle.italic,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 2,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        IconButton(
+                                          icon: Icon(Icons.edit_outlined, color: Colors.blue[600], size: 20),
+                                          tooltip: tr('service_action_edit'),
+                                          constraints: const BoxConstraints(),
+                                          padding: const EdgeInsets.all(8),
+                                          onPressed: () => _editServiceEntry(record),
+                                        ),
+                                        IconButton(
+                                          icon: Icon(Icons.delete_outline, color: Colors.red[600], size: 20),
+                                          tooltip: tr('service_action_delete'),
+                                          constraints: const BoxConstraints(),
+                                          padding: const EdgeInsets.all(8),
+                                          onPressed: () => _deleteServiceEntry(record),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
-                      if (_searchController.text.isEmpty && _totalPages > 1)
-                        _isSmallScreen
-                            ? _buildSimplifiedPagination()
-                            : _isMediumScreen
-                                ? _buildMediumPaginationControls()
-                                : _buildPaginationControls(),
-                    ],
-                  ),
+                            );
+                          },
+                        )
+                      else
+                        // Table layout for medium and large screens
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _filteredRecords.length,
+                          itemBuilder: (context, index) {
+                            final record = _filteredRecords[index];
+                            final vehicleModel = record.vehicleId.isEmpty
+                                ? tr('service_no_vehicle')
+                                : _vehicleModels[record.vehicleId] ?? record.vehicleId;
+                            
+                            Color statusColor;
+                            String statusText;
+                            
+                            switch (record.stage) {
+                              case ServiceStage.newService:
+                                statusText = tr('service_status_new');
+                                statusColor = Colors.blue;
+                                break;
+                              case ServiceStage.inProgress:
+                                statusText = tr('service_status_in_progress');
+                                statusColor = Colors.orange;
+                                break;
+                              case ServiceStage.completed:
+                                statusText = tr('service_status_completed');
+                                statusColor = Colors.green;
+                                break;
+                              default:
+                                statusText = tr('service_status_new');
+                                statusColor = Colors.blue;
+                            }
+                            
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 8),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey[200]!),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(8),
+                                onTap: () => _editServiceEntry(record),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        flex: 2,
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              padding: const EdgeInsets.all(8),
+                                              decoration: BoxDecoration(
+                                                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: Icon(
+                                                Icons.build,
+                                                color: Theme.of(context).primaryColor,
+                                                size: 16,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Text(
+                                                vehicleModel,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Expanded(
+                                        flex: 2,
+                                        child: Text(
+                                          _formatDate(record.date),
+                                          style: TextStyle(
+                                            color: Colors.grey[800],
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      Expanded(
+                                        flex: 2,
+                                        child: Text(
+                                          record.serviceType.isEmpty ? tr('service_no_type') : record.serviceType,
+                                          style: TextStyle(
+                                            color: Colors.grey[800],
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      if (!_isMediumScreen)
+                                        Expanded(
+                                          flex: 2,
+                                          child: Text(
+                                            record.notes.isEmpty ? '-' : record.notes,
+                                            style: TextStyle(
+                                              color: Colors.grey[700],
+                                              fontSize: 13,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      Expanded(
+                                        flex: 2,
+                                        child: Row(
+                                          children: [
+                                            Text(
+                                              '${record.cost.toStringAsFixed(2)} ${tr('service_currency_unit')}',
+                                              style: TextStyle(
+                                                color: Colors.grey[800],
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                              decoration: BoxDecoration(
+                                                color: statusColor.withOpacity(0.1),
+                                                borderRadius: BorderRadius.circular(12),
+                                              ),
+                                              child: Text(
+                                                statusText,
+                                                style: TextStyle(
+                                                  color: statusColor,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 11,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 100,
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          children: [
+                                            IconButton(
+                                              icon: Icon(Icons.edit_outlined, color: Colors.blue[600], size: 20),
+                                              tooltip: tr('service_action_edit'),
+                                              constraints: const BoxConstraints(),
+                                              padding: const EdgeInsets.all(8),
+                                              onPressed: () => _editServiceEntry(record),
+                                            ),
+                                            IconButton(
+                                              icon: Icon(Icons.delete_outline, color: Colors.red[600], size: 20),
+                                              tooltip: tr('service_action_delete'),
+                                              constraints: const BoxConstraints(),
+                                              padding: const EdgeInsets.all(8),
+                                              onPressed: () => _deleteServiceEntry(record),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+
+                    if (_searchController.text.isEmpty && _totalPages > 1)
+                      _isSmallScreen 
+                        ? _buildSimplifiedPagination() 
+                        : _isMediumScreen 
+                          ? _buildMediumPaginationControls()
+                          : _buildPaginationControls(),
+                  ],
                 ),
               ),
-      ],
+            ),
+    ],
     );
   }
-
+  
   Widget _buildSimplifiedPagination() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -1045,7 +1303,7 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
           IconButton(
             icon: const Icon(Icons.chevron_left),
             onPressed: _currentPage > 1 ? _previousPage : null,
-            tooltip: 'Önceki Sayfa',
+            tooltip: tr('service_pagination_previous'),
             splashRadius: 20,
             color: _currentPage > 1 ? Colors.blue : Colors.grey,
           ),
@@ -1056,7 +1314,10 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              '$_currentPage / $_totalPages',
+              tr('service_pagination_page_of_total', namedArgs: {
+                'current': _currentPage.toString(),
+                'total': _totalPages.toString()
+              }),
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
               ),
@@ -1065,7 +1326,7 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
           IconButton(
             icon: const Icon(Icons.chevron_right),
             onPressed: _currentPage < _totalPages ? _nextPage : null,
-            tooltip: 'Sonraki Sayfa',
+            tooltip: tr('service_pagination_next'),
             splashRadius: 20,
             color: _currentPage < _totalPages ? Colors.blue : Colors.grey,
           ),
@@ -1086,7 +1347,7 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Toplam $_totalRecords kayıt',
+            tr('service_pagination_total_records', namedArgs: {'count': _totalRecords.toString()}),
             style: TextStyle(
               color: Colors.grey[700],
               fontWeight: FontWeight.w500,
@@ -1097,7 +1358,7 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
               IconButton(
                 icon: const Icon(Icons.chevron_left),
                 onPressed: _currentPage > 1 ? _previousPage : null,
-                tooltip: 'Önceki Sayfa',
+                tooltip: tr('service_pagination_previous'),
                 splashRadius: 20,
                 color: _currentPage > 1 ? Colors.blue : Colors.grey,
               ),
@@ -1123,11 +1384,14 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
                   },
                 ),
               ),
-              Text(' / $_totalPages', style: const TextStyle(color: Colors.grey)),
+              Text(
+                tr('service_pagination_of_total', namedArgs: {'total': _totalPages.toString()}),
+                style: const TextStyle(color: Colors.grey)
+              ),
               IconButton(
                 icon: const Icon(Icons.chevron_right),
                 onPressed: _currentPage < _totalPages ? _nextPage : null,
-                tooltip: 'Sonraki Sayfa',
+                tooltip: tr('service_pagination_next'),
                 splashRadius: 20,
                 color: _currentPage < _totalPages ? Colors.blue : Colors.grey,
               ),
@@ -1150,7 +1414,7 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Toplam $_totalRecords kayıt',
+            tr('service_pagination_total_records', namedArgs: {'count': _totalRecords.toString()}),
             style: TextStyle(
               color: Colors.grey[700],
               fontWeight: FontWeight.w500,
@@ -1161,14 +1425,14 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
               IconButton(
                 icon: const Icon(Icons.first_page),
                 onPressed: _currentPage > 1 ? () => _changePage(1) : null,
-                tooltip: 'İlk Sayfa',
+                tooltip: tr('service_pagination_first'),
                 splashRadius: 20,
                 color: _currentPage > 1 ? Colors.blue : Colors.grey,
               ),
               IconButton(
                 icon: const Icon(Icons.chevron_left),
                 onPressed: _currentPage > 1 ? _previousPage : null,
-                tooltip: 'Önceki Sayfa',
+                tooltip: tr('service_pagination_previous'),
                 splashRadius: 20,
                 color: _currentPage > 1 ? Colors.blue : Colors.grey,
               ),
@@ -1194,23 +1458,29 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
                   },
                 ),
               ),
-              Text(' / $_totalPages', style: const TextStyle(color: Colors.grey)),
+              Text(
+                tr('service_pagination_of_total', namedArgs: {'total': _totalPages.toString()}),
+                style: const TextStyle(color: Colors.grey)
+              ),
               IconButton(
                 icon: const Icon(Icons.chevron_right),
                 onPressed: _currentPage < _totalPages ? _nextPage : null,
-                tooltip: 'Sonraki Sayfa',
+                tooltip: tr('service_pagination_next'),
                 splashRadius: 20,
                 color: _currentPage < _totalPages ? Colors.blue : Colors.grey,
               ),
               IconButton(
                 icon: const Icon(Icons.last_page),
                 onPressed: _currentPage < _totalPages ? () => _changePage(_totalPages) : null,
-                tooltip: 'Son Sayfa',
+                tooltip: tr('service_pagination_last'),
                 splashRadius: 20,
                 color: _currentPage < _totalPages ? Colors.blue : Colors.grey,
               ),
               const SizedBox(width: 16),
-              Text('Sayfa Başına:', style: TextStyle(color: Colors.grey[700])),
+              Text(
+                tr('service_pagination_per_page'),
+                style: TextStyle(color: Colors.grey[700])
+              ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 decoration: BoxDecoration(
@@ -1269,18 +1539,18 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
               Icon(Icons.build_outlined, size: 64, color: Colors.grey[400]),
               const SizedBox(height: 16),
               Text(
-                'Henüz servis kaydı eklenmemiş',
+                tr('service_empty_state_title'),
                 style: TextStyle(fontSize: 18, color: Colors.grey[600], fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 24),
               Text(
-                'Yeni bir servis kaydı eklemek için sağ alttaki + butonuna tıklayın',
+                tr('service_empty_state_message'),
                 style: TextStyle(fontSize: 14, color: Colors.grey[500]),
               ),
               const SizedBox(height: 32),
               ElevatedButton.icon(
                 icon: const Icon(Icons.add),
-                label: const Text('Yeni Servis Kaydı Ekle'),
+                label: Text(tr('service_button_add_new')),
                 onPressed: _addNewServiceEntry,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -1304,21 +1574,26 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
   }
 
   void _editServiceEntry(ServiceEntry service) {
-    ServiceManagement.addNewService(context, () {
-      _loadServiceData(); // Refresh the data after editing
-    }, editService: service);
+    ServiceManagement.addNewService(
+      context,
+      () {
+        _loadServiceData(); // Refresh the data after editing
+      },
+      editService: service,
+      selectedVehicleId: service.vehicleId, // <-- seçili aracı gönder
+    );
   }
 
   void _deleteServiceEntry(ServiceEntry service) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Servis Kaydını Sil'),
-        content: const Text('Bu servis kaydını silmek istediğinize emin misiniz?'),
+        title: Text(tr('service_delete_dialog_title')),
+        content: Text(tr('service_delete_dialog_message')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('İptal'),
+            child: Text(tr('service_button_cancel')),
           ),
           ElevatedButton(
             onPressed: () {
@@ -1330,33 +1605,36 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
                   svc.remove(service.id);
                   _loadServiceData();
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Servis kaydı silindi'),
-                      backgroundColor: Colors.red,
-                    ),
+                  InfoCard.showInfoCard(
+                    context,
+                    tr('service_delete_success'),
+                    Colors.red,
+                    icon: Icons.delete_outline,
                   );
                 }).catchError((error) {
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Silme işlemi başarısız: $error'),
-                      backgroundColor: Colors.red,
-                    ),
+                  InfoCard.showInfoCard(
+                    context,
+                    tr('service_delete_error', namedArgs: {'error': error.toString()}),
+                    Colors.red,
+                    icon: Icons.error_outline,
                   );
                 });
               } else {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Kullanıcı oturumu bulunamadı'),
-                    backgroundColor: Colors.red,
-                  ),
+                InfoCard.showInfoCard(
+                  context,
+                  tr('service_error_no_user_session'),
+                  Colors.red,
+                  icon: Icons.error_outline,
                 );
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Sil'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: Text(tr('service_button_delete')),
           ),
         ],
       ),
@@ -1373,13 +1651,13 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
             Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
             const SizedBox(height: 16),
             Text(
-              'Veri yüklenirken bir hata oluştu',
+              tr('service_error_loading_title'),
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.red[700]),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
             Text(
-              _errorMessage ?? 'Bilinmeyen hata',
+              _errorMessage ?? tr('service_error_unknown'),
               style: TextStyle(fontSize: 16, color: Colors.grey[700]),
               textAlign: TextAlign.center,
             ),
@@ -1387,7 +1665,7 @@ class _ServicesPageState extends State<ServicesPage> with SingleTickerProviderSt
             ElevatedButton.icon(
               onPressed: _loadServiceData,
               icon: const Icon(Icons.refresh),
-              label: const Text('Yeniden Dene'),
+              label: Text(tr('service_button_retry')),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),

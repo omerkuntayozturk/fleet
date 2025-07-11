@@ -63,7 +63,7 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
       final user = _auth.currentUser;
       if (user == null) {
         setState(() {
-          _errorMessage = tr('user_session_not_found');
+          _errorMessage = tr('employee_error_user_session_not_found');
           _isLoading = false;
         });
         return;
@@ -72,7 +72,7 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
       await _loadEmployees();
     } catch (e) {
       setState(() {
-        _errorMessage = tr('data_loading_error', args: [e.toString()]);
+        _errorMessage = tr('employee_error_data_loading', namedArgs: {'error': e.toString()});
         _isLoading = false;
       });
     }
@@ -593,7 +593,7 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
                           ElevatedButton.icon(
                             onPressed: _initializeData,
                             icon: const Icon(Icons.refresh),
-                            label: Text(tr('try_again')),
+                            label: Text(tr('employee_button_try_again')),
                           ),
                         ],
                       ),
@@ -628,7 +628,7 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
                                   Expanded(
                                     flex: 3,
                                     child: Text(
-                                      tr('full_name'),
+                                      tr('employee_column_full_name'),
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         color: Colors.grey[700],
@@ -638,7 +638,7 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
                                   Expanded(
                                     flex: 3,
                                     child: Text(
-                                      tr('email'),
+                                      tr('employee_column_email'),
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         color: Colors.grey[700],
@@ -648,7 +648,7 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
                                   Expanded(
                                     flex: 2,
                                     child: Text(
-                                      tr('phone'),
+                                      tr('employee_column_phone'),
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         color: Colors.grey[700],
@@ -658,7 +658,7 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
                                   Expanded(
                                     flex: 2,
                                     child: Text(
-                                      tr('status'),
+                                      tr('employee_column_status'),
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         color: Colors.grey[700],
@@ -707,23 +707,23 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
                                 String statusText;
                                 switch (employee.status) {
                                   case EmploymentStatus.active:
-                                    statusText = tr('active');
+                                    statusText = tr('employee_status_active');
                                     statusColor = Colors.green;
                                     break;
                                   case EmploymentStatus.onLeave:
-                                    statusText = tr('on_leave');
+                                    statusText = tr('employee_status_on_leave');
                                     statusColor = Colors.orange;
                                     break;
                                   case EmploymentStatus.terminated:
-                                    statusText = tr('terminated');
+                                    statusText = tr('employee_status_terminated');
                                     statusColor = Colors.red;
                                     break;
                                   case EmploymentStatus.resigned:
-                                    statusText = tr('resigned');
+                                    statusText = tr('employee_status_resigned');
                                     statusColor = Colors.red[300]!;
                                     break;
                                   default:
-                                    statusText = tr('active');
+                                    statusText = tr('employee_status_active');
                                     statusColor = Colors.green;
                                     break;
                                 }
@@ -794,7 +794,7 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
                                               child: Text(
                                                 employee.email?.isNotEmpty == true
                                                     ? employee.email!
-                                                    : tr('dash'),
+                                                    : tr('employee_no_data'),
                                                 style: TextStyle(
                                                   color: employee.email?.isNotEmpty == true
                                                       ? Colors.grey[800]
@@ -815,7 +815,7 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
                                               child: Text(
                                                 employee.phone?.isNotEmpty == true
                                                     ? employee.phone!
-                                                    : tr('dash'),
+                                                    : tr('employee_no_data'),
                                                 style: TextStyle(
                                                   color: employee.phone?.isNotEmpty == true
                                                       ? Colors.grey[800]
@@ -833,14 +833,14 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
                                           children: [
                                             IconButton(
                                               icon: Icon(Icons.edit_outlined, color: Colors.blue[600], size: 20),
-                                              tooltip: tr('edit'),
+                                              tooltip: tr('employee_action_edit'),
                                               constraints: const BoxConstraints(),
                                               padding: const EdgeInsets.all(8),
                                               onPressed: () => _editEmployee(employee),
                                             ),
                                             IconButton(
                                               icon: Icon(Icons.delete_outline, color: Colors.red[600], size: 20),
-                                              tooltip: tr('delete'),
+                                              tooltip: tr('employee_action_delete'),
                                               constraints: const BoxConstraints(),
                                               padding: const EdgeInsets.all(8),
                                               onPressed: () => _deleteEmployee(employee),
@@ -864,23 +864,23 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
                                 String statusText;
                                 switch (employee.status) {
                                   case EmploymentStatus.active:
-                                    statusText = tr('active');
+                                    statusText = tr('employee_status_active');
                                     statusColor = Colors.green;
                                     break;
                                   case EmploymentStatus.onLeave:
-                                    statusText = tr('on_leave');
+                                    statusText = tr('employee_status_on_leave');
                                     statusColor = Colors.orange;
                                     break;
                                   case EmploymentStatus.terminated:
-                                    statusText = tr('terminated');
+                                    statusText = tr('employee_status_terminated');
                                     statusColor = Colors.red;
                                     break;
                                   case EmploymentStatus.resigned:
-                                    statusText = tr('resigned');
+                                    statusText = tr('employee_status_resigned');
                                     statusColor = Colors.red[300]!;
                                     break;
                                   default:
-                                    statusText = tr('active');
+                                    statusText = tr('employee_status_active');
                                     statusColor = Colors.green;
                                     break;
                                 }
@@ -936,7 +936,7 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
                                             child: Text(
                                               employee.email?.isNotEmpty == true
                                                   ? employee.email!
-                                                  : tr('dash'),
+                                                  : tr('employee_no_data'),
                                               style: TextStyle(
                                                 color: employee.email?.isNotEmpty == true
                                                     ? Colors.grey[800]
@@ -959,7 +959,7 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
                                                   child: Text(
                                                     employee.phone?.isNotEmpty == true 
                                                         ? employee.phone!
-                                                        : tr('dash'),
+                                                        : tr('employee_no_data'),
                                                     style: TextStyle(
                                                       color: employee.phone?.isNotEmpty == true
                                                           ? Colors.grey[800]
@@ -999,14 +999,14 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
                                               children: [
                                                 IconButton(
                                                   icon: Icon(Icons.edit_outlined, color: Colors.blue[600], size: 20),
-                                                  tooltip: tr('edit'),
+                                                  tooltip: tr('employee_action_edit'),
                                                   constraints: const BoxConstraints(),
                                                   padding: const EdgeInsets.all(8),
                                                   onPressed: () => _editEmployee(employee),
                                                 ),
                                                 IconButton(
                                                   icon: Icon(Icons.delete_outline, color: Colors.red[600], size: 20),
-                                                  tooltip: tr('delete'),
+                                                  tooltip: tr('employee_action_delete'),
                                                   constraints: const BoxConstraints(),
                                                   padding: const EdgeInsets.all(8),
                                                   onPressed: () => _deleteEmployee(employee),
@@ -1047,7 +1047,7 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
           IconButton(
             icon: const Icon(Icons.chevron_left),
             onPressed: _currentPage > 1 ? _previousPage : null,
-            tooltip: tr('previous_page'),
+            tooltip: tr('employee_pagination_previous'),
             splashRadius: 20,
             color: _currentPage > 1 ? Colors.blue : Colors.grey,
           ),
@@ -1059,7 +1059,10 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              '$_currentPage / $_totalPages',
+              tr('employee_pagination_page_of_total', namedArgs: {
+                'current': _currentPage.toString(),
+                'total': _totalPages.toString()
+              }),
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
               ),
@@ -1069,7 +1072,7 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
           IconButton(
             icon: const Icon(Icons.chevron_right),
             onPressed: _currentPage < _totalPages ? _nextPage : null,
-            tooltip: tr('next_page'),
+            tooltip: tr('employee_pagination_next'),
             splashRadius: 20,
             color: _currentPage < _totalPages ? Colors.blue : Colors.grey,
           ),
@@ -1092,7 +1095,7 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
         children: [
           // Records info
           Text(
-            tr('total_employees_count', args: ['$_totalEmployees']),
+            tr('employee_pagination_total_records', namedArgs: {'count': _totalEmployees.toString()}),
             style: TextStyle(
               color: Colors.grey[700],
               fontWeight: FontWeight.w500,
@@ -1106,7 +1109,7 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
               IconButton(
                 icon: const Icon(Icons.chevron_left),
                 onPressed: _currentPage > 1 ? _previousPage : null,
-                tooltip: tr('previous_page'),
+                tooltip: tr('employee_pagination_previous'),
                 splashRadius: 20,
                 color: _currentPage > 1 ? Colors.blue : Colors.grey,
               ),
@@ -1135,14 +1138,16 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
                 ),
               ),
               
-              Text(' / $_totalPages',
-                  style: const TextStyle(color: Colors.grey)),
+              Text(
+                tr('employee_pagination_of_total', namedArgs: {'total': _totalPages.toString()}),
+                style: const TextStyle(color: Colors.grey)
+              ),
               
               // Next page button
               IconButton(
                 icon: const Icon(Icons.chevron_right),
                 onPressed: _currentPage < _totalPages ? _nextPage : null,
-                tooltip: tr('next_page'),
+                tooltip: tr('employee_pagination_next'),
                 splashRadius: 20,
                 color: _currentPage < _totalPages ? Colors.blue : Colors.grey,
               ),
@@ -1167,7 +1172,7 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
         children: [
           // Records info
           Text(
-            tr('total_employees_count', args: ['$_totalEmployees']),
+            tr('employee_pagination_total_records', namedArgs: {'count': _totalEmployees.toString()}),
             style: TextStyle(
               color: Colors.grey[700],
               fontWeight: FontWeight.w500,
@@ -1181,7 +1186,7 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
               IconButton(
                 icon: const Icon(Icons.first_page),
                 onPressed: _currentPage > 1 ? () => _changePage(1) : null,
-                tooltip: tr('first_page'),
+                tooltip: tr('employee_pagination_first'),
                 splashRadius: 20,
                 color: _currentPage > 1 ? Colors.blue : Colors.grey,
               ),
@@ -1190,7 +1195,7 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
               IconButton(
                 icon: const Icon(Icons.chevron_left),
                 onPressed: _currentPage > 1 ? _previousPage : null,
-                tooltip: tr('previous_page'),
+                tooltip: tr('employee_pagination_previous'),
                 splashRadius: 20,
                 color: _currentPage > 1 ? Colors.blue : Colors.grey,
               ),
@@ -1219,14 +1224,16 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
                 ),
               ),
               
-              Text(' / $_totalPages',
-                  style: const TextStyle(color: Colors.grey)),
+              Text(
+                tr('employee_pagination_of_total', namedArgs: {'total': _totalPages.toString()}),
+                style: const TextStyle(color: Colors.grey)
+              ),
               
               // Next page button
               IconButton(
                 icon: const Icon(Icons.chevron_right),
                 onPressed: _currentPage < _totalPages ? _nextPage : null,
-                tooltip: tr('next_page'),
+                tooltip: tr('employee_pagination_next'),
                 splashRadius: 20,
                 color: _currentPage < _totalPages ? Colors.blue : Colors.grey,
               ),
@@ -1235,14 +1242,14 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
               IconButton(
                 icon: const Icon(Icons.last_page),
                 onPressed: _currentPage < _totalPages ? () => _changePage(_totalPages) : null,
-                tooltip: tr('last_page'),
+                tooltip: tr('employee_pagination_last'),
                 splashRadius: 20,
                 color: _currentPage < _totalPages ? Colors.blue : Colors.grey,
               ),
               
               // Page size selector
               const SizedBox(width: 16),
-              Text(tr('per_page'), style: TextStyle(color: Colors.grey[700])),
+              Text(tr('employee_pagination_per_page'), style: TextStyle(color: Colors.grey[700])),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 decoration: BoxDecoration(
@@ -1286,13 +1293,15 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
       context, 
       () {
         _initializeData();
-        if (!mounted) return;
-        InfoCard.showInfoCard(
-          context,
-          tr('employee_updated', args: [employee.name]),
-          Colors.green,
-          icon: Icons.check_circle,
-        );
+        // Add mounted check before using context
+        if (mounted) {
+          InfoCard.showInfoCard(
+            context,
+            tr('employee_success_update', namedArgs: {'name': employee.name}),
+            Colors.green,
+            icon: Icons.check_circle,
+          );
+        }
       },
       editEmployee: employee,
     );
@@ -1302,12 +1311,12 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(tr('delete_employee')),
-        content: Text(tr('delete_employee_confirm', args: [employee.name])),
+        title: Text(tr('employee_dialog_delete_title')),
+        content: Text(tr('employee_dialog_delete_confirm', namedArgs: {'name': employee.name})),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(tr('cancel')),
+            child: Text(tr('employee_button_cancel')),
           ),
           TextButton(
             onPressed: () async {
@@ -1319,11 +1328,13 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
                 final user = _auth.currentUser;
                 if (user != null) {
                   await _employeeService.delete(employee.id);
-                  _initializeData();
+                  await _initializeData(); // Add await here
+                  
+                  // Check if widget is still mounted before showing InfoCard
                   if (!mounted) return;
                   InfoCard.showInfoCard(
                     context,
-                    tr('employee_deleted', args: [employee.name]),
+                    tr('employee_success_delete', namedArgs: {'name': employee.name}),
                     Colors.red,
                     icon: Icons.delete_forever,
                   );
@@ -1331,18 +1342,20 @@ class _EmployeeListPageState extends State<EmployeeListPage> with SingleTickerPr
               } catch (e) {
                 setState(() {
                   _isLoading = false;
-                  _errorMessage = tr('employee_delete_error', args: [e.toString()]);
+                  _errorMessage = tr('employee_error_delete', namedArgs: {'error': e.toString()});
                 });
+                
+                // Check if widget is still mounted before showing InfoCard
                 if (!mounted) return;
                 InfoCard.showInfoCard(
                   context,
-                  tr('error_with_message', args: [e.toString()]),
+                  tr('employee_error_message', namedArgs: {'error': e.toString()}),
                   Colors.red,
                   icon: Icons.error,
                 );
               }
             },
-            child: Text(tr('delete'), style: const TextStyle(color: Colors.red)),
+            child: Text(tr('employee_button_delete'), style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),

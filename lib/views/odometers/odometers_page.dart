@@ -7,6 +7,9 @@ import 'add_odometers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../services/firestore_service.dart'; // Add FirestoreService import
+import 'import_odometers.dart'; // <-- Add this import
+import '../../info_card.dart'; // InfoCard importu eklendi
+import 'package:easy_localization/easy_localization.dart'; // Add Easy Localization import
 
 class OdometersPage extends StatefulWidget {
   const OdometersPage({super.key});
@@ -216,15 +219,19 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
   // Dummy import/export methods
   void _importOdometers(BuildContext context) {
     // TODO: Implement import logic
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('İçe Aktar özelliği henüz eklenmedi.'), backgroundColor: Colors.blue),
+    InfoCard.showInfoCard(
+      context,
+      tr('odometer_import_not_available'),
+      Colors.blue,
+      icon: Icons.info_outline,
     );
   }
 
   void _exportOdometers(BuildContext context) {
-    // TODO: Implement export logic
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Dışa Aktar özelliği henüz eklenmedi.'), backgroundColor: Colors.blue),
+    // Export odometer records to Excel using import_odometers.dart logic
+    exportOdometersToExcel(
+      context,
+      vehiclePlates: _vehiclePlates,
     );
   }
 
@@ -324,7 +331,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
               curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
             )),
             child: Text(
-              'Kilometre Kayıtları',
+              tr('odometer_page_title'),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).primaryColor,
@@ -340,7 +347,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
               ),
             ),
             child: Text(
-              'Araçların kilometre bilgilerini takip edin',
+              tr('odometer_page_subtitle'),
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     color: Colors.grey[600],
                   ),
@@ -357,7 +364,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Kilometre kaydı ara...',
+                hintText: tr('odometer_search_hint'),
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: Colors.grey[100],
@@ -390,7 +397,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
                       curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
                     )),
                     child: Text(
-                      'Kilometre Kayıtları',
+                      tr('odometer_page_title'),
                       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).primaryColor,
@@ -406,7 +413,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
                       ),
                     ),
                     child: Text(
-                      'Araçların kilometre bilgilerini takip edin',
+                      tr('odometer_page_subtitle'),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             color: Colors.grey[600],
                           ),
@@ -416,7 +423,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
               ),
               ElevatedButton.icon(
                 icon: const Icon(Icons.add),
-                label: const Text('Yeni Kayıt'),
+                label: Text(tr('odometer_button_new_record')),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).primaryColor,
                   foregroundColor: Colors.white,
@@ -443,7 +450,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      hintText: 'Kilometre kaydı ara...',
+                      hintText: tr('odometer_search_hint'),
                       prefixIcon: const Icon(Icons.search),
                       filled: true,
                       fillColor: Colors.grey[100],
@@ -459,7 +466,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
               const SizedBox(width: 16),
               OutlinedButton.icon(
                 icon: const Icon(Icons.download),
-                label: const Text('Dışa Aktar'),
+                label: Text(tr('odometer_button_export')),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
@@ -485,7 +492,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
                   curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
                 )),
                 child: Text(
-                  'Kilometre Kayıtları',
+                  tr('odometer_page_title'),
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).primaryColor,
@@ -501,7 +508,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
                   ),
                 ),
                 child: Text(
-                  'Araçların kilometre bilgilerini takip edin',
+                  tr('odometer_page_subtitle'),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: Colors.grey[600],
                       ),
@@ -513,7 +520,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
             children: [
               ElevatedButton.icon(
                 icon: const Icon(Icons.download),
-                label: const Text('Dışa Aktar'),
+                label: Text(tr('odometer_button_export')),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).colorScheme.tertiary,
                   foregroundColor: Colors.white,
@@ -527,7 +534,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
               const SizedBox(width: 16),
               ElevatedButton.icon(
                 icon: const Icon(Icons.add),
-                label: const Text('Yeni Kayıt'),
+                label: Text(tr('odometer_button_new_record')),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).primaryColor,
                   foregroundColor: Colors.white,
@@ -551,7 +558,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      hintText: 'Kilometre kaydı ara...',
+                      hintText: tr('odometer_search_hint'),
                       prefixIcon: const Icon(Icons.search),
                       filled: true,
                       fillColor: Colors.grey[100],
@@ -588,7 +595,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
     final List<Map<String, dynamic>> cards = [
       {
         'icon': Icons.speed,
-        'title': 'Toplam Kayıt',
+        'title': tr('odometer_stats_total_records'),
         'value': '$totalRecords',
         'color': Colors.indigo,
         'trend': '+2%',
@@ -596,26 +603,26 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
       },
       {
         'icon': Icons.timeline,
-        'title': 'Ortalama Km',
-        'value': '${averageKm.toStringAsFixed(0)} km',
+        'title': tr('odometer_stats_average_km'),
+        'value': '${averageKm.toStringAsFixed(0)} ${tr('odometer_unit_km')}',
         'color': Colors.orange,
         'trend': '+3%',
         'isUp': true,
       },
       {
         'icon': Icons.trending_up,
-        'title': 'En Yüksek Km',
-        'value': '$maxKm km',
+        'title': tr('odometer_stats_max_km'),
+        'value': '$maxKm ${tr('odometer_unit_km')}',
         'color': Colors.blue,
         'trend': '+5%',
         'isUp': true,
       },
       {
         'icon': Icons.calendar_today,
-        'title': 'Son Güncelleme',
+        'title': tr('odometer_stats_last_update'),
         'value': lastUpdate != null ? _formatDate(lastUpdate) : '-',
         'color': Colors.green,
-        'trend': 'Bugün',
+        'trend': tr('odometer_stats_today'),
         'isUp': true,
       },
     ];
@@ -632,7 +639,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Kilometre İstatistikleri',
+              tr('odometer_stats_title'),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -668,7 +675,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Kilometre İstatistikleri',
+              tr('odometer_stats_title'),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -834,7 +841,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Kilometre Listesi',
+          tr('odometer_list_title'),
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -870,7 +877,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
                             Expanded(
                               flex: 2,
                               child: Text(
-                                'Araç', // Changed from 'Araç ID' to 'Araç'
+                                tr('odometer_column_vehicle'),
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.grey[700],
@@ -880,7 +887,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
                             Expanded(
                               flex: 2,
                               child: Text(
-                                'Tarih',
+                                tr('odometer_column_date'),
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.grey[700],
@@ -890,7 +897,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
                             Expanded(
                               flex: 2,
                               child: Text(
-                                'Kilometre',
+                                tr('odometer_column_value'),
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.grey[700],
@@ -912,7 +919,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
                           final record = _filteredRecords[index];
                           // Get vehicle plate from map, or show placeholder if not found
                           final vehiclePlate = record.vehicleId.isEmpty 
-                              ? '(Araç yok)' 
+                              ? tr('odometer_no_vehicle') 
                               : _vehiclePlates[record.vehicleId] ?? record.vehicleId;
                               
                           return Container(
@@ -941,7 +948,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
                                     ),
                                     Expanded(
                                       flex: 2,
-                                      child: Text('${record.value} km'),
+                                      child: Text('${record.value} ${tr('odometer_unit_km')}'),
                                     ),
                                     SizedBox(
                                       width: _isSmallScreen ? 50 : 100,
@@ -949,13 +956,13 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
                                           ? PopupMenuButton(
                                               icon: Icon(Icons.more_vert, color: Colors.grey[600]),
                                               itemBuilder: (context) => [
-                                                const PopupMenuItem(
+                                                PopupMenuItem(
                                                   value: 'edit',
-                                                  child: Text('Düzenle'),
+                                                  child: Text(tr('odometer_action_edit')),
                                                 ),
-                                                const PopupMenuItem(
+                                                PopupMenuItem(
                                                   value: 'delete',
-                                                  child: Text('Sil'),
+                                                  child: Text(tr('odometer_action_delete')),
                                                 ),
                                               ],
                                               onSelected: (value) {
@@ -971,14 +978,14 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
                                               children: [
                                                 IconButton(
                                                   icon: Icon(Icons.edit_outlined, color: Colors.blue[600], size: 20),
-                                                  tooltip: 'Düzenle',
+                                                  tooltip: tr('odometer_action_edit'),
                                                   constraints: const BoxConstraints(),
                                                   padding: const EdgeInsets.all(8),
                                                   onPressed: () => _editOdometerRecord(record),
                                                 ),
                                                 IconButton(
                                                   icon: Icon(Icons.delete_outline, color: Colors.red[600], size: 20),
-                                                  tooltip: 'Sil',
+                                                  tooltip: tr('odometer_action_delete'),
                                                   constraints: const BoxConstraints(),
                                                   padding: const EdgeInsets.all(8),
                                                   onPressed: () => _deleteOdometerRecord(record),
@@ -1016,7 +1023,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
           IconButton(
             icon: const Icon(Icons.chevron_left),
             onPressed: _currentPage > 1 ? _previousPage : null,
-            tooltip: 'Önceki Sayfa',
+            tooltip: tr('odometer_pagination_previous'),
             splashRadius: 20,
             color: _currentPage > 1 ? Colors.blue : Colors.grey,
           ),
@@ -1027,7 +1034,10 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              '$_currentPage / $_totalPages',
+              tr('odometer_pagination_page_of_total', namedArgs: {
+                'current': _currentPage.toString(),
+                'total': _totalPages.toString()
+              }),
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
               ),
@@ -1036,7 +1046,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
           IconButton(
             icon: const Icon(Icons.chevron_right),
             onPressed: _currentPage < _totalPages ? _nextPage : null,
-            tooltip: 'Sonraki Sayfa',
+            tooltip: tr('odometer_pagination_next'),
             splashRadius: 20,
             color: _currentPage < _totalPages ? Colors.blue : Colors.grey,
           ),
@@ -1057,7 +1067,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Toplam $_totalRecords kayıt',
+            tr('odometer_pagination_total_records', namedArgs: {'count': _totalRecords.toString()}),
             style: TextStyle(
               color: Colors.grey[700],
               fontWeight: FontWeight.w500,
@@ -1068,7 +1078,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
               IconButton(
                 icon: const Icon(Icons.chevron_left),
                 onPressed: _currentPage > 1 ? _previousPage : null,
-                tooltip: 'Önceki Sayfa',
+                tooltip: tr('odometer_pagination_previous'),
                 splashRadius: 20,
                 color: _currentPage > 1 ? Colors.blue : Colors.grey,
               ),
@@ -1094,11 +1104,14 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
                   },
                 ),
               ),
-              Text(' / $_totalPages', style: const TextStyle(color: Colors.grey)),
+              Text(
+                tr('odometer_pagination_of_total', namedArgs: {'total': _totalPages.toString()}),
+                style: const TextStyle(color: Colors.grey)
+              ),
               IconButton(
                 icon: const Icon(Icons.chevron_right),
                 onPressed: _currentPage < _totalPages ? _nextPage : null,
-                tooltip: 'Sonraki Sayfa',
+                tooltip: tr('odometer_pagination_next'),
                 splashRadius: 20,
                 color: _currentPage < _totalPages ? Colors.blue : Colors.grey,
               ),
@@ -1121,7 +1134,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Toplam $_totalRecords kayıt',
+            tr('odometer_pagination_total_records', namedArgs: {'count': _totalRecords.toString()}),
             style: TextStyle(
               color: Colors.grey[700],
               fontWeight: FontWeight.w500,
@@ -1132,14 +1145,14 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
               IconButton(
                 icon: const Icon(Icons.first_page),
                 onPressed: _currentPage > 1 ? () => _changePage(1) : null,
-                tooltip: 'İlk Sayfa',
+                tooltip: tr('odometer_pagination_first'),
                 splashRadius: 20,
                 color: _currentPage > 1 ? Colors.blue : Colors.grey,
               ),
               IconButton(
                 icon: const Icon(Icons.chevron_left),
                 onPressed: _currentPage > 1 ? _previousPage : null,
-                tooltip: 'Önceki Sayfa',
+                tooltip: tr('odometer_pagination_previous'),
                 splashRadius: 20,
                 color: _currentPage > 1 ? Colors.blue : Colors.grey,
               ),
@@ -1165,23 +1178,29 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
                   },
                 ),
               ),
-              Text(' / $_totalPages', style: const TextStyle(color: Colors.grey)),
+              Text(
+                tr('odometer_pagination_of_total', namedArgs: {'total': _totalPages.toString()}),
+                style: const TextStyle(color: Colors.grey)
+              ),
               IconButton(
                 icon: const Icon(Icons.chevron_right),
                 onPressed: _currentPage < _totalPages ? _nextPage : null,
-                tooltip: 'Sonraki Sayfa',
+                tooltip: tr('odometer_pagination_next'),
                 splashRadius: 20,
                 color: _currentPage < _totalPages ? Colors.blue : Colors.grey,
               ),
               IconButton(
                 icon: const Icon(Icons.last_page),
                 onPressed: _currentPage < _totalPages ? () => _changePage(_totalPages) : null,
-                tooltip: 'Son Sayfa',
+                tooltip: tr('odometer_pagination_last'),
                 splashRadius: 20,
                 color: _currentPage < _totalPages ? Colors.blue : Colors.grey,
               ),
               const SizedBox(width: 16),
-              Text('Sayfa Başına:', style: TextStyle(color: Colors.grey[700])),
+              Text(
+                tr('odometer_pagination_per_page'),
+                style: TextStyle(color: Colors.grey[700])
+              ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 decoration: BoxDecoration(
@@ -1240,18 +1259,18 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
               Icon(Icons.speed_outlined, size: 64, color: Colors.grey[400]),
               const SizedBox(height: 16),
               Text(
-                'Henüz kilometre kaydı eklenmemiş',
+                tr('odometer_empty_state_title'),
                 style: TextStyle(fontSize: 18, color: Colors.grey[600], fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 24),
               Text(
-                'Yeni bir kilometre kaydı eklemek için sağ alttaki + butonuna tıklayın',
+                tr('odometer_empty_state_message'),
                 style: TextStyle(fontSize: 14, color: Colors.grey[500]),
               ),
               const SizedBox(height: 32),
               ElevatedButton.icon(
                 icon: const Icon(Icons.add),
-                label: const Text('Yeni Kilometre Kaydı Ekle'),
+                label: Text(tr('odometer_button_add_new')),
                 onPressed: _addNewOdometerRecord,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -1272,10 +1291,26 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
     OdometerManagement.addNewOdometer(
       context, 
       () {
-        // Callback for when record is updated
         _loadOdometerData();
       },
       editRecord: record,
+      allOdometerRecords: _allRecords, // <-- ekle
+      // Düzenlemede de aynı plakalı başka kayıt varsa (ve bu kayıt değilse) silinsin
+      onBeforeAdd: (OdometerRecord newRecord) async {
+        final User? currentUser = _auth.currentUser;
+        if (currentUser == null) return;
+        final sameVehicleRecords = _allRecords.where((r) => r.vehicleId == newRecord.vehicleId && r.id != record.id).toList();
+        for (final old in sameVehicleRecords) {
+          await _firestore
+              .collection('users')
+              .doc(currentUser.uid)
+              .collection('odometers')
+              .doc(old.id)
+              .delete()
+              .catchError((_) {});
+          svc.remove(old.id);
+        }
+      },
     );
   }
 
@@ -1283,12 +1318,12 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Kilometre Kaydını Sil'),
-        content: const Text('Bu kilometre kaydını silmek istediğinize emin misiniz?'),
+        title: Text(tr('odometer_delete_dialog_title')),
+        content: Text(tr('odometer_delete_dialog_message')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('İptal'),
+            child: Text(tr('odometer_button_cancel')),
           ),
           ElevatedButton(
             onPressed: () {
@@ -1306,20 +1341,20 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
                       svc.remove(record.id);
                       _loadOdometerData();
                       Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Kilometre kaydı silindi'),
-                          backgroundColor: Colors.red,
-                        ),
+                      InfoCard.showInfoCard(
+                        context,
+                        tr('odometer_delete_success'),
+                        Colors.red,
+                        icon: Icons.delete_outline,
                       );
                     })
                     .catchError((error) {
                       Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Hata: $error'),
-                          backgroundColor: Colors.red,
-                        ),
+                      InfoCard.showInfoCard(
+                        context,
+                        tr('odometer_error_message', namedArgs: {'error': error.toString()}),
+                        Colors.red,
+                        icon: Icons.error_outline,
                       );
                     });
               } else {
@@ -1327,11 +1362,11 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
                 svc.remove(record.id);
                 _loadOdometerData();
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Kilometre kaydı silindi'),
-                    backgroundColor: Colors.red,
-                  ),
+                InfoCard.showInfoCard(
+                  context,
+                  tr('odometer_delete_success'),
+                  Colors.red,
+                  icon: Icons.delete_outline,
                 );
               }
             },
@@ -1339,7 +1374,7 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
               backgroundColor: Colors.red,
               foregroundColor: Colors.white, // Added foregroundColor to make text white
             ),
-            child: const Text('Sil'),
+            child: Text(tr('odometer_button_delete')),
           ),
         ],
       ),
@@ -1350,9 +1385,28 @@ class _OdometersPageState extends State<OdometersPage> with SingleTickerProvider
     OdometerManagement.addNewOdometer(
       context, 
       () {
-        // Callback for when record is added/updated
         _loadOdometerData();
-      }
+      },
+      allOdometerRecords: _allRecords,
+      // Yeni: Aynı plakalı kayıt varsa silinsin
+      onBeforeAdd: (OdometerRecord newRecord) async {
+        final User? currentUser = _auth.currentUser;
+        if (currentUser == null) return;
+        // Aynı plakalı eski kayıtları bul
+        final sameVehicleRecords = _allRecords.where((r) => r.vehicleId == newRecord.vehicleId).toList();
+        for (final old in sameVehicleRecords) {
+          // Firestore'dan sil
+          await _firestore
+              .collection('users')
+              .doc(currentUser.uid)
+              .collection('odometers')
+              .doc(old.id)
+              .delete()
+              .catchError((_) {});
+          // Local servisten sil
+          svc.remove(old.id);
+        }
+      },
     );
   }
 }

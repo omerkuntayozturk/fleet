@@ -9,6 +9,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:uuid/uuid.dart';
 import '../../models/vehicle.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart'; // Make sure this import is present
 
 // Main class for service management
 class ServiceManagement {
@@ -21,7 +22,12 @@ class ServiceManagement {
   }
 
   // Method to show add/edit service dialog
-  static void addNewService(BuildContext context, VoidCallback onServiceAdded, {ServiceEntry? editService}) {
+  static void addNewService(
+    BuildContext context,
+    VoidCallback onServiceAdded, {
+    ServiceEntry? editService,
+    String? selectedVehicleId, // <-- parametre eklendi
+  }) {
     // Get screen dimensions for responsive layout
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
@@ -63,6 +69,7 @@ class ServiceManagement {
                     onServiceAdded: onServiceAdded,
                     isMobile: isMobile,
                     editService: editService, // Pass service for editing
+                    selectedVehicleId: selectedVehicleId, // <-- parametreyi ilet
                   ),
                 ),
               ],
@@ -247,12 +254,14 @@ class AddServiceForm extends StatefulWidget {
   final VoidCallback onServiceAdded;
   final bool isMobile;
   final ServiceEntry? editService;
-  
+  final String? selectedVehicleId; // <-- parametre eklendi
+
   const AddServiceForm({
     super.key,
     required this.onServiceAdded,
     required this.isMobile,
     this.editService,
+    this.selectedVehicleId, // <-- parametre eklendi
   });
 
   @override
@@ -282,7 +291,6 @@ class _AddServiceFormState extends State<AddServiceForm> {
   String _selectedVehicleId = '';
   
   // Add these variables to store vehicle details
-  String _selectedVehicleName = '';
   String _selectedVehiclePlate = '';
 
   @override
@@ -298,6 +306,20 @@ class _AddServiceFormState extends State<AddServiceForm> {
     // If in edit mode, populate form with service data
     if (_isEditMode) {
       _populateFormWithServiceData();
+    } else {
+      // Eğer edit modunda değilsek ve selectedVehicleId parametresi varsa onu ata
+      if (widget.selectedVehicleId != null && widget.selectedVehicleId!.isNotEmpty) {
+        _selectedVehicleId = widget.selectedVehicleId!;
+        _vehicleIdController.text = widget.selectedVehicleId!;
+        _loadVehicleDetails(widget.selectedVehicleId!).then((_) {
+          // Plaka bilgisini inputa yaz
+          if (mounted) {
+            setState(() {
+              _vehicleDisplayController.text = _selectedVehiclePlate;
+            });
+          }
+        });
+      }
     }
   }
   
@@ -333,7 +355,6 @@ class _AddServiceFormState extends State<AddServiceForm> {
         final data = vehicleDoc.data() as Map<String, dynamic>;
         if (mounted) {
           setState(() {
-            _selectedVehicleName = data['model'] ?? '';
             _selectedVehiclePlate = data['plate'] ?? '';
           });
         }
@@ -364,7 +385,14 @@ class _AddServiceFormState extends State<AddServiceForm> {
     });
     
     // Load vehicle details
-    _loadVehicleDetails(service.vehicleId);
+    _loadVehicleDetails(service.vehicleId).then((_) {
+      // Plaka bilgisini inputa yaz
+      if (mounted) {
+        setState(() {
+          _vehicleDisplayController.text = _selectedVehiclePlate;
+        });
+      }
+    });
   }
 
   @override
@@ -382,7 +410,7 @@ class _AddServiceFormState extends State<AddServiceForm> {
     final User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {
       setState(() {
-        _errorMessage = 'Kullanıcı oturumu bulunamadı';
+        _errorMessage = tr('service_error_no_user_session');
       });
       return;
     }
@@ -405,7 +433,6 @@ class _AddServiceFormState extends State<AddServiceForm> {
         _selectedVehicleId = selectedVehicle.id;
         // Display the plate in the field
         _vehicleDisplayController.text = selectedVehicle.plate;
-        _selectedVehicleName = selectedVehicle.model;
         _selectedVehiclePlate = selectedVehicle.plate;
       });
     }
@@ -426,7 +453,7 @@ class _AddServiceFormState extends State<AddServiceForm> {
       // Get current user
       final currentUser = _auth.currentUser;
       if (currentUser == null) {
-        throw Exception('Kullanıcı oturum açmamış!');
+        throw Exception(tr('service_error_user_not_logged_in'));
       }
 
       // Generate unique ID for the service or use existing if in edit mode
@@ -469,8 +496,8 @@ class _AddServiceFormState extends State<AddServiceForm> {
         InfoCard.showInfoCard(
           context,
           _isEditMode 
-              ? 'Servis kaydı başarıyla güncellendi' 
-              : 'Servis kaydı başarıyla eklendi',
+              ? tr('service_success_update')
+              : tr('service_success_add'),
           Colors.green,
           icon: Icons.check_circle,
         );
@@ -479,8 +506,8 @@ class _AddServiceFormState extends State<AddServiceForm> {
       if (mounted) {
         setState(() {
           _errorMessage = _isEditMode 
-              ? 'Servis güncellenirken hata: $e' 
-              : 'Servis eklenirken hata: $e';
+              ? tr('service_error_update', namedArgs: {'error': e.toString()})
+              : tr('service_error_add', namedArgs: {'error': e.toString()});
         });
       }
     } finally {
@@ -542,6 +569,45 @@ class _AddServiceFormState extends State<AddServiceForm> {
     return '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
   }
 
+  // Add this method to validate cost input
+  String? _validateCost(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return tr('service_error_cost_required');
+    }
+    
+    // Try to parse as double
+    final costValue = double.tryParse(value);
+    if (costValue == null) {
+      return tr('service_error_cost_invalid_number');
+    }
+    
+    // Check if value is negative
+    if (costValue < 0) {
+      return tr('service_error_cost_negative');
+    }
+    
+    // You could add an upper limit check if needed
+    // For example, if cost cannot exceed 1,000,000 TL
+    if (costValue > 1000000) {
+      return tr('service_error_cost_too_high');
+    }
+    
+    return null;
+  }
+  
+  // Add this method to format currency
+  String _formatCurrency(String value) {
+    if (value.isEmpty) return '';
+    
+    // Try to parse the value
+    final number = double.tryParse(value);
+    if (number == null) return value;
+    
+    // Format with thousand separators and two decimal places
+    return number.toStringAsFixed(2)
+        .replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},');
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -564,14 +630,14 @@ class _AddServiceFormState extends State<AddServiceForm> {
             
             // Service Information Card
             _buildFormCard(
-              'Servis Bilgileri',
+              tr('service_information_title'),
               [
                 // Service type field
                 TextFormField(
                   controller: _serviceTypeController,
                   decoration: InputDecoration(
-                    labelText: 'Servis Türü *',
-                    hintText: 'Örn: Yağ Değişimi, Lastik Değişimi',
+                    labelText: tr('service_field_type'),
+                    hintText: tr('service_hint_type'),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(widget.isMobile ? 8 : 12),
                       borderSide: BorderSide(color: Colors.grey[300]!),
@@ -598,7 +664,7 @@ class _AddServiceFormState extends State<AddServiceForm> {
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Servis türü gereklidir';
+                      return tr('service_error_type_required');
                     }
                     return null;
                   },
@@ -612,8 +678,8 @@ class _AddServiceFormState extends State<AddServiceForm> {
                     child: TextFormField(
                       controller: _vehicleDisplayController, // Use display controller instead of vehicleIdController
                       decoration: InputDecoration(
-                        labelText: 'Araç Seçimi *',
-                        hintText: 'Araç seçmek için tıklayın',
+                        labelText: tr('service_field_vehicle'),
+                        hintText: tr('service_hint_vehicle'),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(widget.isMobile ? 8 : 12),
                           borderSide: BorderSide(color: Colors.grey[300]!),
@@ -644,41 +710,13 @@ class _AddServiceFormState extends State<AddServiceForm> {
                       ),
                       validator: (value) {
                         if (_selectedVehicleId.isEmpty) {
-                          return 'Araç seçimi zorunludur';
+                          return tr('service_error_vehicle_required');
                         }
                         return null;
                       },
                     ),
                   ),
                 ),
-                
-                // Display selected vehicle info if available
-                if (_selectedVehicleName.isNotEmpty || _selectedVehiclePlate.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Container(
-                      padding: EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.info_outline, size: 16, color: Colors.blue.shade700),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Seçilen araç: $_selectedVehicleName ($_selectedVehiclePlate)',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.blue.shade700,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
                 
                 SizedBox(height: widget.isMobile ? 16 : 20),
                 
@@ -687,7 +725,7 @@ class _AddServiceFormState extends State<AddServiceForm> {
                   onTap: () => _selectDate(context),
                   child: InputDecorator(
                     decoration: InputDecoration(
-                      labelText: 'Servis Tarihi *',
+                      labelText: tr('service_field_date'),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(widget.isMobile ? 8 : 12),
                         borderSide: BorderSide(color: Colors.grey[300]!),
@@ -731,14 +769,14 @@ class _AddServiceFormState extends State<AddServiceForm> {
             
             // Cost and Notes Card
             _buildFormCard(
-              'Maliyet ve Notlar',
+              tr('service_cost_notes_title'),
               [
-                // Cost field
+                // Cost field - Updated with better validation and formatting
                 TextFormField(
                   controller: _costController,
                   decoration: InputDecoration(
-                    labelText: 'Maliyet (TL) *',
-                    hintText: 'Servis maliyetini girin',
+                    labelText: tr('service_field_cost'),
+                    hintText: tr('service_hint_cost'),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(widget.isMobile ? 8 : 12),
                       borderSide: BorderSide(color: Colors.grey[300]!),
@@ -756,32 +794,43 @@ class _AddServiceFormState extends State<AddServiceForm> {
                       color: Colors.grey[500],
                       size: widget.isMobile ? 18 : 24,
                     ),
+                    suffixText: tr('service_currency_tl'),
                     filled: true,
                     fillColor: Colors.white,
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: widget.isMobile ? 12 : 16,
                       vertical: widget.isMobile ? 10 : 16
                     ),
+                    helperText: tr('service_helper_cost_numeric'),
+                    helperStyle: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
                   ),
                   keyboardType: TextInputType.numberWithOptions(decimal: true),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Maliyet gereklidir';
-                    }
-                    if (double.tryParse(value) == null) {
-                      return 'Geçerli bir sayı girin';
-                    }
-                    return null;
-                  },
+                  validator: _validateCost,
+                  inputFormatters: [
+                    // Allow only numbers and a single decimal point
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+                    // Optional: Limit to 2 decimal places
+                    TextInputFormatter.withFunction((oldValue, newValue) {
+                      final regExp = RegExp(r'^\d*\.?\d{0,2}$');
+                      if (regExp.hasMatch(newValue.text)) {
+                        return newValue;
+                      }
+                      return oldValue;
+                    }),
+                  ],
                 ),
+                
                 SizedBox(height: widget.isMobile ? 16 : 20),
                 
                 // Notes field
                 TextFormField(
                   controller: _notesController,
                   decoration: InputDecoration(
-                    labelText: 'Notlar',
-                    hintText: 'Ek bilgiler veya notlar ekleyin',
+                    labelText: tr('service_field_notes'),
+                    hintText: tr('service_hint_notes'),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(widget.isMobile ? 8 : 12),
                       borderSide: BorderSide(color: Colors.grey[300]!),
@@ -843,8 +892,8 @@ class _AddServiceFormState extends State<AddServiceForm> {
               context,
               () => Navigator.pop(context),
               _saveService,
-              'cancel',
-              _isEditMode ? 'Güncelle' : 'Kaydet',
+              'service_button_cancel',
+              _isEditMode ? 'service_button_update' : 'service_button_save',
               Theme.of(context).primaryColor,
               widget.isMobile,
               _isSubmitting,
@@ -915,7 +964,7 @@ class _VehicleSelectionDialogState extends State<VehicleSelectionDialog> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = 'Araçlar yüklenirken hata oluştu: $e';
+          _errorMessage = tr('service_error_loading_vehicles', namedArgs: {'error': e.toString()});
           _isLoading = false;
         });
       }
@@ -980,7 +1029,7 @@ class _VehicleSelectionDialogState extends State<VehicleSelectionDialog> {
                 SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Araç Seçimi',
+                    tr('service_vehicle_selection_title'),
                     style: TextStyle(
                       fontSize: widget.isMobile ? 18 : 22,
                       fontWeight: FontWeight.bold,
@@ -1001,7 +1050,7 @@ class _VehicleSelectionDialogState extends State<VehicleSelectionDialog> {
             TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Araç ara (model, plaka veya yıl)',
+                hintText: tr('service_vehicle_search_hint'),
                 prefixIcon: Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(widget.isMobile ? 8 : 12),
@@ -1046,7 +1095,7 @@ class _VehicleSelectionDialogState extends State<VehicleSelectionDialog> {
             SizedBox(height: 24),
             ElevatedButton(
               onPressed: _loadVehicles,
-              child: Text('Yeniden Dene'),
+              child: Text(tr('service_button_retry')),
             ),
           ],
         ),
@@ -1062,8 +1111,8 @@ class _VehicleSelectionDialogState extends State<VehicleSelectionDialog> {
             SizedBox(height: 16),
             Text(
               _searchController.text.isEmpty
-                  ? 'Henüz araç eklenmemiş'
-                  : 'Aramalara uygun araç bulunamadı',
+                  ? tr('service_vehicle_empty_list')
+                  : tr('service_vehicle_no_search_results'),
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey[600]),
             ),
@@ -1122,7 +1171,7 @@ class _VehicleSelectionDialogState extends State<VehicleSelectionDialog> {
                         ),
                         if (vehicle.year != null)
                           Text(
-                            'Yıl: ${vehicle.year}',
+                            tr('service_vehicle_year', namedArgs: {'year': vehicle.year.toString()}),
                             style: TextStyle(
                               color: Colors.grey[600],
                               fontSize: 12,

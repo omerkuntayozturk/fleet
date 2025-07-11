@@ -61,4 +61,6 @@ class FirebaseService {
       debugPrint('FirebaseService: Error disabling network: $e');
     }
   }
+
+  FirebaseFirestore get firestore => _firestore;
 }

@@ -856,7 +856,7 @@ class ContractManagement {
                                     ),
                                   ),
                                 ),
-                                );
+                               ); 
                             },
                           );
                         },
@@ -874,27 +874,14 @@ class ContractManagement {
                         ),
                       ),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: MainAxisAlignment.end, // Changed from spaceBetween to end
                         children: [
-                          // Employee count
-                          FutureBuilder<List<Map<String, dynamic>>>(
-                            future: _fetchEmployeesForSelection(),
-                            builder: (context, snapshot) {
-                              final count = snapshot.data?.length ?? 0;
-                              return Text(
-                                tr('total_employees', args: [count.toString()]), // 'Toplam çalışan: $count'
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: isMobile ? 12 : 14,
-                                ),
-                              );
-                            }
-                          ),
+                          // Vehicle count removed
                           
                           TextButton(
                             onPressed: () => Navigator.pop(context),
                             child: Text(
-                              tr('common_cancel'), // 'Vazgeç'
+                              tr('common_cancel', gender: 'Vazgeç'),
                               style: TextStyle(
                                 color: Colors.grey[700],
                                 fontSize: isMobile ? 14 : 16,
@@ -1327,34 +1314,9 @@ class ContractManagement {
         'icon': Icons.date_range,
       },
       {
-        'name': tr('contract_type_part_time'), // 'Kısmi Zamanlı'
-        'description': tr('contract_type_part_time_desc'), // 'Yarı zamanlı çalışma esasına dayalı sözleşme'
-        'icon': Icons.timelapse,
-      },
-      {
         'name': tr('contract_type_full_time'), // 'Tam Zamanlı'
         'description': tr('contract_type_full_time_desc'), // 'Tam gün çalışma esasına dayalı sözleşme'
         'icon': Icons.access_time_filled,
-      },
-      {
-        'name': tr('contract_type_internship'), // 'Stajyerlik'
-        'description': tr('contract_type_internship_desc'), // 'Geçici staj dönemi için yapılan sözleşme'
-        'icon': Icons.school,
-      },
-      {
-        'name': tr('contract_type_probation'), // 'Deneme Süresi'
-        'description': tr('contract_type_probation_desc'), // 'İşe alım öncesi değerlendirme dönemi sözleşmesi'
-        'icon': Icons.hourglass_empty,
-      },
-      {
-        'name': tr('contract_type_project'), // 'Proje Bazlı'
-        'description': tr('contract_type_project_desc'), // 'Belirli bir projenin tamamlanması için yapılan sözleşme'
-        'icon': Icons.assignment,
-      },
-      {
-        'name': tr('contract_type_other'), // 'Diğer'
-        'description': tr('contract_type_other_desc'), // 'Diğer sözleşme türleri'
-        'icon': Icons.more_horiz,
       },
     ];
     
@@ -1867,16 +1829,7 @@ class ContractManagement {
                                                   fontWeight: FontWeight.w500,
                                                 ),
                                               ),
-                                              if (vehicle['year'] != null && vehicle['year'].toString().isNotEmpty) ...[
-                                                const SizedBox(height: 2),
-                                                Text(
-                                                  tr('vehicle_year', gender: 'Model Yılı: {0}', args: [vehicle['year']]),
-                                                  style: TextStyle(
-                                                    fontSize: isMobile ? 11 : 12,
-                                                    color: Colors.grey[600],
-                                                  ),
-                                                ),
-                                              ],
+                                              // Vehicle year display removed
                                             ],
                                           ),
                                         ),
@@ -1913,22 +1866,9 @@ class ContractManagement {
                         ),
                       ),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: MainAxisAlignment.end, // Changed from spaceBetween to end
                         children: [
-                          // Vehicle count
-                          FutureBuilder<List<Map<String, dynamic>>>(
-                            future: _fetchVehiclesForSelection(),
-                            builder: (context, snapshot) {
-                              final count = snapshot.data?.length ?? 0;
-                              return Text(
-                                tr('total_vehicles', gender: 'Toplam araç: {0}', args: [count.toString()]),
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: isMobile ? 12 : 14,
-                                ),
-                              );
-                            }
-                          ),
+                          // Vehicle count removed
                           
                           TextButton(
                             onPressed: () => Navigator.pop(context),
@@ -1964,7 +1904,7 @@ class ContractManagement {
     Function refreshContracts,
     String? selectedEmployeeId,
     String? selectedVehiclePlate,
-  ) {
+  ) async { // Changed to async
     // Validate inputs
     if (employeeNameCtrl.text.isEmpty ||
         contractTypeCtrl.text.isEmpty ||
@@ -2019,14 +1959,26 @@ class ContractManagement {
       return;
     }
     
+    // Check for existing active contracts for this vehicle and block if found
+    bool hasExistingContract = await _hasActiveContractForVehicle(
+      currentUser.uid, 
+      vehicleIdCtrl.text
+    );
+    
+    if (hasExistingContract) {
+      // Show error message and prevent contract creation
+      InfoCard.showInfoCard(
+        context,
+        tr('contracts_vehicle_already_has_contract', namedArgs: {'plate': selectedVehiclePlate}),
+        Colors.red,
+        icon: Icons.error,
+        duration: const Duration(seconds: 5),
+      );
+      return; // Don't proceed with contract creation
+    }
+    
     // Create a unique ID for the new contract
     final contractId = uuid.v4();
-
-    // --- CONTRACT TYPE FIELD DÜZENLEME ---
-    // contractTypeCtrl.text kullanıcıya gösterilen isim, firebase'e hem 'type' hem 'reference' alanı olarak ekleniyor.
-    // 'type' alanı firebase'de contractTypeCtrl.text olarak kaydedilecek.
-    // 'reference' alanı ise ayrı bir açıklama/referans için kullanılıyor (referenceCtrl.text).
-    // Eğer firebase'de 'type' alanı yoksa, eklenmeli.
 
     // Create a contract object
     final contract = Contract(
@@ -2083,6 +2035,47 @@ class ContractManagement {
         );
       });
   }
+  
+  // Add a new method to check for existing active contracts for a vehicle
+  static Future<bool> _hasActiveContractForVehicle(String userId, String vehicleId) async {
+    try {
+      // Fetch all contracts for this vehicle
+      final QuerySnapshot contractsSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('contracts')
+          .where('vehicleId', isEqualTo: vehicleId)
+          .get();
+      
+      // Check if any contract is active (ongoing status and end date in the future)
+      final now = DateTime.now();
+      for (var doc in contractsSnapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        
+        // Check if status is ongoing
+        final status = data['status'] as String? ?? '';
+        final isOngoing = status.contains('ongoing');
+        
+        // Check if end date is in the future
+        final endDate = data['endDate'] is Timestamp 
+            ? (data['endDate'] as Timestamp).toDate()
+            : null;
+        
+        final isActive = isOngoing && endDate != null && endDate.isAfter(now);
+        
+        if (isActive) {
+          return true; // Found an active contract
+        }
+      }
+      
+      return false; // No active contracts found
+    } catch (e) {
+      print('Error checking existing contracts: $e');
+      return false; // Return false on error to allow contract creation
+    }
+  }
+
+  // Helper method to handle edit contract functionality
   static void _handleEditContract(
     BuildContext context,
     String contractId,

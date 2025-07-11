@@ -291,17 +291,15 @@ class EmployeeImportExport {
               developer.log('Excel workbook created successfully', name: 'EmployeeImportExport');
               
               // Create sheet for employees and set as default
-              final sheet = excel['Çalışanlar'];
-              excel.setDefaultSheet('Çalışanlar');
+              final sheet = excel[tr('import_list_sheet_name')];
+              excel.setDefaultSheet(tr('import_list_sheet_name'));
               
-              // Add headers
+              // Add headers - REMOVED position and department
               sheet.appendRow([
-                'Ad Soyad',
-                'Pozisyon',
-                'Departman',
-                'Durum',
-                'E-posta',
-                'Telefon',
+                tr('import_list_header_name'),
+                tr('import_list_header_status'),
+                tr('import_list_header_email'),
+                tr('import_list_header_phone'),
               ]);
               
               // Add employee data from Firebase
@@ -311,27 +309,9 @@ class EmployeeImportExport {
                 try {
                   final data = doc.data();
                   
-                  // Get department name if available
-                  String departmentName = data['departmentId'] ?? '';
-                  if (departmentName.isNotEmpty) {
-                    try {
-                      // Try to look up department name
-                      _getDepartmentName(currentUser.uid, departmentName).then((name) {
-                        if (name.isNotEmpty) {
-                          departmentName = name;
-                        }
-                      });
-                    } catch (deptError) {
-                      developer.log('Error fetching department name: ${deptError.toString()}', 
-                          name: 'EmployeeImportExport', error: deptError);
-                    }
-                  }
-                  
-                  // Add row to Excel
+                  // Add row to Excel - REMOVED position and department
                   sheet.appendRow([
                     data['name'] ?? '',
-                    data['position'] ?? '',
-                    departmentName,
                     _getStatusText(data['status']?.toString() ?? 'active'),
                     data['email'] ?? '',
                     data['phone'] ?? '',
@@ -354,7 +334,7 @@ class EmployeeImportExport {
                   
                   // Create an anchor element with download attribute to properly trigger the download
                   html.AnchorElement(href: url)
-                    ..setAttribute('download', 'Calisanlar_${DateTime.now().millisecondsSinceEpoch}.xlsx')
+                    ..setAttribute('download', '${tr('import_list_filename')}_${DateTime.now().millisecondsSinceEpoch}.xlsx')
                     ..click();
                     
                   // Clean up the URL object after download starts
@@ -474,22 +454,20 @@ class EmployeeImportExport {
   
   static String _parseStatusText(String statusText) {
     try {
-      switch (statusText.toLowerCase()) {
-        case 'izinli':
-        case 'on leave':
-        case 'izinde':
-          return 'onLeave';
-        case 'işten ayrılmış':
-        case 'terminated':
-        case 'ayrıldı':
-        case 'işten çıktı':
-          return 'terminated';
-        case 'aktif':
-        case 'active':
-        case 'çalışıyor':
-        default:
-          return 'active';
+      final lowerText = statusText.toLowerCase();
+      if (lowerText == tr('import_list_status_onleave').toLowerCase() ||
+          lowerText == 'on leave' ||
+          lowerText == 'izinde' ||
+          lowerText == 'izinli') {
+        return 'onLeave';
+      } else if (lowerText == tr('import_list_status_terminated').toLowerCase() ||
+                lowerText == 'terminated' ||
+                lowerText == 'işten ayrılmış' ||
+                lowerText == 'ayrıldı' ||
+                lowerText == 'işten çıktı') {
+        return 'terminated';
       }
+      return 'active'; // Default to active
     } catch (e) {
       developer.log('Error in _parseStatusText: ${e.toString()}', name: 'EmployeeImportExport', error: e);
       return 'active'; // Default fallback
@@ -498,21 +476,17 @@ class EmployeeImportExport {
 
   static void _downloadEmployeeTemplate(BuildContext context) {
     try {
-      // Define column headers for the template
+      // Define column headers for the template - REMOVED position and department
       List<String> headers = [
         'import_list_header_name'.tr(),
-        'import_list_header_position'.tr(),
-        'import_list_header_department'.tr(),
         'import_list_header_status'.tr(),
         'import_list_header_email'.tr(),
         'import_list_header_phone'.tr(),
       ];
       
-      // Define an example row with sample data
+      // Define an example row with sample data - REMOVED position and department
       List<String> exampleData = [
         'import_list_example_name'.tr(),
-        'import_list_example_position'.tr(),
-        'import_list_example_department'.tr(),
         'import_list_example_status'.tr(),
         'import_list_example_email'.tr(),
         'import_list_example_phone'.tr(),
@@ -763,12 +737,9 @@ class EmployeeImportExport {
           }
           
           try {
-            // Validate header row
+            // Validate header row - UPDATED to only check for name (first column)
             final headerRow = rows[0];
-            if (headerRow.length < 3 || 
-                headerRow[0]?.value?.toString() == null ||
-                headerRow[1]?.value?.toString() == null ||
-                headerRow[2]?.value?.toString() == null) {
+            if (headerRow.isEmpty || headerRow[0]?.value?.toString() == null) {
               developer.log('Invalid header row in Excel file', name: 'EmployeeImportExport');
               _showExcelErrorDialog(
                 context, 
@@ -809,15 +780,13 @@ class EmployeeImportExport {
                   try {
                     // Extract values, ensuring we handle nulls properly
                     final name = row[0]?.value?.toString() ?? '';
-                    final position = row[1]?.value?.toString() ?? '';
-                    final department = row[2]?.value?.toString() ?? '';
                     
                     // Status is optional with a default value
                     String status = 'active';
                     
                     try {
-                      if (row.length > 3 && row[3]?.value != null) {
-                        final statusText = row[3]?.value?.toString() ?? 'Aktif';
+                      if (row.length > 1 && row[1]?.value != null) {
+                        final statusText = row[1]?.value?.toString() ?? 'Aktif';
                         status = _parseStatusText(statusText);
                       }
                     } catch (statusError) {
@@ -831,20 +800,20 @@ class EmployeeImportExport {
                     String? imageUrl = null;
                     
                     try {
-                      if (row.length > 4 && row[4]?.value != null) {
-                        email = row[4]?.value?.toString();
+                      if (row.length > 2 && row[2]?.value != null) {
+                        email = row[2]?.value?.toString();
                       }
                       
-                      if (row.length > 5 && row[5]?.value != null) {
-                        phone = row[5]?.value?.toString();
+                      if (row.length > 3 && row[3]?.value != null) {
+                        phone = row[3]?.value?.toString();
                       }
                     } catch (optionalFieldError) {
                       developer.log('Error parsing optional fields at row $i: ${optionalFieldError.toString()}', name: 'EmployeeImportExport', error: optionalFieldError);
                       // Continue with nulls for optional fields
                     }
                     
-                    // Skip if required fields are empty
-                    if (name.isEmpty || position.isEmpty || department.isEmpty) {
+                    // Skip if name is empty (only required field now)
+                    if (name.isEmpty) {
                       errorRows.add('import_list_row_missing_fields'.tr(args: ['${i+1}']));
                       continue;
                     }
@@ -855,8 +824,8 @@ class EmployeeImportExport {
                       final employee = {
                         'id': employeeId,
                         'name': name,
-                        'position': position,
-                        'department': department,
+                        'position': '', // Default empty string
+                        'department': '', // Default empty string
                         'status': status,
                         'email': email,
                         'phone': phone,
@@ -1074,36 +1043,31 @@ class EmployeeImportExport {
         try {
           final fields = line.split(',');
           
-          // Make sure we have at least the required fields
-          if (fields.length < 3 || 
-              fields[0].trim().isEmpty || 
-              fields[1].trim().isEmpty || 
-              fields[2].trim().isEmpty) {
+          // Make sure we have at least the name field
+          if (fields.isEmpty || fields[0].trim().isEmpty) {
             errorRows.add('import_list_row_missing_fields'.tr(args: ['${i+1}']));
             continue;
           }
           
           final name = fields[0].trim();
-          final position = fields[1].trim();
-          final department = fields[2].trim();
           
           // Status is optional with a default value
           String status = 'active';
           
-          if (fields.length > 3 && fields[3].trim().isNotEmpty) {
-            status = _parseStatusText(fields[3].trim());
+          if (fields.length > 1 && fields[1].trim().isNotEmpty) {
+            status = _parseStatusText(fields[1].trim());
           }
           
           // Optional fields
           String? email = null;
           String? phone = null;
           
-          if (fields.length > 4 && fields[4].trim().isNotEmpty) {
-            email = fields[4].trim();
+          if (fields.length > 2 && fields[2].trim().isNotEmpty) {
+            email = fields[2].trim();
           }
           
-          if (fields.length > 5 && fields[5].trim().isNotEmpty) {
-            phone = fields[5].trim();
+          if (fields.length > 3 && fields[3].trim().isNotEmpty) {
+            phone = fields[3].trim();
           }
           
           // Create employee object as Map
@@ -1111,8 +1075,8 @@ class EmployeeImportExport {
           final employee = {
             'id': employeeId,
             'name': name,
-            'position': position,
-            'department': department,
+            'position': '', // Default empty string
+            'department': '', // Default empty string
             'status': status,
             'email': email,
             'phone': phone,

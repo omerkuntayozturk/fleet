@@ -8,6 +8,8 @@ import '../../models/vehicle.dart';
 import '../../services/firestore_service.dart';
 import '../../models/employee.dart';
 import '../../services/employee_service.dart';
+import 'package:flutter/services.dart'; // Add this import for input formatters
+import '../../info_card.dart'; // InfoCard importu eklendi
 
 // Main class for odometer management
 class OdometerManagement {
@@ -20,7 +22,13 @@ class OdometerManagement {
   }
 
   // Method to show add/edit odometer dialog
-  static void addNewOdometer(BuildContext context, VoidCallback onOdometerAdded, {OdometerRecord? editRecord}) {
+  static void addNewOdometer(
+    BuildContext context,
+    VoidCallback onOdometerAdded, {
+    OdometerRecord? editRecord,
+    List<OdometerRecord>? allOdometerRecords,
+    Future<void> Function(OdometerRecord newRecord)? onBeforeAdd, // <-- yeni parametre
+  }) {
     // Get screen dimensions for responsive layout
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
@@ -61,7 +69,9 @@ class OdometerManagement {
                   child: AddOdometerForm(
                     onOdometerAdded: onOdometerAdded,
                     isMobile: isMobile,
-                    editRecord: editRecord, // Pass record for editing
+                    editRecord: editRecord,
+                    allOdometerRecords: allOdometerRecords,
+                    onBeforeAdd: onBeforeAdd, // <-- ekle
                   ),
                 ),
               ],
@@ -246,12 +256,16 @@ class AddOdometerForm extends StatefulWidget {
   final VoidCallback onOdometerAdded;
   final bool isMobile;
   final OdometerRecord? editRecord;
-  
+  final List<OdometerRecord>? allOdometerRecords;
+  final Future<void> Function(OdometerRecord newRecord)? onBeforeAdd; // <-- yeni parametre
+
   const AddOdometerForm({
     super.key,
     required this.onOdometerAdded,
     required this.isMobile,
     this.editRecord,
+    this.allOdometerRecords,
+    this.onBeforeAdd, // <-- ekle
   });
 
   @override
@@ -282,6 +296,11 @@ class _AddOdometerFormState extends State<AddOdometerForm> {
   // Add this variable to store driver name
   String _selectedDriverName = '';
 
+  // Add these new variables to track vehicle's last odometer reading
+  double _lastOdometerValue = 0.0;
+  bool _hasLastOdometerReading = false;
+  bool _isLoadingLastReading = false;
+  
   @override
   void initState() {
     super.initState();
@@ -317,14 +336,29 @@ class _AddOdometerFormState extends State<AddOdometerForm> {
     _selectedDriverName = record.driver;
   }
   
-  // New method to load vehicle details
+  // Yeni: Parent'tan gelen listedeki en yüksek km'yi bul
+  double _getMaxOdometerFromList(String vehicleId) {
+    if (widget.allOdometerRecords == null) return 0.0;
+    final records = widget.allOdometerRecords!
+        .where((r) => r.vehicleId == vehicleId)
+        .toList();
+    if (records.isEmpty) return 0.0;
+    return records.map((r) => r.value).reduce((a, b) => a > b ? a : b);
+  }
+
+  // New method to load vehicle details and last odometer reading
   Future<void> _loadVehicleDetails(String vehicleId) async {
     if (vehicleId.isEmpty) return;
+    
+    setState(() {
+      _isLoadingLastReading = true;
+    });
     
     try {
       final User? currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) return;
       
+      // Fetch vehicle details
       final vehicleDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(currentUser.uid)
@@ -338,13 +372,63 @@ class _AddOdometerFormState extends State<AddOdometerForm> {
           setState(() {
             _selectedVehicleName = data['model'] ?? '';
             _selectedVehiclePlate = data['plate'] ?? '';
-            // Set the display controller with plate
             _vehicleDisplayController.text = data['plate'] ?? '';
           });
         }
       }
+      
+      // Firestore'dan en yüksek km
+      double firestoreMax = 0.0;
+      final odometerQuery = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .collection('odometers')
+          .where('vehicleId', isEqualTo: vehicleId)
+          .orderBy('value', descending: true)
+          .limit(1)
+          .get();
+      
+      if (odometerQuery.docs.isNotEmpty) {
+        final lastReading = odometerQuery.docs.first.data();
+        firestoreMax = lastReading['value'] is double 
+            ? lastReading['value'] 
+            : double.tryParse(lastReading['value'].toString()) ?? 0.0;
+      }
+
+      // Parent'tan gelen listedeki en yüksek km
+      double listMax = _getMaxOdometerFromList(vehicleId);
+
+      // Eğer edit moddaysak, mevcut kaydı hariç tut
+      if (_isEditMode && widget.editRecord != null) {
+        if (widget.allOdometerRecords != null) {
+          final filtered = widget.allOdometerRecords!
+              .where((r) => r.vehicleId == vehicleId && r.id != widget.editRecord!.id)
+              .toList();
+          if (filtered.isNotEmpty) {
+            listMax = filtered.map((r) => r.value).reduce((a, b) => a > b ? a : b);
+          } else {
+            listMax = 0.0;
+          }
+        }
+      }
+
+      // En yüksek olanı kullan
+      final maxValue = firestoreMax > listMax ? firestoreMax : listMax;
+
+      if (mounted) {
+        setState(() {
+          _lastOdometerValue = maxValue;
+          _hasLastOdometerReading = maxValue > 0;
+          _isLoadingLastReading = false;
+        });
+      }
     } catch (e) {
-      print('Error loading vehicle details: $e');
+      print('Error loading vehicle details or odometer readings: $e');
+      if (mounted) {
+        setState(() {
+          _isLoadingLastReading = false;
+        });
+      }
     }
   }
 
@@ -381,6 +465,10 @@ class _AddOdometerFormState extends State<AddOdometerForm> {
     // If a vehicle was selected, update the form
     if (selectedVehicle != null && mounted) {
       setState(() {
+        // Reset the km value when vehicle changes
+        if (_selectedVehicleId != selectedVehicle.id) {
+          _valueController.text = '';
+        }
         // Store the actual ID in a separate variable
         _selectedVehicleId = selectedVehicle.id;
         // Display the plate in the field
@@ -388,6 +476,9 @@ class _AddOdometerFormState extends State<AddOdometerForm> {
         _selectedVehicleName = selectedVehicle.model;
         _selectedVehiclePlate = selectedVehicle.plate;
       });
+      
+      // Load vehicle details and fetch last odometer reading
+      await _loadVehicleDetails(selectedVehicle.id);
     }
   }
 
@@ -475,6 +566,11 @@ class _AddOdometerFormState extends State<AddOdometerForm> {
         date: _selectedDate,
         value: value,
       );
+
+      // Yeni: Kayıt eklenmeden önce callback ile aynı plakalı eski kayıtları sil
+      if (widget.onBeforeAdd != null) {
+        await widget.onBeforeAdd!(record);
+      }
       
       // Save to Firestore
       await FirebaseFirestore.instance
@@ -505,23 +601,31 @@ class _AddOdometerFormState extends State<AddOdometerForm> {
         Navigator.of(context).pop();
         
         // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(_isEditMode 
-                ? 'Kilometre kaydı başarıyla güncellendi' 
-                : 'Kilometre kaydı başarıyla eklendi'),
-            backgroundColor: Colors.green,
-          ),
+        InfoCard.showInfoCard(
+          context,
+          _isEditMode 
+              ? tr('odometer_success_update')
+              : tr('odometer_success_add'),
+          Colors.green,
+          icon: Icons.check_circle_outline,
         );
       }
     } catch (e) {
       if (mounted) {
         setState(() {
           _errorMessage = _isEditMode 
-              ? 'Kilometre kaydı güncellenirken hata: $e' 
-              : 'Kilometre kaydı eklenirken hata: $e';
+              ? tr('odometer_error_update', namedArgs: {'error': e.toString()})
+              : tr('odometer_error_add', namedArgs: {'error': e.toString()});
         });
         print('Error saving odometer record: $e');
+        InfoCard.showInfoCard(
+          context,
+          _isEditMode
+              ? tr('odometer_error_update', namedArgs: {'error': e.toString()})
+              : tr('odometer_error_add', namedArgs: {'error': e.toString()}),
+          Colors.red,
+          icon: Icons.error_outline,
+        );
       }
     } finally {
       if (mounted) {
@@ -531,6 +635,39 @@ class _AddOdometerFormState extends State<AddOdometerForm> {
       }
     }
   }
+
+  // Build a form card with title and content (duplicate, consider removing if not needed)
+  Widget _buildFormCardDuplicate(String title, List<Widget> children) {
+    return Card(
+      elevation: 0,
+      color: Colors.grey[50],
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(widget.isMobile ? 12 : 16),
+        side: BorderSide(color: Colors.grey[200]!),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(widget.isMobile ? 16 : 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: widget.isMobile ? 14 : 16,
+                color: Colors.grey[800],
+              ),
+            ),
+            SizedBox(height: widget.isMobile ? 12 : 16),
+            ...children,
+          ],
+        ),
+      ),
+      );
+  }
+
+
+  // Duplicate build method removed to resolve the error.
 
   // Build a form card with title and content
   Widget _buildFormCard(String title, List<Widget> children) {
@@ -559,7 +696,47 @@ class _AddOdometerFormState extends State<AddOdometerForm> {
           ],
         ),
       ),
-    );
+      );
+  }
+
+  // Validate kilometer value
+  String? _validateKilometerValue(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return tr('odometer_error_value_required');
+    }
+    
+    final numericValue = double.tryParse(value);
+    if (numericValue == null) {
+      return tr('odometer_error_invalid_number');
+    }
+    
+    if (numericValue < 0) {
+      return tr('odometer_error_negative_value');
+    }
+
+    // Yeni: Hem Firestore hem listedeki max değeri kontrol et
+    double maxValue = _lastOdometerValue;
+    // Edit modda, mevcut kaydı hariç tut
+    if (_isEditMode && widget.editRecord != null) {
+      double listMax = 0.0;
+      if (widget.allOdometerRecords != null) {
+        final filtered = widget.allOdometerRecords!
+            .where((r) => r.vehicleId == _selectedVehicleId && r.id != widget.editRecord!.id)
+            .toList();
+        if (filtered.isNotEmpty) {
+          listMax = filtered.map((r) => r.value).reduce((a, b) => a > b ? a : b);
+        }
+      }
+      if (maxValue < listMax) maxValue = listMax;
+    }
+
+    if (maxValue > 0 && numericValue < maxValue) {
+      return tr('odometer_error_value_too_low', namedArgs: {
+        'value': maxValue.toStringAsFixed(0)
+      });
+    }
+
+    return null;
   }
 
   @override
@@ -574,8 +751,8 @@ class _AddOdometerFormState extends State<AddOdometerForm> {
             // Header with title and close button
             OdometerManagement.buildResponsiveHeader(
               context,
-              _isEditMode ? 'Kilometre Kaydını Düzenle' : 'Yeni Kilometre Kaydı',
-              _isEditMode ? 'Mevcut kaydı güncelleyin' : 'Yeni kilometre kaydı ekleyin',
+              _isEditMode ? 'odometer_edit_title' : 'odometer_add_title',
+              _isEditMode ? 'odometer_edit_subtitle' : 'odometer_add_subtitle',
               _isEditMode ? Icons.edit : Icons.speed,
               Theme.of(context).primaryColor,
               widget.isMobile,
@@ -584,7 +761,7 @@ class _AddOdometerFormState extends State<AddOdometerForm> {
             
             // Odometer Information Card
             _buildFormCard(
-              'Kilometre Bilgileri',
+              tr('odometer_information_title'),
               [
                 // Vehicle selection field - Updated to use vehicleDisplayController
                 GestureDetector(
@@ -593,8 +770,8 @@ class _AddOdometerFormState extends State<AddOdometerForm> {
                     child: TextFormField(
                       controller: _vehicleDisplayController, // Use the display controller
                       decoration: InputDecoration(
-                        labelText: 'Araç Seçimi *',
-                        hintText: 'Araç seçmek için tıklayın',
+                        labelText: tr('odometer_field_vehicle'),
+                        hintText: tr('odometer_hint_vehicle'),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(widget.isMobile ? 8 : 12),
                           borderSide: BorderSide(color: Colors.grey[300]!),
@@ -625,7 +802,7 @@ class _AddOdometerFormState extends State<AddOdometerForm> {
                       ),
                       validator: (value) {
                         if (_selectedVehicleId.isEmpty) {
-                          return 'Araç seçimi zorunludur';
+                          return tr('odometer_error_vehicle_required');
                         }
                         return null;
                       },
@@ -649,10 +826,51 @@ class _AddOdometerFormState extends State<AddOdometerForm> {
                           SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Seçilen araç: $_selectedVehicleName ($_selectedVehiclePlate)',
+                              "Seçilen Araç: ${_selectedVehicleName} - ${_selectedVehiclePlate}",
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.blue.shade700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                
+                // Display current odometer reading if available
+                if (_isLoadingLastReading)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Center(
+                      child: SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    ),
+                  )
+                else if (_hasLastOdometerReading)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Container(
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.amber.shade200),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.speed, size: 16, color: Colors.amber.shade800),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              "Mevcut km: ${_lastOdometerValue.toStringAsFixed(0)}",
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.amber.shade800,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
@@ -670,8 +888,8 @@ class _AddOdometerFormState extends State<AddOdometerForm> {
                     child: TextFormField(
                       controller: _driverController,
                       decoration: InputDecoration(
-                        labelText: 'Sürücü Seçimi',
-                        hintText: 'Sürücü seçmek için tıklayın',
+                        labelText: tr('odometer_field_driver'),
+                        hintText: tr('odometer_hint_driver'),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(widget.isMobile ? 8 : 12),
                           borderSide: BorderSide(color: Colors.grey[300]!),
@@ -720,7 +938,7 @@ class _AddOdometerFormState extends State<AddOdometerForm> {
                           SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Seçilen sürücü: $_selectedDriverName',
+                              "Seçilen Sürücü: ${_selectedDriverName}",
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.green.shade700,
@@ -734,12 +952,14 @@ class _AddOdometerFormState extends State<AddOdometerForm> {
                 
                 SizedBox(height: widget.isMobile ? 16 : 20),
                 
-                // Odometer value field
+                // Odometer value field - Updated with validation and input formatters
                 TextFormField(
                   controller: _valueController,
                   decoration: InputDecoration(
-                    labelText: 'Kilometre Değeri *',
-                    hintText: 'Kilometre değerini girin',
+                    labelText: tr('odometer_field_value'),
+                    hintText: _hasLastOdometerReading 
+                        ? tr('odometer_hint_value_with_last', namedArgs: {'value': _lastOdometerValue.toStringAsFixed(0)})
+                        : tr('odometer_hint_value'),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(widget.isMobile ? 8 : 12),
                       borderSide: BorderSide(color: Colors.grey[300]!),
@@ -757,25 +977,29 @@ class _AddOdometerFormState extends State<AddOdometerForm> {
                       color: Colors.grey[500],
                       size: widget.isMobile ? 18 : 24,
                     ),
-                    suffixText: 'km',
+                    suffixText: tr('odometer_unit_km'),
                     filled: true,
                     fillColor: Colors.white,
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: widget.isMobile ? 12 : 16,
                       vertical: widget.isMobile ? 10 : 16
                     ),
+                    helperText: _hasLastOdometerReading 
+                        ? "Son okuma: ${_lastOdometerValue.toStringAsFixed(0)}"
+                        : tr('odometer_helper_first_reading'),
+                    helperStyle: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
                   ),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Kilometre değeri zorunludur';
-                    }
-                    if (double.tryParse(value) == null) {
-                      return 'Geçerli bir sayı giriniz';
-                    }
-                    return null;
-                  },
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                  validator: _validateKilometerValue,
+                  inputFormatters: [
+                    // Allow only numbers and a single decimal point
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+                  ],
                 ),
+                
                 SizedBox(height: widget.isMobile ? 16 : 20),
                 
                 // Date field
@@ -783,7 +1007,7 @@ class _AddOdometerFormState extends State<AddOdometerForm> {
                   onTap: () => _selectDate(context),
                   child: InputDecorator(
                     decoration: InputDecoration(
-                      labelText: 'Tarih *',
+                      labelText: tr('odometer_field_date'),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(widget.isMobile ? 8 : 12),
                         borderSide: BorderSide(color: Colors.grey[300]!),
@@ -856,8 +1080,8 @@ class _AddOdometerFormState extends State<AddOdometerForm> {
               context,
               () => Navigator.pop(context),
               _saveOdometerRecord,
-              'İptal',
-              _isEditMode ? 'Güncelle' : 'Kaydet',
+              'odometer_button_cancel',
+              _isEditMode ? 'odometer_button_update' : 'odometer_button_save',
               Theme.of(context).primaryColor,
               widget.isMobile,
               _isSubmitting,
@@ -993,7 +1217,7 @@ class _VehicleSelectionDialogState extends State<VehicleSelectionDialog> {
                 SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Araç Seçimi',
+                    tr('vehicle_selection_title'),
                     style: TextStyle(
                       fontSize: widget.isMobile ? 18 : 22,
                       fontWeight: FontWeight.bold,
@@ -1014,7 +1238,7 @@ class _VehicleSelectionDialogState extends State<VehicleSelectionDialog> {
             TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Araç ara (model, plaka veya yıl)',
+                hintText: tr('vehicle_search_hint'),
                 prefixIcon: Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(widget.isMobile ? 8 : 12),
@@ -1059,7 +1283,7 @@ class _VehicleSelectionDialogState extends State<VehicleSelectionDialog> {
             SizedBox(height: 24),
             ElevatedButton(
               onPressed: _loadVehicles,
-              child: Text('Yeniden Dene'),
+              child: Text(tr('button_retry')),
             ),
           ],
         ),
@@ -1075,8 +1299,8 @@ class _VehicleSelectionDialogState extends State<VehicleSelectionDialog> {
             SizedBox(height: 16),
             Text(
               _searchController.text.isEmpty
-                  ? 'Henüz araç eklenmemiş'
-                  : 'Aramalara uygun araç bulunamadı',
+                  ? tr('vehicle_empty_list')
+                  : tr('vehicle_no_search_results'),
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey[600]),
             ),
@@ -1279,7 +1503,7 @@ class _DriverSelectionDialogState extends State<DriverSelectionDialog> {
                 SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Sürücü Seçimi',
+                    tr('driver_selection_title'),
                     style: TextStyle(
                       fontSize: widget.isMobile ? 18 : 22,
                       fontWeight: FontWeight.bold,
@@ -1300,7 +1524,7 @@ class _DriverSelectionDialogState extends State<DriverSelectionDialog> {
             TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Sürücü ara (isim, e-posta veya telefon)',
+                hintText: tr('driver_search_hint'),
                 prefixIcon: Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(widget.isMobile ? 8 : 12),
@@ -1345,7 +1569,7 @@ class _DriverSelectionDialogState extends State<DriverSelectionDialog> {
             SizedBox(height: 24),
             ElevatedButton(
               onPressed: _loadEmployees,
-              child: Text('Yeniden Dene'),
+              child: Text(tr('button_retry')),
             ),
           ],
         ),
@@ -1361,8 +1585,8 @@ class _DriverSelectionDialogState extends State<DriverSelectionDialog> {
             SizedBox(height: 16),
             Text(
               _searchController.text.isEmpty
-                  ? 'Henüz sürücü eklenmemiş'
-                  : 'Aramalara uygun sürücü bulunamadı',
+                  ? tr('driver_empty_list')
+                  : tr('driver_no_search_results'),
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey[600]),
             ),
@@ -1426,6 +1650,17 @@ class _DriverSelectionDialogState extends State<DriverSelectionDialog> {
                             padding: const EdgeInsets.only(top: 4.0),
                             child: Text(
                               employee.phone!,
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        if (employee.email != null && employee.email!.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4.0),
+                            child: Text(
+                              employee.email!,
                               style: TextStyle(
                                 color: Colors.grey[600],
                                 fontSize: 12,
